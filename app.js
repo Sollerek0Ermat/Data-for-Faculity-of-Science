@@ -116,6 +116,15 @@ app.all(/.*/, (request, responce, next) => {
 
 })
 
+const path = require('path');
+
+// serve the built frontend, AFTER the API routes
+const frontendPath = path.join(__dirname, './package');
+app.use(express.static(frontendPath));
+app.get('*', (request, response) => {
+    response.sendFile(path.join(frontendPath, 'index.html'));
+});
+
 
 //global error handling middleware
 app.use(global_error)
