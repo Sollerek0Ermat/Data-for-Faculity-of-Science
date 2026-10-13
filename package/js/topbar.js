@@ -1,0 +1,88 @@
+/**
+ * 🧭 Topbar + Footer + Mobile Menu
+ */
+
+function renderTopbar(activePage = '') {
+  const pages = [
+    { href: 'index.html',       key: 'nav_home' },
+    { href: 'subjects.html',    key: 'nav_subjects' },
+    { href: 'doctors.html',     key: 'nav_doctors' },
+  ];
+
+  const navLinks = pages.map(p =>
+    `<a href="${p.href}" class="${activePage === p.href ? 'active' : ''}">${I18N.t(p.key)}</a>`
+  ).join('');
+
+  const html = `
+    <header class="topbar">
+
+      <button class="menu-toggle-btn" id="menuToggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+
+      <a href="index.html" class="brand">
+        <div class="brand-logo"></div>
+        <span class="brand-text">DATA<span>.</span></span>
+      </a>
+
+      <nav class="nav" id="mainNav">
+        ${navLinks}
+      </nav>
+
+      <div class="topbar-search">
+        <input type="search" id="topbarSearch" placeholder="Search...">
+        <span class="search-icon">🔍</span>
+      </div>
+
+    </header>
+  `;
+
+  const placeholder = document.getElementById('topbarPlaceholder');
+  if (placeholder) placeholder.outerHTML = html;
+
+  /* Bind search */
+  const searchInput = document.getElementById('topbarSearch');
+  if (searchInput) {
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const q = searchInput.value.trim();
+        if (q) {
+          window.location.href = 'search.html?q=' + encodeURIComponent(q);
+        }
+      }
+    });
+  }
+
+  bindMobileMenu();
+}
+
+function bindMobileMenu() {
+  const btn = document.getElementById('menuToggle');
+  const nav = document.getElementById('mainNav');
+  if (!btn || !nav) return;
+
+  btn.addEventListener('click', () => {
+    const open = nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.textContent = open ? '✕' : '☰';
+  });
+
+  nav.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      nav.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.textContent = '☰';
+    });
+  });
+}
+
+function renderFooter() {
+  const year = new Date().getFullYear();
+  return `
+    <footer class="footer">
+      <div class="footer-content">
+        <p>© ${year} — All Rights Reserved</p>
+        <p class="footer-dev">Developed by Kerollos Tamer &amp; Abdellatif</p>
+        <a href="login.html" class="footer-hidden-admin" title="Admin">⚙️</a>
+      </div>
+    </footer>
+  `;
+}

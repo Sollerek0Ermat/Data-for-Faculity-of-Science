@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Dashboard — CS Data</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;700&family=Karla:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="preload" href="style.css" as="style">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎓%3C/text%3E%3C/svg%3E">
+</head>
+<body class="dark">
+
+  <div class="page">
+    <div id="topbarPlaceholder"></div>
+
+    <section class="container">
+      <div class="hero hero-home">
+        <div class="hero-content">
+          <h1 id="welcomeTitle">👋 Welcome Admin</h1>
+          <p>Leaving a mark, reaching new heights</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="container">
+      <div class="tabs" id="adminTabs">
+        <button class="tab active" data-tab="upload">📤 Upload</button>
+        <button class="tab"        data-tab="published">📚 Published</button>
+        <button class="tab"        data-tab="doctors">👨‍🏫 Doctors</button>
+        <button class="tab"        data-tab="subjects">📖 Subjects</button>
+      </div>
+
+      <div class="tab-content" id="tab-upload">
+        <div class="table-wrap" style="padding:24px">
+          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">📤 Upload New File</h2>
+
+          <div class="field">
+            <label>File Title</label>
+            <input type="text" id="fileTitle" placeholder="e.g., Chapter 1 Summary">
+          </div>
+
+          <div class="field">
+            <label>File Type</label>
+            <select id="fileType">
+              <option value="section">📄 Section</option>
+              <option value="summary">📝 Summary</option>
+              <option value="resource">📦 Resource</option>
+              <option value="video">🎬 Video</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Subject</label>
+            <select id="fileSubject"></select>
+          </div>
+
+          <div class="field">
+            <label>Doctor</label>
+            <select id="fileDoctor"></select>
+          </div>
+
+          <div class="field">
+            <label>File</label>
+            <input type="file" id="fileInput">
+          </div>
+
+          <button class="btn btn-primary" id="uploadBtn">🚀 Upload & Save</button>
+        </div>
+      </div>
+
+      <div class="tab-content hidden" id="tab-published">
+        <div class="table-wrap">
+          <div style="padding:18px 24px;border-bottom:1px solid var(--line)">
+            <h2 style="font-size:18px;font-weight:800;color:var(--cyan)">📚 Published Files</h2>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Subject</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="filesBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-content hidden" id="tab-doctors">
+        <div class="table-wrap" style="padding:24px">
+          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">👨‍🏫 Manage Doctors</h2>
+
+          <div class="field"><label>Doctor Name</label><input type="text" id="doctorName" placeholder="Amgad Salama"></div>
+          <div class="field"><label>Academic Degree</label><input type="text" id="doctorDegree" placeholder="PhD / MSc"></div>
+          <div class="field"><label>Description</label><input type="text" id="doctorDesc" placeholder="Professor of Algorithms"></div>
+          <button class="btn btn-primary" id="addDoctorBtn">➕ Add Doctor</button>
+
+          <div id="doctorsList" style="margin-top:24px"></div>
+        </div>
+      </div>
+
+      <div class="tab-content hidden" id="tab-subjects">
+        <div class="table-wrap" style="padding:24px">
+          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">📖 Manage Subjects</h2>
+
+          <div class="field"><label>Subject Name</label><input type="text" id="subjectName" placeholder="algorithm"></div>
+          <div class="field"><label>Icon</label><input type="text" id="subjectIcon" placeholder="🧮" maxlength="2"></div>
+          <button class="btn btn-primary" id="addSubjectBtn">➕ Add Subject</button>
+
+          <div id="subjectsList" style="margin-top:24px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="footerPlaceholder"></div>
+  </div>
+
+  <script src="js/config.js"          defer></script>
+  <script src="js/i18n.js"            defer></script>
+  <script src="js/helpers.js"         defer></script>
+  <script src="js/ui.js"              defer></script>
+  <script src="js/auth.js"            defer></script>
+  <script src="js/mappers.js"         defer></script>
+  <script src="js/api.js"             defer></script>
+  <script src="js/mockApi.js"         defer></script>
+  <script src="js/matrix.js" defer></script>
+  <script src="js/topbar.js"          defer></script>
+  <script src="js/pages/admin.js"     defer></script>
+</body>
+</html>
