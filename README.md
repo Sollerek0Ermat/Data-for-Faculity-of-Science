@@ -1,1 +1,0 @@
-# Data-for-Faculity-of-Science
