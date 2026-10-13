@@ -100,7 +100,7 @@ exports.admin_check = (...role) => { //if we want to pass more than 1 role we us
 exports.adminCheckForLogin = (...role) => { //if we want to pass more than 1 role we use ... before the role to check every one by its own
     return async (request, response, next) => {
         const user = await ModeratorControllerMethods.getUserDetails(request)
-        if (role.includes(user.role) && user.adminLogged_in == true) {
+        if (role.includes(user.role)) {
             next()
         }
         else {
