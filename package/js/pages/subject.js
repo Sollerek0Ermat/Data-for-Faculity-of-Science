@@ -3,29 +3,37 @@
  */
 
 let _subject = null;
+let _doctors = [];
 let _currentTab = 'section';
 
 document.addEventListener('DOMContentLoaded', async () => {
   renderTopbar();
   document.getElementById('footerPlaceholder').outerHTML = renderFooter();
 
-  const id = getQueryParam('id');
+  const id = getQueryParam('id');   // ← id = subjectName
   if (!id) {
     showNotFound();
     return;
   }
 
   try {
+    // 1. Get all subjects
     const subjects = await API.getSubjects();
-    _subject = subjects.find(s => s.id === id);
+    _subject = subjects.find(s => s.name === id || s.id === id);
     if (!_subject) {
       showNotFound();
       return;
     }
 
-    document.getElementById('subjectTitle').textContent = `${_subject.icon || CONFIG.DEFAULT_SUBJECT_ICON} ${_subject.name}`;
+    document.getElementById('subjectTitle').textContent = '📚 ' + _subject.name;
     document.getElementById('subjectInfo').textContent = _subject.description || '';
 
+    // 2. Get doctors for this subject
+    const dws = await API.getDoctorWithSubjects();
+    const entry = dws.find(d => d.subjects.some(s => s.name === _subject.name));
+    _doctors = entry ? [entry.doctor] : [];
+
+    // 3. Tabs
     document.querySelectorAll('#tabsBar .tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('#tabsBar .tab').forEach(t => t.classList.remove('active'));
@@ -37,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderTab('section');
   } catch (err) {
     console.error(err);
-    UI.error(err.message || I18N.t('msg_error'));
+    UI.error(err.message || 'Failed to load');
   }
 });
 
@@ -51,20 +59,36 @@ async function renderTab(type) {
   const grid = document.getElementById('sectionsGrid');
   setLoading(grid);
 
+  if (!_doctors.length) {
+    setEmpty(grid, 'No content');
+    return;
+  }
+
   try {
-    const files = await API.getFolder({ subjectId: _subject.id, type });
-    if (!files.length) {
-      setEmpty(grid, I18N.t('subj_no_content'));
+    // نجيب الملفات لكل دكتور
+    const allFiles = [];
+    for (const doctor of _doctors) {
+      const files = await API.getFolderContent({
+        subjectName: _subject.name,
+        doctorName:  doctor.name,
+        dataType:    type,
+      });
+      files.forEach(f => allFiles.push(f));
+    }
+
+    if (!allFiles.length) {
+      setEmpty(grid, 'No content of this type');
       return;
     }
-    grid.innerHTML = files.map(f => sectionCardHTML(f)).join('');
+
+    grid.innerHTML = allFiles.map(f => sectionCardHTML(f, type)).join('');
 
     grid.querySelectorAll('[data-action]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
+        const name = btn.dataset.name;
         const action = btn.dataset.action;
-        if (action === 'view') viewSection(id);
-        if (action === 'download') downloadSection(id);
+        if (action === 'view') viewSection(name, type);
+        if (action === 'download') downloadSection(name, type);
       });
     });
   } catch (err) {
@@ -73,28 +97,54 @@ async function renderTab(type) {
   }
 }
 
-function sectionCardHTML(file) {
+function sectionCardHTML(file, type) {
   const icons = { section: '📄', summary: '📝', resource: '📦', video: '🎬' };
-  const icon = icons[file.type] || '📄';
+  const icon = icons[type] || '📄';
+
+  const titleKey = {
+    section:  'sectionTitle',
+    summary:  'summaryTitle',
+    resource: 'resourceTitle',
+    video:    'videoTitle',
+  }[type];
+
+  const publisherKey = {
+    section:  'sectionPublishedBy',
+    summary:  'summaryPublishedBy',
+    resource: 'resourcePublishedBy',
+    video:    'videoPublishedBy',
+  }[type];
+
+  const dateKey = {
+    section:  'sectionPublishDate',
+    summary:  'summaryPublishDate',
+    resource: 'resourcePublishDate',
+    video:    'videoPublishDate',
+  }[type];
+
+  const title     = file[titleKey] || '';
+  const publisher = file[publisherKey] || '—';
+  const date      = file[dateKey];
+  const size      = file.size || null;
 
   return `
-    <div class="section-card" data-id="${file.id}">
+    <div class="section-card" data-id="${escapeHtml(title)}">
       <div class="section-head">
         <div class="section-icon">${icon}</div>
         <div class="section-info">
-          <h4>${escapeHtml(file.title)}</h4>
+          <h4>${escapeHtml(title)}</h4>
           <div class="section-meta">
-            <span>👤 ${escapeHtml(file.publisher || '—')}</span>
-            <span>📅 ${formatDate(file.created_at)}</span>
-            <span>💾 ${formatBytes(file.size)}</span>
+            <span>👤 ${escapeHtml(publisher)}</span>
+            <span>📅 ${formatDate(date)}</span>
+            ${size ? `<span>💾 ${size} MB</span>` : ''}
           </div>
         </div>
       </div>
       <div class="section-actions">
-        <button class="action-btn" data-action="view" data-id="${file.id}">
+        <button class="action-btn" data-action="view" data-name="${escapeHtml(title)}">
           <span>👁️</span> View
         </button>
-        <button class="action-btn primary" data-action="download" data-id="${file.id}">
+        <button class="action-btn primary" data-action="download" data-name="${escapeHtml(title)}">
           <span>⬇️</span> Download
         </button>
       </div>
@@ -102,21 +152,12 @@ function sectionCardHTML(file) {
   `;
 }
 
-async function viewSection(id) {
-  const files = await API.getFolder({ subjectId: _subject.id, type: _currentTab });
-  const file = files.find(f => f.id === id);
-  if (!file) return;
-  UI.info(`👁️ View: ${file.title}`);
+function viewSection(name, type) {
+  UI.info(`👁️ View: ${name}`);
+  API.downloadFile(type, name, 'view');
 }
 
-async function downloadSection(id) {
-  const files = await API.getFolder({ subjectId: _subject.id, type: _currentTab });
-  const file = files.find(f => f.id === id);
-  if (!file) return;
-  UI.success(`⬇️ Download: ${file.title}`);
-  try {
-    await API.downloadFile(file.title, 'download');
-  } catch (err) {
-    console.error(err);
-  }
+function downloadSection(name, type) {
+  UI.success(`⬇️ Download: ${name}`);
+  API.downloadFile(type, name, 'download');
 }

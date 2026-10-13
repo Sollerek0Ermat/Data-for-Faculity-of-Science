@@ -1,14 +1,11 @@
 /**
- * 🧭 Topbar + Banner + Footer + Mobile Menu
+ * 🧭 Topbar + Footer + Mobile Menu
  */
 
 function renderTopbar(activePage = '') {
-  const session = Auth.getSession();
-
   const pages = [
     { href: 'index.html',       key: 'nav_home' },
     { href: 'subjects.html',    key: 'nav_subjects' },
-    { href: 'search.html',      key: 'nav_search' },
     { href: 'doctors.html',     key: 'nav_doctors' },
   ];
 
@@ -16,37 +13,42 @@ function renderTopbar(activePage = '') {
     `<a href="${p.href}" class="${activePage === p.href ? 'active' : ''}">${I18N.t(p.key)}</a>`
   ).join('');
 
-  const authBlock = session
-    ? `<a href="admin.html">${I18N.t('nav_dashboard')}</a>
-       <button class="nav-logout" id="btnLogout">${I18N.t('nav_logout')}</button>`
-    : '';
-
   const html = `
-    <div class="top-banner">
-      <div class="banner-track">
-        <div class="banner-content">
-          <span class="banner-phrase">★ ${I18N.t('banner')} ★</span>
-        </div>
-        <div class="banner-content">
-          <span class="banner-phrase">★ ${I18N.t('banner')} ★</span>
-        </div>
-      </div>
-    </div>
-
     <header class="topbar">
+
+      <button class="menu-toggle-btn" id="menuToggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+
+      <a href="index.html" class="brand">
+        <div class="brand-logo"></div>
+        <span class="brand-text">DATA<span>.</span></span>
+      </a>
+
       <nav class="nav" id="mainNav">
         ${navLinks}
-        ${authBlock}
       </nav>
+
+      <div class="topbar-search">
+        <input type="search" id="topbarSearch" placeholder="Search...">
+        <span class="search-icon">🔍</span>
+      </div>
+
     </header>
   `;
 
   const placeholder = document.getElementById('topbarPlaceholder');
   if (placeholder) placeholder.outerHTML = html;
 
-  const btnLogout = document.getElementById('btnLogout');
-  if (btnLogout) {
-    btnLogout.addEventListener('click', () => Auth.logout());
+  /* Bind search */
+  const searchInput = document.getElementById('topbarSearch');
+  if (searchInput) {
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const q = searchInput.value.trim();
+        if (q) {
+          window.location.href = 'search.html?q=' + encodeURIComponent(q);
+        }
+      }
+    });
   }
 
   bindMobileMenu();
@@ -73,11 +75,12 @@ function bindMobileMenu() {
 }
 
 function renderFooter() {
+  const year = new Date().getFullYear();
   return `
     <footer class="footer">
       <div class="footer-content">
-        <p>${I18N.t('footer_rights')}</p>
-        <p class="footer-dev">${I18N.t('footer_dev')}</p>
+        <p>© ${year} — All Rights Reserved</p>
+        <p class="footer-dev">Developed by Kerollos Tamer &amp; Abdellatif</p>
         <a href="login.html" class="footer-hidden-admin" title="Admin">⚙️</a>
       </div>
     </footer>

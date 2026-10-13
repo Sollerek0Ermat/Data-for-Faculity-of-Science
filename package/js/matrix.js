@@ -1,52 +1,52 @@
 /**
- * 🌧️ Matrix Rain — Optimized + Auto-disable on weak devices
+ * 🌧️ Matrix Rain — Cyan only
+ * Auto-injects canvas if not present
  */
 (function () {
-  const canvas = document.getElementById('matrixCanvas');
-  if (!canvas) return;
+  'use strict';
+
+  let canvas = document.getElementById('matrixCanvas');
+
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.id = 'matrixCanvas';
+    document.body.insertBefore(canvas, document.body.firstChild);
+  }
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const cores         = navigator.hardwareConcurrency || 8;
-  const memory        = navigator.deviceMemory || 8;
-  const isWeakDevice  = cores <= 4 || memory <= 4;
+  const cores  = navigator.hardwareConcurrency || 8;
+  const memory = navigator.deviceMemory || 8;
 
-  if (reducedMotion || isWeakDevice) {
+  if (reducedMotion || cores <= 4 || memory <= 4) {
     canvas.style.display = 'none';
-    document.body.style.backgroundImage =
-      'radial-gradient(circle at 50% 40%, #0b3a6b 0%, #020d1d 70%)';
     return;
   }
 
   const ctx = canvas.getContext('2d', { alpha: false });
 
   let width, height, columns, drops;
-  let fontSize = 22;
-  let targetFPS = 24;
-  let frameInterval = 1000 / targetFPS;
+  let fontSize = 20;
+  let frameInterval = 100;
   let lastFrame = 0;
   let rafId = null;
   let paused = false;
 
   const isMobile = window.innerWidth < 768;
   if (isMobile) {
-    fontSize = 28;
-    targetFPS = 12;
-    frameInterval = 1000 / targetFPS;
+    fontSize = 26;
+    frameInterval = 150;
   }
 
   function resize() {
     width  = window.innerWidth;
     height = window.innerHeight;
-
     canvas.width  = width;
     canvas.height = height;
     canvas.style.width  = width + 'px';
     canvas.style.height = height + 'px';
-
     columns = Math.floor(width / fontSize);
     drops = Array(columns).fill(1);
-
-    ctx.fillStyle = '#020d1d';
+    ctx.fillStyle = '#07111F';
     ctx.fillRect(0, 0, width, height);
   }
 
@@ -54,17 +54,16 @@
 
   function draw(timestamp) {
     if (paused) return;
-
     if (timestamp - lastFrame < frameInterval) {
       rafId = requestAnimationFrame(draw);
       return;
     }
     lastFrame = timestamp;
 
-    ctx.fillStyle = 'rgba(2, 13, 29, 0.15)';
+    ctx.fillStyle = 'rgba(7, 17, 31, 0.15)';
     ctx.fillRect(0, 0, width, height);
 
-    ctx.font = `${fontSize}px monospace`;
+    ctx.font = fontSize + 'px "JetBrains Mono", monospace';
     ctx.shadowBlur = 0;
 
     for (let i = 0; i < drops.length; i++) {
@@ -72,7 +71,12 @@
       const x = i * fontSize;
       const y = drops[i] * fontSize;
 
-      ctx.fillStyle = Math.random() > 0.99 ? '#ffffff' : 'rgba(0, 234, 255, 0.7)';
+      if (Math.random() > 0.99) {
+        ctx.fillStyle = '#ffffff';
+      } else {
+        ctx.fillStyle = 'rgba(0, 213, 232, 0.75)';
+      }
+
       ctx.fillText(char, x, y);
 
       if (y > height && Math.random() > 0.975) drops[i] = 0;
@@ -99,10 +103,10 @@
 
   let scrollTimer;
   window.addEventListener('scroll', () => {
-    frameInterval = 1000 / 8;
+    frameInterval = 150;
     clearTimeout(scrollTimer);
     scrollTimer = setTimeout(() => {
-      frameInterval = 1000 / targetFPS;
+      frameInterval = isMobile ? 150 : 100;
     }, 200);
   }, { passive: true });
 

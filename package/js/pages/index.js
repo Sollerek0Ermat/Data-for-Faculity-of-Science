@@ -2,75 +2,63 @@
  * 🏠 Home page
  */
 
-/* ═══ 1) ارسم البيانات فوراً من localStorage (بدون انتظار) ═══ */
-(function renderInstant() {
-  // نشتغل لما الـ DOM يكون جاهز
-  document.addEventListener('DOMContentLoaded', () => {
-    // ← نعرض القيم الأولية فوراً
-    const subjectsGrid = document.getElementById('subjectsGrid');
-    const announceList = document.getElementById('announceList');
-
-    // إذا البيانات موجودة في localStorage، اعرضها فوراً
-    try {
-      const cachedSubjects = JSON.parse(localStorage.getItem('mock_subjects') || 'null');
-      const cachedAnns = JSON.parse(localStorage.getItem('mock_announcements') || 'null');
-
-      if (cachedSubjects && subjectsGrid) {
-        renderSubjects(cachedSubjects);
-      }
-      if (cachedAnns && announceList) {
-        renderAnnouncements(cachedAnns);
-      }
-    } catch (e) { /* ignore */ }
-  }, { once: true });
-})();
-
-/* ═══ 2) تحميل عادي (بعد ما الصفحة تجهز) ═══ */
 document.addEventListener('DOMContentLoaded', async () => {
+  // ═══════════════════════════════════════════
+  // 🔐 تحقق من الجلسة
+  // ═══════════════════════════════════════════
+  try {
+    const profile = await API.getProfile();
+    if (profile) {
+      Auth.setSession({
+        id:    profile.id,
+        name:  profile.name,
+        email: profile.email,
+        role:  profile.role,
+      });
+
+      // لو admin → admin.html
+      if (profile.role === 'owner' || 
+          profile.role === 'moderator' || 
+          profile.role === 'doctor') {
+        window.location.href = 'admin.html';
+        return;
+      }
+    }
+  } catch (err) {
+    // مش مسجّل — عادي
+    console.log('Not logged in:', err.message);
+  }
+
+  // ═══════════════════════════════════════════
+  // 🏠 عرض الرئيسية
+  // ═══════════════════════════════════════════
   renderTopbar('index.html');
-  document.getElementById('footerPlaceholder').outerHTML = renderFooter();
+  const footer = document.getElementById('footerPlaceholder');
+  if (footer) footer.outerHTML = renderFooter();
 
   await loadHome();
 });
 
 async function loadHome() {
-  const announceList = document.getElementById('announceList');
   const subjectsGrid = document.getElementById('subjectsGrid');
+  if (!subjectsGrid) return;
 
-  // ما نعرضش الـ loader لو البيانات ظاهرة
-  if (!announceList.innerHTML.trim()) setLoading(announceList);
-  if (!subjectsGrid.innerHTML.trim()) setLoading(subjectsGrid);
+  setLoading(subjectsGrid);
 
   try {
-    const [announcements, subjects] = await Promise.all([
-      API.getAnnouncements(),
-      API.getSubjects(),
-    ]);
+    const subjects = await API.getSubjects();
 
-    renderAnnouncements(announcements);
+    if (!subjects || !subjects.length) {
+      setEmpty(subjectsGrid, 'No courses available');
+      return;
+    }
+
     renderSubjects(subjects);
   } catch (err) {
     console.error(err);
     UI.error(err.message || I18N.t('msg_error'));
+    setEmpty(subjectsGrid, err.message || 'Failed to load');
   }
-}
-
-function renderAnnouncements(list) {
-  const el = document.getElementById('announceList');
-  if (!el) return;
-
-  if (!list || !list.length) {
-    el.innerHTML = `<div class="announce-card"><p class="text-muted">No announcements</p></div>`;
-    return;
-  }
-
-  el.innerHTML = list.map(a => `
-    <div class="announce-card">
-      <h4>${escapeHtml(a.title)}</h4>
-      <p>${escapeHtml(a.body)}</p>
-      <small>📅 ${formatDate(a.date)}</small>
-    </div>
-  `).join('');
 }
 
 function renderSubjects(list) {
@@ -78,14 +66,14 @@ function renderSubjects(list) {
   if (!grid) return;
 
   if (!list || !list.length) {
-    grid.innerHTML = `<p class="text-muted text-center" style="grid-column:1/-1;padding:40px">No courses</p>`;
+    setEmpty(grid, 'No courses');
     return;
   }
 
   grid.innerHTML = list.map(s => `
-    <a href="subject.html?id=${s.id}" class="subject-card">
+    <a href="subject.html?id=${encodeURIComponent(s.name)}" class="subject-card">
       <span class="subject-code">${escapeHtml(s.code || '')}</span>
-      <span class="subject-icon">${s.icon || CONFIG.DEFAULT_SUBJECT_ICON}</span>
+      <span class="subject-icon">📚</span>
       <h3>${escapeHtml(s.name)}</h3>
       <p>${escapeHtml(s.description || '')}</p>
     </a>

@@ -1,5 +1,5 @@
 /**
- * 🔑 Set Password page
+ * 🔑 Set Password page (first time)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (newPwd.length < 6) {
-      msg.textContent = '❌ Password too short';
+    if (newPwd.length < 8) {
+      msg.textContent = '❌ Password too short (min 8)';
       msg.style.color = 'var(--danger)';
       return;
     }
@@ -39,10 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
     msg.style.color = 'var(--muted)';
 
     try {
-      await API.changePassword({
-        oldPassword: 'temp',
+      // adminLogin يقبل password جديد لو user.password === null
+      await API.adminLogin({
+        email: Auth.getUser()?.email || '',
         password: newPwd,
-        confirm_password: confirmPwd,
       });
 
       msg.textContent = '✅ Password saved';

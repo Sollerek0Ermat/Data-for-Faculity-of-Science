@@ -1,75 +1,143 @@
 /**
- * 🔄 Mappers — Convert backend field names → frontend shape
+ * 🔄 Mappers — تحويل ردود الباك
  */
 
 const Mappers = {
+
+  /* ═══════════════════════════════════════════
+     🎓 User Profile
+     ═══════════════════════════════════════════ */
+  profile(raw) {
+    if (!raw) return null;
+    return {
+      id:            raw.userId?.toString() || null,
+      name:          raw.name || '',
+      email:         raw.colleageEmail || '',
+      role:          raw.role || 'user',
+      photo:         raw.photo || null,
+      department:    raw.department || null,
+      level:         raw.level?.toString() || null,
+      adminLoggedIn: raw.adminLogged_in || false,
+    };
+  },
+
+  /* ═══════════════════════════════════════════
+     📚 Subject — الباك بيرجّع subjectName بس
+     ═══════════════════════════════════════════ */
   subject(raw) {
     if (!raw) return null;
     return {
-      id:          raw._id || raw.id || raw.subjectId || uid('s'),
-      name:        raw.subjectName || raw.name || '',
-      code:        raw.subjectCode || raw.code || '',
-      description: raw.subjectDescription || raw.description || '',
-      icon:        CONFIG.DEFAULT_SUBJECT_ICON,
-      semesterId:  raw.semesterId || raw.semester?._id || null,
+      id:          raw.subjectName || '',
+      name:        raw.subjectName || '',
+      description: raw.subjectDescription || '',
+      semsterId:   raw.semsterId?.toString() || null,
     };
   },
 
+  /* ═══════════════════════════════════════════
+     👨‍🏫 Doctor
+     ═══════════════════════════════════════════ */
   doctor(raw) {
     if (!raw) return null;
     return {
-      id:             raw._id || raw.id || raw.doctorId || uid('doc'),
-      name:           raw.doctorName || raw.name || '',
-      academicDegree: raw.doctorAcademicDegree || raw.academicDegree || '',
-      description:    raw.doctorDescription || raw.description || '',
-      photo:          raw.doctorPhoto || raw.photo || null,
-      certifications: raw.doctorCertifications || raw.certifications || [],
-      subjectIds:     raw.subjects?.map(s => s._id || s.id || s) || raw.subjectIds || [],
+      id:             raw.doctorName || '',
+      name:           raw.doctorName || '',
+      academicDegree: raw.doctorAcademicDegree || '',
+      description:    raw.doctorDescription || '',
+      photo:          raw.doctorPhoto || null,
+      certifications: raw.doctorCertifications || [],
     };
   },
 
-  file(raw, forcedType = null) {
+  /* ═══════════════════════════════════════════
+     📄 File — حسب النوع
+     ═══════════════════════════════════════════ */
+  file(raw, type) {
     if (!raw) return null;
-    const type = forcedType || raw.type || (
-      raw.sectionTitle ? 'section' :
-      raw.summaryTitle ? 'summary' :
-      raw.resourceTitle ? 'resource' :
-      raw.videoTitle ? 'video' : 'section'
-    );
 
     const titles = {
       section:  raw.sectionTitle,
       summary:  raw.summaryTitle,
-      resource: raw.resourceTitle,
+      resource: raw.resourceTitle || raw.recourseTitle,
       video:    raw.videoTitle,
     };
 
+    const publishers = {
+      section:  raw.sectionPublishedBy,
+      summary:  raw.summaryPublishedBy,
+      resource: raw.resourcePublishedBy || raw.recoursePublishedBy,
+      video:    raw.videoPublishedBy,
+    };
+
+    const dates = {
+      section:  raw.sectionPublishDate,
+      summary:  raw.summaryPublishDate,
+      resource: raw.resourcePublishDate || raw.recoursePublishDate,
+      video:    raw.videoPublishDate,
+    };
+
+    const editDates = {
+      section:  raw.sectionLastEditDate,
+      summary:  raw.summaryLastEditDate,
+      resource: raw.resourceLastEditDate || raw.recourseLastEditDate,
+      video:    raw.videoLastEditDate,
+    };
+
     return {
-      id:         raw._id || raw.id || uid('file'),
-      title:      titles[type] || raw.title || '',
-      type,
-      subjectId:  raw.subjectId || raw.subject?._id || null,
-      doctorId:   raw.doctorId || raw.doctor?._id || null,
-      publisher:  raw.publisher || raw.doctorName || raw.doctor?.doctorName || '—',
-      url:        raw.fileUrl || raw.url || raw.sectionFile || raw.summaryFile || raw.resourceFile || raw.video || null,
-      size:       raw.size ?? null,
-      created_at: raw.createdAt || raw.created_at || raw.date || null,
-      status:     raw.status || 'approved',
+      id:         titles[type] || ('file_' + Date.now()),
+      title:      titles[type] || '',
+      type:       type,
+      publisher:  publishers[type] || '—',
+      url:        raw[type] || raw[type === 'resource' ? 'recourse' : type] || null,
+      fileType:   raw.fileType || null,
+      created_at: dates[type] || null,
+      edited_at:  editDates[type] || null,
+      link:       raw.link || null,
+      status:     'approved',
     };
   },
 
-  folderResponse(raw) {
-    if (!raw) return [];
-    const list = Array.isArray(raw) ? raw : (raw.data || raw.files || []);
-    return list.map(f => Mappers.file(f));
-  },
-
+  /* ═══════════════════════════════════════════
+     📚 DoctorWithSubjects — أهم واحد
+     الباك بيرجّع: [{doctorName, subjectName, link}]
+     ═══════════════════════════════════════════ */
   doctorWithSubjects(raw) {
-    if (!raw) return [];
-    const list = Array.isArray(raw) ? raw : (raw.data || []);
-    return list.map(item => ({
-      doctor:   Mappers.doctor(item),
-      subjects: (item.subjects || item.Subjects || []).map(s => Mappers.subject(s)),
-    }));
+    if (!raw || !Array.isArray(raw)) return [];
+
+    const docMap = new Map();
+
+    raw.forEach(function (item) {
+      const docName  = item.doctorName;
+      const subjName = item.subjectName;
+
+      if (!docName || !subjName) return;
+
+      if (!docMap.has(docName)) {
+        docMap.set(docName, {
+          doctor: {
+            id:             docName,
+            name:           docName,
+            academicDegree: '',
+            description:    '',
+            photo:          null,
+            certifications: [],
+          },
+          subjects: [],
+        });
+      }
+
+      const entry = docMap.get(docName);
+
+      if (!entry.subjects.some(function (s) { return s.id === subjName; })) {
+        entry.subjects.push({
+          id:          subjName,
+          name:        subjName,
+          description: '',
+          link:        item.link,
+        });
+      }
+    });
+
+    return Array.from(docMap.values());
   },
 };

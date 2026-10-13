@@ -41,6 +41,16 @@ const Auth = {
         || r === CONFIG.ROLES.DOCTOR;
   },
 
+  /* ═══════════════════════════════════════════
+     🔑 Login (Microsoft OAuth)
+     ═══════════════════════════════════════════ */
+  loginWithMicrosoft() {
+    window.location.href = CONFIG.API_URL + '/' + CONFIG.ENDPOINTS.student.microsoftLogin;
+  },
+
+  /* ═══════════════════════════════════════════
+     🎓 Login (Admin - password only)
+     ═══════════════════════════════════════════ */
   async login(email, password) {
     const res = await API.adminLogin({ email, password });
     if (res?.success) {
@@ -55,6 +65,9 @@ const Auth = {
     window.location.href = 'login.html';
   },
 
+  /* ═══════════════════════════════════════════
+     🛡️ Role Check
+     ═══════════════════════════════════════════ */
   requireAuth(allowedRoles = []) {
     if (!this.isLoggedIn()) {
       window.location.href = 'login.html';
@@ -74,6 +87,32 @@ const Auth = {
   },
 
   async changePassword(oldPassword, newPassword) {
-    return await API.changePassword({ oldPassword, newPassword });
+    return await API.changePassword({
+      oldPassword:      oldPassword,
+      password:         newPassword,
+      confirm_password: newPassword,
+    });
+  },
+
+  /* ═══════════════════════════════════════════
+     📥 Sync Session from Server
+     ═══════════════════════════════════════════ */
+  async syncSession() {
+    try {
+      const profile = await API.getProfile();
+      if (profile) {
+        this.setSession({
+          id:    profile.id,
+          name:  profile.name,
+          email: profile.email,
+          role:  profile.role,
+          photo: profile.photo,
+        });
+      }
+      return profile;
+    } catch (err) {
+      console.warn('Session sync failed:', err.message);
+      return null;
+    }
   },
 };

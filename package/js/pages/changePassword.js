@@ -21,13 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
     msg.textContent = '';
 
     if (newPwd !== confirmPwd) {
-      msg.textContent = I18N.t('msg_password_mismatch');
+      msg.textContent = '❌ Passwords do not match';
       msg.style.color = 'var(--danger)';
       return;
     }
 
-    if (newPwd.length < 6) {
-      msg.textContent = I18N.t('msg_password_short');
+    if (newPwd.length < 8) {
+      msg.textContent = '❌ Password too short (min 8)';
       msg.style.color = 'var(--danger)';
       return;
     }
@@ -37,23 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
     msg.style.color = 'var(--muted)';
 
     try {
-      const res = await Auth.changePassword(oldPwd, newPwd);
+      await Auth.changePassword(oldPwd, newPwd);
 
-      if (res.success) {
-        msg.textContent = I18N.t('msg_password_updated');
-        msg.style.color = 'var(--success)';
-        UI.success(I18N.t('msg_password_updated'));
-        form.reset();
-        setTimeout(() => { btn.disabled = false; }, 1500);
-      } else {
-        msg.textContent = '❌ ' + (res.message || 'Failed');
-        msg.style.color = 'var(--danger)';
-        btn.disabled = false;
-      }
+      msg.textContent = '✅ Password updated';
+      msg.style.color = 'var(--success)';
+      UI.success('Password updated');
+      form.reset();
     } catch (err) {
       console.error(err);
-      msg.textContent = '❌ ' + (err.message || I18N.t('msg_error'));
+      msg.textContent = '❌ ' + (err.message || 'Failed');
       msg.style.color = 'var(--danger)';
+    } finally {
       btn.disabled = false;
     }
   });
