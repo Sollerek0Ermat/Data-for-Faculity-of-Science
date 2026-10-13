@@ -1,9 +1,6 @@
 # Dependencies
 node_modules/
 
-# Secrets and environment
-.env
-.env.*
 
 # Logs
 *.log
