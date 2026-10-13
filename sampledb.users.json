@@ -1,0 +1,56 @@
+[{
+  "_id": {
+    "$oid": "6a65210365ae607b89197e77"
+  },
+  "name": "kero Zaki",
+  "email": "kokoteto734@gmail.com",
+  "OTP_attempts": 1,
+  "email_verification": true,
+  "password": "$2b$10$NpDT.Bf1c6fZu63xWx936OGs2rNym3oP1mpo7//RWdwT1TRASWK7G",
+  "before_current_password": "$2b$10$NpDT.Bf1c6fZu63xWx936O4V.o.Tq6o/FYi99FV9jgnbiD.JuMYq.",
+  "role": "admin",
+  "active": true,
+  "logged_in": true,
+  "login_attempts": 1,
+  "isOAuthUser": true,
+  "oauthProvider": [
+    "google"
+  ],
+  "twoFactorEnabled": false,
+  "twoFactorAttempts": 1,
+  "failedLoginTimes": 1,
+  "failedOTPTimes": 0,
+  "failed2faDeactivationTimes": 3,
+  "isLocked": false,
+  "__v": 11,
+  "jwt_expires": {
+    "$date": "2026-08-08T14:44:39.816Z"
+  },
+  "twoFactorSecret": "J5WD4OTUIZ2HWS3WJFKCK6LJGIQTQW2D",
+  "backupCodes": [
+    "$2b$10$diUFTutosRSMKje8.nGz5uNw7aF0zx2xALqvEDXauX4RuZn5EXyIy",
+    "$2b$10$PbrAh6G5OkpU1uWLX0vpPOwX1p4twk.7oOx7WEcv3ATts72UbOUGa",
+    "$2b$10$gzzh3aC4gBnbxApcd8WFFesUkbyKkz8ferXtd.WeXOs4pNX/IluKW",
+    "$2b$10$y9e2pGXRKtYX8OexciPmJu8LZWI1j/aSxElAj6DzcjwDeaexCr0PW",
+    "$2b$10$SvEvm7ndoetdmgQ.4PM0reKE1kFfaRngAp5F7FII8GIyc3eUWvcBy",
+    "$2b$10$/G8QprxPkq7/aPjcO1TkhO40JD9qaJv4cARnQCbk8UdMN3D6wWNMO",
+    "$2b$10$8JBpVTri1FYRa2Fu.Acmseyy14K.Jv1yhQRqJLTjA4mcy8xzZRYdO",
+    "$2b$10$AAR6DcohSkjgc9QT8Nmih.url6N71wiBehjBNUDpxDiS07CtgCj06",
+    "$2b$10$l0/MpQRatqitNsehkj0dfOhI036WrMNjRiOREz5wn3aB5qj9a7NTq",
+    "$2b$10$Gw7verIWkz/Vqgf1zFOVYucvr20T3LFzbEFKrWimk4JPTHl/VcCgS"
+  ],
+  "backupCodesUsed": [
+    "$2b$10$diUFTutosRSMKje8.nGz5uNw7aF0zx2xALqvEDXauX4RuZn5EXyIy"
+  ],
+  "backupCodesAttempts": 1,
+  "failedBackupCodesTimes": 0,
+  "failedPhoneOTPTimes": 0,
+  "phoneOTPAttempts": 1,
+  "phoneVerified": false,
+  "changePasswordAttempts": 9,
+  "failedchangePasswordTimes": 0,
+  "changePasswordAttemptsTimestamp": {
+    "$date": "2026-08-01T17:30:45.726Z"
+  },
+  "googleId": "105565494946138408059"
+}]

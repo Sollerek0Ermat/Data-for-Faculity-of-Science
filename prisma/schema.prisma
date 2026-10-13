@@ -1,0 +1,205 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  userId                          BigInt    @id @default(autoincrement())
+  name                            String
+  colleageEmail                   String    @unique
+  password                        String?
+  changePasswordAttempts          Int?      @default(1)
+  changePasswordAttemptsTimestamp DateTime?
+  failedChangePasswordTimes       Int?      @default(0)
+  photo                           String?
+  role                            UserRole  @default(user)
+  failedLoginTimes                Int?      @default(0)
+  jwtExpires                      DateTime?
+  isLocked                        Boolean   @default(false)
+  microsoftId                     String    @unique
+  active                          Boolean   @default(true)
+  logged_in                       Boolean   @default(false)
+  adminLogged_in                  Boolean   @default(false)
+  login_attempts                  Int?      @default(1)
+  login_attempts_timestamp        DateTime?
+  before_current_password         String?
+  password_changed_at             DateTime?
+  password_reset_token            String?
+  password_reset_token_expires    DateTime?
+  password_reset_token_sent_at    DateTime?
+  department                      String?
+  level                           BigInt?
+
+  @@index([userId], map: "BTree_userId_idx")
+  @@index([userId], map: "hash_userId_idx", type: Hash)
+  @@index([colleageEmail], map: "BTree_colleageEmail_idx")
+  @@index([colleageEmail], map: "hash_colleageEmail_idx", type: Hash)
+  @@index([role], map: "BTree_Users_role_idx")
+  @@index([role], map: "hash_Users_role_idx", type: Hash)
+  @@map("Users")
+}
+
+model Department {
+  depId                  BigInt  @id @default(autoincrement())
+  depName                String  @unique
+  departmentDescription  String  @unique
+  departmentExpectedJobs String
+  code                   String  @unique @default("0")
+  levels                 Level[]
+
+  @@index([depId], map: "BTree_depId_idx")
+  @@index([depId], map: "hash_depId_idx", type: Hash)
+  @@index([depName], map: "BTree_depName_idx")
+  @@index([depName], map: "hash_depName_idx", type: Hash)
+  @@map("Department")
+}
+
+model Level {
+  levelId     BigInt     @id @default(autoincrement())
+  levelNumber BigInt
+  depId       BigInt
+  department  Department @relation(fields: [depId], references: [depId])
+  semesters   Semester[]
+
+  @@index([levelId], map: "BTree_levelId_idx")
+  @@index([levelId], map: "hash_levelId_idx", type: Hash)
+  @@index([levelNumber], map: "BTree_levelNumber_idx")
+  @@index([levelNumber], map: "hash_levelNumber_idx", type: Hash)
+  @@map("Level")
+}
+
+model Semester {
+  semsterId      BigInt    @id @default(autoincrement())
+  semesterNumber BigInt
+  levelId        BigInt
+  level          Level     @relation(fields: [levelId], references: [levelId])
+  subjects       Subject[]
+
+  @@index([semsterId], map: "BTree_semsterId_idx")
+  @@index([semsterId], map: "hash_semsterId_idx", type: Hash)
+  @@index([semesterNumber], map: "BTree_semesterNumber_idx")
+  @@index([semesterNumber], map: "hash_semesterNumber_idx", type: Hash)
+  @@map("Semester")
+}
+
+model Subject {
+  subjectId          BigInt          @id @default(autoincrement())
+  subjectName        String          @unique
+  semsterId          BigInt
+  subjectDescription String
+  code               String
+  semester           Semester        @relation(fields: [semsterId], references: [semsterId])
+  subjectDoctors     SubjectDoctor[]
+
+  @@index([subjectId], map: "BTree_subjectId_idx")
+  @@index([subjectId], map: "hash_subjectId_idx", type: Hash)
+  @@index([subjectName], map: "BTree_subjectName_idx")
+  @@index([subjectName], map: "hash_subjectName_idx", type: Hash)
+  @@map("Subject")
+}
+
+model Doctor {
+  doctorId             BigInt          @id @default(autoincrement())
+  doctorName           String          @unique
+  doctorPhoto          String
+  doctorAcademicDegree String
+  doctorDescription    String
+  photoType            String          @default(" ")
+  doctorCertifications String[]
+  certificationsType   String[]
+  subjectDoctors       SubjectDoctor[]
+
+  @@index([doctorId], map: "BTree_doctorId_idx")
+  @@index([doctorId], map: "hash_doctorId_idx", type: Hash)
+  @@index([doctorName], map: "BTree_doctorName_idx")
+  @@index([doctorName], map: "hash_doctorName_idx", type: Hash)
+  @@map("Doctors")
+}
+
+model SubjectDoctor {
+  subjectId BigInt     @map("subjectId")
+  doctorId  BigInt     @map("doctorId")
+  subDocId  BigInt     @id @default(autoincrement())
+  resources Resource[]
+  sections  Section[]
+  doctor    Doctor     @relation(fields: [doctorId], references: [doctorId])
+  subject   Subject    @relation(fields: [subjectId], references: [subjectId])
+  summaries Summary[]
+  videos    Video[]
+
+  @@unique([subjectId, doctorId])
+  @@map("Subject_Doctor")
+}
+
+model Section {
+  sectionId           BigInt        @id @default(autoincrement())
+  section             String
+  sectionPublishedBy  String
+  sectionTitle        String        @unique
+  subDocId            BigInt
+  fileType            String        @default(" ")
+  sectionPublishDate  DateTime
+  sectionLastEditDate DateTime
+  subjectDoctor       SubjectDoctor @relation(fields: [subDocId], references: [subDocId])
+
+  @@index([sectionId], map: "BTree_sectionId_idx")
+  @@index([sectionId], map: "hash_sectionId_idx", type: Hash)
+  @@map("Sections")
+}
+
+model Resource {
+  resourcesId          BigInt        @id @default(autoincrement())
+  resource             String
+  resourcePublishedBy  String
+  resourceTitle        String        @unique
+  subDocId             BigInt
+  fileType             String        @default(" ")
+  resourcePublishDate  DateTime
+  resourceLastEditDate DateTime
+  subjectDoctor        SubjectDoctor @relation(fields: [subDocId], references: [subDocId])
+
+  @@index([resourcesId], map: "BTree_resourcesId_idx")
+  @@index([resourcesId], map: "hash_resourcesId_idx", type: Hash)
+  @@map("Resources")
+}
+
+model Video {
+  videosId          BigInt        @id @default(autoincrement())
+  video             String
+  videoPublishedBy  String
+  videoTitle        String        @unique
+  subDocId          BigInt
+  videoPublishDate  DateTime
+  videoLastEditDate DateTime
+  subjectDoctor     SubjectDoctor @relation(fields: [subDocId], references: [subDocId])
+
+  @@index([videosId], map: "BTree_videosId_idx")
+  @@index([videosId], map: "hash_videosId_idx", type: Hash)
+  @@map("videos")
+}
+
+model Summary {
+  summariesId         BigInt        @id @default(autoincrement())
+  summary             String
+  summaryTitle        String        @unique
+  subDocId            BigInt
+  fileType            String        @default(" ")
+  summaryPublishDate  DateTime
+  summaryLastEditDate DateTime
+  summaryPublishedBy  String
+  subjectDoctor       SubjectDoctor @relation(fields: [subDocId], references: [subDocId])
+
+  @@index([summariesId], map: "BTree_summariesId_idx")
+  @@index([summariesId], map: "hash_summariesId_idx", type: Hash)
+  @@map("Summaries")
+}
+
+enum UserRole {
+  moderator
+  owner
+  user
+  doctor
+}

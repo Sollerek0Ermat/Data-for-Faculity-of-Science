@@ -1,0 +1,1869 @@
+{
+  "info": {
+    "_postman_id": "95654141-e259-417d-94a6-3db3758cf3b8",
+    "name": "DATA",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "34353417",
+    "_collection_link": "https://go.postman.co/collection/34353417-95654141-e259-417d-94a6-3db3758cf3b8?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Student",
+      "item": [
+        {
+          "name": "info",
+          "item": [
+            {
+              "name": "user profile",
+              "item": [
+                {
+                  "name": "profile",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{jwt}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}v1/student/profile",
+                      "host": [
+                        "{{URL}}v1"
+                      ],
+                      "path": [
+                        "student",
+                        "profile"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "profile photo",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{jwt}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}v1/student/profile/photo/31",
+                      "host": [
+                        "{{URL}}v1"
+                      ],
+                      "path": [
+                        "student",
+                        "profile",
+                        "photo",
+                        "31"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "folders",
+              "item": [
+                {
+                  "name": "folder info",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{jwt}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}v1/student/folderInfo/doctor/Amgad Salama",
+                      "host": [
+                        "{{URL}}v1"
+                      ],
+                      "path": [
+                        "student",
+                        "folderInfo",
+                        "doctor",
+                        "Amgad Salama"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "display folders",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{jwt}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}v1/student/folder?department=computer%20science&levelNumber=2&semesterNumber=1&subject=algorithm&doctor=Amgad%20Salama2&dataType=section",
+                      "host": [
+                        "{{URL}}v1"
+                      ],
+                      "path": [
+                        "student",
+                        "folder"
+                      ],
+                      "query": [
+                        {
+                          "key": "department",
+                          "value": "computer%20science"
+                        },
+                        {
+                          "key": "levelNumber",
+                          "value": "2"
+                        },
+                        {
+                          "key": "semesterNumber",
+                          "value": "1"
+                        },
+                        {
+                          "key": "subject",
+                          "value": "algorithm"
+                        },
+                        {
+                          "key": "doctor",
+                          "value": "Amgad%20Salama2"
+                        },
+                        {
+                          "key": "dataType",
+                          "value": "section"
+                        }
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "doctor photos",
+              "item": [
+                {
+                  "name": "get doctor photo",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{jwt}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}v1/student/profile/photo/doctor/Amgad%20Salama",
+                      "host": [
+                        "{{URL}}v1"
+                      ],
+                      "path": [
+                        "student",
+                        "profile",
+                        "photo",
+                        "doctor",
+                        "Amgad%20Salama"
+                      ]
+                    }
+                  },
+                  "response": []
+                },
+                {
+                  "name": "get doctor certifications",
+                  "request": {
+                    "auth": {
+                      "type": "bearer",
+                      "bearer": [
+                        {
+                          "key": "token",
+                          "value": "{{jwt}}",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{URL}}v1/student/doctor/certifications/Amgad%20Salama/1",
+                      "host": [
+                        "{{URL}}v1"
+                      ],
+                      "path": [
+                        "student",
+                        "doctor",
+                        "certifications",
+                        "Amgad%20Salama",
+                        "1"
+                      ]
+                    }
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "get all doctors with subject and vicevers",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{URL}}v1/student/doctorWithSubjects",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "student",
+                    "doctorWithSubjects"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "microsoft OAuth login",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{URL}}v1/student/auth/microsoft/login",
+              "host": [
+                "{{URL}}v1"
+              ],
+              "path": [
+                "student",
+                "auth",
+                "microsoft",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "download data",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{URL}}v1/student/file/section/section2/download?mode=view",
+              "host": [
+                "{{URL}}v1"
+              ],
+              "path": [
+                "student",
+                "file",
+                "section",
+                "section2",
+                "download"
+              ],
+              "query": [
+                {
+                  "key": "mode",
+                  "value": "view"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "password",
+          "item": [
+            {
+              "name": "changePassword",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"old_password\": \"Qaz123-+-124\",\r\n    \"password\": \"Qaz123-+-123\",\r\n    \"confirm_password\": \"Qaz123-+-123\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/admin/changePassword",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "admin",
+                    "changePassword"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "forgot Password",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{URL}}v1/admin/auth/microsoft/forgotPassword",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "admin",
+                    "auth",
+                    "microsoft",
+                    "forgotPassword"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "reset Password",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"password\": \"Qaz123-+-123\",\r\n    \"confirm_password\": \"Qaz123-+-123\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/admin/resetPassword/dd74cd753b9c05476d03b63df951970e949fa1826e8dee16fb3585c184ce3d4b",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "admin",
+                    "resetPassword",
+                    "dd74cd753b9c05476d03b63df951970e949fa1826e8dee16fb3585c184ce3d4b"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "login",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"password\": \"Qaz123-+-123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}v1/admin/login",
+              "host": [
+                "{{URL}}v1"
+              ],
+              "path": [
+                "admin",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "logout",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}v1/admin/logout",
+              "host": [
+                "{{URL}}v1"
+              ],
+              "path": [
+                "admin",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Owner",
+      "item": [
+        {
+          "name": "admin edits",
+          "item": [
+            {
+              "name": "garanteeRoles",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"students\": [\"UG_31268834@science.tanta.edu.eg\", \"UG_31268835@science.tanta.edu.eg\"],\r\n  \"role\": \"user\",\r\n  \"level\": 1,\r\n  \"department\": \"computer science\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/admins/garanteeRoles",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "admins",
+                    "garanteeRoles"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "change lock status",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"students\": [\"UG_31268834@science.tanta.edu.eg\", \"UG_31268836@science.tanta.edu.eg\"],\r\n  \"lockStatus\": false\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/admins/changeLock",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "admins",
+                    "changeLock"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "departments",
+          "item": [
+            {
+              "name": "Add New Departments",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\r\n    {\r\n        \"DepartmentName\": \"computer science\" ,                \r\n        \"departmentDescription\": \"computer science description\",\r\n        \"departmentExpectedJobs\": \"computer science expected jobs\"\r\n    },\r\n    {\r\n        \"DepartmentName\": \"statistics\" ,                \r\n        \"departmentDescription\": \"statistics description\",\r\n        \"departmentExpectedJobs\": \"statistics expected jobs\"\r\n    },\r\n    {\r\n        \"DepartmentName\": \"chemistry\" ,                \r\n        \"departmentDescription\": \"chemistry description\",\r\n        \"departmentExpectedJobs\": \"chemistry expected jobs\"\r\n    },\r\n    {\r\n        \"DepartmentName\": \"Natural Science\" ,                \r\n        \"departmentDescription\": \"Natural Science description\",\r\n        \"departmentExpectedJobs\": \"Natural Science expected jobs\"\r\n    }\r\n]\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/departments/AddNewDepartments",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "departments",
+                    "AddNewDepartments"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "delete Departments",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"departmentsName\": [ \"statistics\", \"chemistry\", \"cs3\" ]\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/departments/deleteDepartments",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "departments",
+                    "deleteDepartments"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "edit Department",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"departmentName\": \"computer science\",\r\n    \"departmentDescription\": \"computer science description1\",\r\n    \"departmentExpectedJobs\": \"computer science expected jobs1\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/departments/editDepartment",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "departments",
+                    "editDepartment"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "levels",
+          "item": [
+            {
+              "name": "Add New Levels",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\r\n    {\r\n        \"DepartmentName\": \"computer science\" ,                \r\n        \"levelNumber\": 2\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\" ,                \r\n        \"levelNumber\": 3\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\" ,                \r\n        \"levelNumber\": 4\r\n    },\r\n    {\r\n        \"DepartmentName\": \"statistics\" ,                \r\n        \"levelNumber\": 2\r\n    },\r\n        {\r\n        \"DepartmentName\": \"statistics\" ,                \r\n        \"levelNumber\": 3\r\n    },\r\n    {\r\n        \"DepartmentName\": \"statistics\" ,                \r\n        \"levelNumber\": 4\r\n    },\r\n        {\r\n        \"DepartmentName\": \"Natural Science\" ,                \r\n        \"levelNumber\": 1\r\n    }\r\n]\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/levels/AddNewLevels",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "levels",
+                    "AddNewLevels"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "delete Levels",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\r\n    {\r\n        \"DepartmentName\": \"computer science\" ,                \r\n        \"levelNumber\": 3\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\" ,                \r\n        \"levelNumber\": 4\r\n    },\r\n    {\r\n        \"DepartmentName\": \"statistics\" ,                \r\n        \"levelNumber\": 2\r\n    },\r\n    {\r\n        \"DepartmentName\": \"statistics\" ,                \r\n        \"levelNumber\": 3\r\n    }\r\n]\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/levels/deleteLevels",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "levels",
+                    "deleteLevels"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "semesters",
+          "item": [
+            {
+              "name": "Add New Semesters",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 2,\r\n        \"semesterNumber\": 1\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 2,\r\n        \"semesterNumber\": 2\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 3,\r\n        \"semesterNumber\": 1\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 3,\r\n        \"semesterNumber\": 2\r\n    },\r\n    {\r\n        \"DepartmentName\": \"Natural Science\",\r\n        \"levelNumber\": 1,\r\n        \"semesterNumber\": 2\r\n    },\r\n    {\r\n        \"DepartmentName\": \"Natural Science\",\r\n        \"levelNumber\": 1,\r\n        \"semesterNumber\": 1\r\n    }\r\n]",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/semesters/AddNewSemesters",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "semesters",
+                    "AddNewSemesters"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "delete Semesters",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 2,\r\n        \"semesterNumber\": 1\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 2,\r\n        \"semesterNumber\": 2\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 3,\r\n        \"semesterNumber\": 1\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 3,\r\n        \"semesterNumber\": 2\r\n    },\r\n    {\r\n        \"DepartmentName\": \"Natural Science\",\r\n        \"levelNumber\": 1,\r\n        \"semesterNumber\": 2\r\n    },\r\n    {\r\n        \"DepartmentName\": \"Natural Science\",\r\n        \"levelNumber\": 1,\r\n        \"semesterNumber\": 1\r\n    }\r\n]",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/semesters/deleteSemesters",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "semesters",
+                    "deleteSemesters"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "subjects",
+          "item": [
+            {
+              "name": "Add New Subjects",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 2,\r\n        \"semesterNumber\": 1,\r\n        \"subjectName\": \"introduction to computer science\",\r\n        \"subjectDescription\": \"introduction to computer science Description\"\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 2,\r\n        \"semesterNumber\": 1,\r\n        \"subjectName\": \"algorithm\",\r\n        \"subjectDescription\": \"algorithm Description\"\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 3,\r\n        \"semesterNumber\": 2,\r\n        \"subjectName\": \"introduction to computer science2\",\r\n        \"subjectDescription\": \"introduction to computer science Description2\"\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 3,\r\n        \"semesterNumber\": 2,\r\n        \"subjectName\": \"algorithm2\",\r\n        \"subjectDescription\": \"algorithm Description2\"\r\n    }\r\n]",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/subjects/AddNewsubjects",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "subjects",
+                    "AddNewsubjects"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "delete Subjects",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 2,\r\n        \"semesterNumber\": 1,\r\n        \"subjectName\": \"introduction to computer science\"\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 2,\r\n        \"semesterNumber\": 1,\r\n        \"subjectName\": \"algorithm\"\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 3,\r\n        \"semesterNumber\": 2,\r\n        \"subjectName\": \"introduction to computer science2\"\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 3,\r\n        \"semesterNumber\": 2,\r\n        \"subjectName\": \"algorithm2\"\r\n    }\r\n]",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/subjects/deleteSubjects",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "subjects",
+                    "deleteSubjects"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Edit a Subject",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"departmentName\": \"computer science\",\r\n    \"levelNumber\": 2,\r\n    \"semesterNumber\": 1,\r\n    \"subjectName\": \"introduction to computer science\",\r\n    \"subjectDescription\": \"edited introduction to computer science Description\",\r\n    \"newSubjectName\": \"edited introduction to computer science\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/subjects/editSubject",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "subjects",
+                    "editSubject"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "link subjects with doctors",
+          "item": [
+            {
+              "name": "link subjects with doctors",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 2,\r\n        \"semesterNumber\": 1,\r\n        \"subjectName\": \"introduction to computer science\",\r\n        \"doctorName\": \"Amgad Salama\"\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 2,\r\n        \"semesterNumber\": 1,\r\n        \"subjectName\": \"algorithm\",\r\n        \"doctorName\": \"Amgad Salama2\"\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 3,\r\n        \"semesterNumber\": 2,\r\n        \"subjectName\": \"introduction to computer science2\",\r\n        \"doctorName\": \"Amgad Salama\"\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 3,\r\n        \"semesterNumber\": 2,\r\n        \"subjectName\": \"algorithm2\",\r\n        \"doctorName\": \"Amgad Salama2\"\r\n    }\r\n]",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/doctors/linkSubject/LinkNewDoctors",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "doctors",
+                    "linkSubject",
+                    "LinkNewDoctors"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "unlink subjects with doctors",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 2,\r\n        \"semesterNumber\": 1,\r\n        \"subjectName\": \"introduction to computer science\",\r\n        \"doctorName\": \"Amgad Salama\"\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 2,\r\n        \"semesterNumber\": 1,\r\n        \"subjectName\": \"algorithm\",\r\n        \"doctorName\": \"Amgad Salama2\"\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 3,\r\n        \"semesterNumber\": 2,\r\n        \"subjectName\": \"introduction to computer science2\",\r\n        \"doctorName\": \"Amgad Salama\"\r\n    },\r\n    {\r\n        \"DepartmentName\": \"computer science\",\r\n        \"levelNumber\": 3,\r\n        \"semesterNumber\": 2,\r\n        \"subjectName\": \"algorithm2\",\r\n        \"doctorName\": \"Amgad Salama2\"\r\n    }\r\n]",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/doctors/linkSubject/deleteDoctorsLink",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "doctors",
+                    "linkSubject",
+                    "deleteDoctorsLink"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "doctors",
+          "item": [
+            {
+              "name": "Add New Doctors",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "data",
+                      "value": "[\n  {\n    \"doctorName\": \"Amgad Salama\",\n    \"doctorAcademicDegree\": \"PhD\",\n    \"doctorDescription\": \"Specializes in algorithms\",\n    \"doctorPhotoFile\": \"photo1\",\n    \"doctorCertificationFiles\": [\"cert1\", \"cert2\"]\n  },\n  {\n    \"doctorName\": \"Amgad Salama2\",\n    \"doctorAcademicDegree\": \"MSc\",\n    \"doctorDescription\": \"Database systems expert\",\n    \"doctorPhotoFile\": \"photo2\"\n  }\n]",
+                      "type": "text"
+                    },
+                    {
+                      "key": "photo1",
+                      "type": "file",
+                      "src": [
+                        "/C:/Users/LeaderTech/Downloads/download (8).jpg"
+                      ]
+                    },
+                    {
+                      "key": "cert1",
+                      "type": "file",
+                      "src": [
+                        "/C:/Users/LeaderTech/Downloads/download (3).jpg"
+                      ]
+                    },
+                    {
+                      "key": "photo2",
+                      "type": "file",
+                      "src": [
+                        "/C:/Users/LeaderTech/Downloads/تصميم بدون عنوان (29).png"
+                      ]
+                    },
+                    {
+                      "key": "cert2",
+                      "type": "file",
+                      "src": [
+                        "/C:/Users/LeaderTech/Downloads/download.jpg"
+                      ]
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/doctors/AddNewDoctors",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "doctors",
+                    "AddNewDoctors"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "delete Doctors",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"doctorName\": [ \"Dr. Ahmed\", \"Amgad Salama\", \"Amgad Salama2\" ]\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/doctors/deleteDoctors",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "doctors",
+                    "deleteDoctors"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "edit Doctor",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "doctorName",
+                      "value": "Amgad Salama",
+                      "type": "text"
+                    },
+                    {
+                      "key": "doctorPhotoFile",
+                      "value": "newPhotoFile",
+                      "type": "text"
+                    },
+                    {
+                      "key": "newPhotoFile",
+                      "type": "file",
+                      "src": [
+                        "postman-cloud:///1f1bf93e-8711-49a0-a620-caddcca291c7"
+                      ]
+                    },
+                    {
+                      "key": "doctorCertificationFiles",
+                      "value": "[\"newCertFiles\",\"newCertFiles2\",\"newCertFiles3\"]",
+                      "type": "text"
+                    },
+                    {
+                      "key": "newCertFiles",
+                      "type": "file",
+                      "src": [
+                        "postman-cloud:///1f1bf93e-682b-4720-aff9-4e8caf61422d"
+                      ]
+                    },
+                    {
+                      "key": "newCertFiles2",
+                      "type": "file",
+                      "src": [
+                        "postman-cloud:///1f1bf93e-86f4-44e0-b131-ddf23600ea47"
+                      ]
+                    },
+                    {
+                      "key": "newCertFiles3",
+                      "type": "file",
+                      "src": [
+                        "postman-cloud:///1f1bf93e-848f-4830-94f7-61ea6c869ea4"
+                      ],
+                      "disabled": true
+                    },
+                    {
+                      "key": "doctorAcademicDegree",
+                      "value": "PhD",
+                      "type": "text"
+                    },
+                    {
+                      "key": "doctorDescription",
+                      "value": "Specializes in algorithms",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{URL}}v1/owner/doctors/editDoctor",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "owner",
+                    "doctors",
+                    "editDoctor"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "moderator",
+      "item": [
+        {
+          "name": "sections",
+          "item": [
+            {
+              "name": "Add New Sections",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "subjectName",
+                      "value": "introduction to computer science",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "doctorName",
+                      "value": "Amgad Salama",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "section",
+                      "type": "file",
+                      "src": [
+                        "/C:/Users/LeaderTech/Desktop/Abanoub Tamer.docx"
+                      ],
+                      "disabled": true
+                    },
+                    {
+                      "key": "sectionTitle",
+                      "value": "sectionTitle9",
+                      "type": "text",
+                      "disabled": true
+                    },
+                    {
+                      "key": "data",
+                      "value": "[{\"subjectName\":\"algorithm\",\"doctorName\":\"Amgad Salama2\",\"sectionTitle\":\"section8\",\"sectionFile\":\"file1\"},{\"subjectName\":\"introduction to computer science\",\"doctorName\":\"Amgad Salama\",\"sectionTitle\":\"section9\",\"sectionFile\":\"file2\"}]",
+                      "type": "text"
+                    },
+                    {
+                      "key": "file1",
+                      "type": "file",
+                      "src": [
+                        "postman-cloud:///1f1beab4-be46-43a0-8ea2-3eadb9134aed"
+                      ]
+                    },
+                    {
+                      "key": "file2",
+                      "type": "file",
+                      "src": [
+                        "postman-cloud:///1f1beab5-6663-4560-bd6d-77cac62199d1"
+                      ]
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{URL}}v1/moderator/sections/AddNewSections",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "moderator",
+                    "sections",
+                    "AddNewSections"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "delete Sections",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"sectionTitle\": [ \"edited sectionTitle1df\", \"section8\", \"section9\" ]\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/moderator/sections/deleteSections",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "moderator",
+                    "sections",
+                    "deleteSections"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "edit Section",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "sectionTitle",
+                      "value": "section8",
+                      "type": "text"
+                    },
+                    {
+                      "key": "section",
+                      "type": "file",
+                      "src": [
+                        "postman-cloud:///1f1bed5d-f64c-4230-9cfe-a86d54bc843a"
+                      ]
+                    },
+                    {
+                      "key": "newSectionTitle",
+                      "value": "section80",
+                      "type": "text",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{URL}}v1/moderator/sections/EditSection",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "moderator",
+                    "sections",
+                    "EditSection"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Videos",
+          "item": [
+            {
+              "name": "Add New Videos",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\r\n    {\r\n        \"subjectName\": \"introduction to computer science\",\r\n        \"doctorName\": \"Amgad Salama\",\r\n        \"video\": \"video\",\r\n        \"videoTitle\": \"videoTitle\"\r\n    },\r\n    {\r\n        \"subjectName\": \"algorithm\",\r\n        \"doctorName\": \"Amgad Salama2\",\r\n        \"video\": \"video2\",\r\n        \"videoTitle\": \"videoTitle2\"\r\n    },\r\n    {\r\n        \"subjectName\": \"introduction to computer science\",\r\n        \"doctorName\": \"Amgad Salama\",\r\n        \"video\": \"video3\",\r\n        \"videoTitle\": \"videoTitle3\"\r\n    },\r\n    {\r\n        \"subjectName\": \"algorithm2\",\r\n        \"doctorName\": \"Amgad Salama2\",\r\n        \"video\": \"video4\",\r\n        \"videoTitle\": \"videoTitle4\"\r\n    }\r\n]",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/moderator/videos/AddNewVideos",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "moderator",
+                    "videos",
+                    "AddNewVideos"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "delete Videos",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"videoTitle\": [ \"videoTitle4\", \"videoTitle\", \"videoTitle3\" ]\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/moderator/videos/deleteVideos",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "moderator",
+                    "videos",
+                    "deleteVideos"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "edit video",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"videoTitle\": \"videoTitle3\",\r\n    \"video\": \"edited video3\",\r\n    \"newVideoTitle\": \"edited videoTitle3\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/moderator/videos/EditVideo",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "moderator",
+                    "videos",
+                    "EditVideo"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Resource",
+          "item": [
+            {
+              "name": "Add New Resources",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "data",
+                      "value": "[{\"subjectName\":\"algorithm\",\"doctorName\":\"Amgad Salama2\",\"resourceTitle\":\"resourceTitle1\",\"resourceFile\":\"file1\"},{\"subjectName\":\"algorithm\",\"doctorName\":\"Amgad Salama2\",\"resourceTitle\":\"resourceTitle2\",\"resourceFile\":\"file2\"}]",
+                      "type": "text"
+                    },
+                    {
+                      "key": "file1",
+                      "type": "file",
+                      "src": [
+                        "postman-cloud:///1f1beab5-6663-4560-bd6d-77cac62199d1"
+                      ]
+                    },
+                    {
+                      "key": "file2",
+                      "type": "file",
+                      "src": [
+                        "postman-cloud:///1f1beab4-be46-43a0-8ea2-3eadb9134aed"
+                      ]
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{URL}}v1/moderator/resources/AddNewResources",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "moderator",
+                    "resources",
+                    "AddNewResources"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "delete Resources",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"resourceTitle\": [ \"resourceTitle1\", \"edited resourceTitle2\", \"resourceTitle3\" ]\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/moderator/resources/deleteResources",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "moderator",
+                    "resources",
+                    "deleteResources"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "edit Resource",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "resourceTitle",
+                      "value": "resourceTitle2",
+                      "type": "text"
+                    },
+                    {
+                      "key": "resource",
+                      "type": "file",
+                      "src": [
+                        "postman-cloud:///1f1beab5-6663-4560-bd6d-77cac62199d1"
+                      ]
+                    },
+                    {
+                      "key": "newResourceTitle",
+                      "value": "edited resourceTitle2",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{URL}}v1/moderator/resources/EditResource",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "moderator",
+                    "resources",
+                    "EditResource"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Summary",
+          "item": [
+            {
+              "name": "Add New Summaries",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "data",
+                      "value": "[{\"subjectName\":\"algorithm\",\"doctorName\":\"Amgad Salama2\",\"summaryTitle\":\"summaryTitle3\",\"summaryFile\":\"file1\"},{\"subjectName\":\"algorithm\",\"doctorName\":\"Amgad Salama2\",\"summaryTitle\":\"summaryTitle4\",\"summaryFile\":\"file2\"}]",
+                      "type": "text"
+                    },
+                    {
+                      "key": "file1",
+                      "type": "file",
+                      "src": [
+                        "postman-cloud:///1f1beab4-be46-43a0-8ea2-3eadb9134aed"
+                      ]
+                    },
+                    {
+                      "key": "file2",
+                      "type": "file",
+                      "src": [
+                        "postman-cloud:///1f1beab5-6663-4560-bd6d-77cac62199d1"
+                      ]
+                    },
+                    {
+                      "key": " ",
+                      "value": "",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{URL}}v1/moderator/summaries/AddNewSummaries",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "moderator",
+                    "summaries",
+                    "AddNewSummaries"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "delete Summaries",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"summaryTitle\": [ \"summaryTitle1\", \"summaryTitle2\", \"summaryTitle3\" ]\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}v1/moderator/summaries/deleteSummaries",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "moderator",
+                    "summaries",
+                    "deleteSummaries"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "edit Summary",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "summaryTitle",
+                      "value": "summaryTitle3",
+                      "type": "text"
+                    },
+                    {
+                      "key": "summary",
+                      "type": "file",
+                      "src": [
+                        "postman-cloud:///1f1beab4-be46-43a0-8ea2-3eadb9134aed"
+                      ]
+                    },
+                    {
+                      "key": "newSummaryTitle",
+                      "value": "summaryTitle",
+                      "type": "text",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{URL}}v1/moderator/summaries/EditSummary",
+                  "host": [
+                    "{{URL}}v1"
+                  ],
+                  "path": [
+                    "moderator",
+                    "summaries",
+                    "EditSummary"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public._prisma_migrations (
+  id character varying NOT NULL,
+  checksum character varying NOT NULL,
+  finished_at timestamp with time zone,
+  migration_name character varying NOT NULL,
+  logs text,
+  rolled_back_at timestamp with time zone,
+  started_at timestamp with time zone NOT NULL DEFAULT now(),
+  applied_steps_count integer NOT NULL DEFAULT 0,
+  CONSTRAINT _prisma_migrations_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.Users (
+  userId bigint NOT NULL DEFAULT nextval('"Users_userId_seq"'::regclass),
+  name text NOT NULL,
+  colleageEmail text NOT NULL,
+  password text,
+  changePasswordAttempts integer DEFAULT 1,
+  changePasswordAttemptsTimestamp timestamp without time zone,
+  failedChangePasswordTimes integer DEFAULT 0,
+  photo text,
+  role USER-DEFINED NOT NULL DEFAULT 'user'::"UserRole",
+  failedLoginTimes integer DEFAULT 0,
+  jwtExpires timestamp without time zone,
+  isLocked boolean NOT NULL DEFAULT false,
+  microsoftId text NOT NULL,
+  active boolean NOT NULL DEFAULT true,
+  logged_in boolean NOT NULL DEFAULT false,
+  adminLogged_in boolean NOT NULL DEFAULT false,
+  login_attempts integer DEFAULT 1,
+  login_attempts_timestamp timestamp without time zone,
+  before_current_password text,
+  password_changed_at timestamp without time zone,
+  password_reset_token text,
+  password_reset_token_expires timestamp without time zone,
+  password_reset_token_sent_at timestamp without time zone,
+  department text,
+  level bigint,
+  CONSTRAINT Users_pkey PRIMARY KEY (userId)
+);
+CREATE TABLE public.Department (
+  depId bigint NOT NULL DEFAULT nextval('"Department_depId_seq"'::regclass),
+  depName text NOT NULL,
+  departmentDescription text NOT NULL,
+  departmentExpectedJobs text NOT NULL,
+  CONSTRAINT Department_pkey PRIMARY KEY (depId)
+);
+CREATE TABLE public.Level (
+  levelId bigint NOT NULL DEFAULT nextval('"Level_levelId_seq"'::regclass),
+  levelNumber bigint NOT NULL,
+  depId bigint NOT NULL,
+  CONSTRAINT Level_pkey PRIMARY KEY (levelId),
+  CONSTRAINT Level_depId_fkey FOREIGN KEY (depId) REFERENCES public.Department(depId)
+);
+CREATE TABLE public.Semester (
+  semsterId bigint NOT NULL DEFAULT nextval('"Semester_semsterId_seq"'::regclass),
+  semesterNumber bigint NOT NULL,
+  levelId bigint NOT NULL,
+  CONSTRAINT Semester_pkey PRIMARY KEY (semsterId),
+  CONSTRAINT Semester_levelId_fkey FOREIGN KEY (levelId) REFERENCES public.Level(levelId)
+);
+CREATE TABLE public.Subject (
+  subjectId bigint NOT NULL DEFAULT nextval('"Subject_subjectId_seq"'::regclass),
+  subjectName text NOT NULL,
+  semsterId bigint NOT NULL,
+  subjectDescription text NOT NULL,
+  CONSTRAINT Subject_pkey PRIMARY KEY (subjectId),
+  CONSTRAINT Subject_semsterId_fkey FOREIGN KEY (semsterId) REFERENCES public.Semester(semsterId)
+);
+CREATE TABLE public.Sections (
+  sectionId bigint NOT NULL DEFAULT nextval('"Sections_sectionId_seq"'::regclass),
+  section text NOT NULL,
+  sectionPublishedBy text NOT NULL,
+  sectionTitle text NOT NULL,
+  subDocId bigint NOT NULL,
+  fileType text NOT NULL DEFAULT ' '::text,
+  sectionPublishDate timestamp without time zone NOT NULL,
+  sectionLastEditDate timestamp without time zone NOT NULL,
+  CONSTRAINT Sections_pkey PRIMARY KEY (sectionId),
+  CONSTRAINT Sections_subDocId_fkey FOREIGN KEY (subDocId) REFERENCES public.Subject_Doctor(subDocId)
+);
+CREATE TABLE public.Doctors (
+  doctorId bigint NOT NULL DEFAULT nextval('"Doctors_doctorId_seq"'::regclass),
+  doctorName text NOT NULL,
+  doctorPhoto text NOT NULL,
+  doctorAcademicDegree text NOT NULL,
+  doctorDescription text NOT NULL,
+  photoType text NOT NULL DEFAULT ' '::text,
+  doctorCertifications ARRAY,
+  certificationsType ARRAY,
+  CONSTRAINT Doctors_pkey PRIMARY KEY (doctorId)
+);
+CREATE TABLE public.Subject_Doctor (
+  subjectId bigint NOT NULL,
+  doctorId bigint NOT NULL,
+  subDocId bigint NOT NULL DEFAULT nextval('"Subject_Doctor_subDocId_seq"'::regclass),
+  CONSTRAINT Subject_Doctor_pkey PRIMARY KEY (subDocId),
+  CONSTRAINT Subject_Doctor_subjectId_fkey FOREIGN KEY (subjectId) REFERENCES public.Subject(subjectId),
+  CONSTRAINT Subject_Doctor_doctorId_fkey FOREIGN KEY (doctorId) REFERENCES public.Doctors(doctorId)
+);
+CREATE TABLE public.Resources (
+  resourcesId bigint NOT NULL DEFAULT nextval('"Resources_resourcesId_seq"'::regclass),
+  resource text NOT NULL,
+  resourcePublishedBy text NOT NULL,
+  resourceTitle text NOT NULL,
+  subDocId bigint NOT NULL,
+  fileType text NOT NULL DEFAULT ' '::text,
+  resourcePublishDate timestamp without time zone NOT NULL,
+  resourceLastEditDate timestamp without time zone NOT NULL,
+  CONSTRAINT Resources_pkey PRIMARY KEY (resourcesId),
+  CONSTRAINT Resources_subDocId_fkey FOREIGN KEY (subDocId) REFERENCES public.Subject_Doctor(subDocId)
+);
+CREATE TABLE public.videos (
+  videosId bigint NOT NULL DEFAULT nextval('"videos_videosId_seq"'::regclass),
+  video text NOT NULL,
+  videoPublishedBy text NOT NULL,
+  videoTitle text NOT NULL,
+  subDocId bigint NOT NULL,
+  videoPublishDate timestamp without time zone NOT NULL,
+  videoLastEditDate timestamp without time zone NOT NULL,
+  CONSTRAINT videos_pkey PRIMARY KEY (videosId),
+  CONSTRAINT videos_subDocId_fkey FOREIGN KEY (subDocId) REFERENCES public.Subject_Doctor(subDocId)
+);
+CREATE TABLE public.Summaries (
+  summariesId bigint NOT NULL DEFAULT nextval('"Summaries_summariesId_seq"'::regclass),
+  summary text NOT NULL,
+  summaryTitle text NOT NULL,
+  subDocId bigint NOT NULL,
+  fileType text NOT NULL DEFAULT ' '::text,
+  summaryPublishDate timestamp without time zone NOT NULL,
+  summaryLastEditDate timestamp without time zone NOT NULL,
+  summaryPublishedBy text NOT NULL,
+  CONSTRAINT Summaries_pkey PRIMARY KEY (summariesId),
+  CONSTRAINT Summaries_subDocId_fkey FOREIGN KEY (subDocId) REFERENCES public.Subject_Doctor(subDocId)
+);
