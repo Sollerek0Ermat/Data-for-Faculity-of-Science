@@ -9,7 +9,7 @@ const router = express.Router()
 router.route('/login')
 	.post(
 		userController.is_user,
-		AdminController.admin_check('moderator', 'owner', 'doctor'),
+		AdminController.adminCheckForLogin('moderator', 'owner', 'doctor'),
 		AdminController.adminLogin
 	)
 
@@ -30,7 +30,7 @@ router.route('/changePassword')
 router.route('/auth/microsoft/forgotPassword')
 	.get(
 		userController.is_user,
-		AdminController.admin_check('moderator', 'owner', 'doctor'),
+		AdminController.adminCheckForLogin('moderator', 'owner', 'doctor'),
 		AdminController.microsoftforgotPassword
 	)
 

@@ -97,6 +97,19 @@ exports.admin_check = (...role) => { //if we want to pass more than 1 role we us
     }
 }
 
+exports.adminCheckForLogin = (...role) => { //if we want to pass more than 1 role we use ... before the role to check every one by its own
+    return async (request, response, next) => {
+        const user = await ModeratorControllerMethods.getUserDetails(request)
+        if (role.includes(user.role) && user.adminLogged_in == true) {
+            next()
+        }
+        else {
+            const err = new custom_error('you are not an admin to perform this action', 403)
+            return next(err)
+        }
+    }
+}
+
 
 exports.adminLogin = async (request, response, next) => {
     try {
