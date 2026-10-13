@@ -6,7 +6,7 @@ const CONFIG = {
   USE_MOCK: false,
   DEV_MODE: true,   // ← دخول مباشر للأدمن (للتطوير)
   // API_URL: 'http://localhost:3000',
-  API_URL: 'https://data-for-faculity-of-science.onrender.com',
+  API_URL: '',
 
 
   DEFAULTS: {

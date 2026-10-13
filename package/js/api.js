@@ -12,7 +12,7 @@ const API = (() => {
 
     const url = CONFIG.API_URL
       ? CONFIG.API_URL.replace(/\/$/, '') + '/' + path.replace(/^\//, '')
-      : path;
+      : '/' + path.replace(/^\//, '');
 
     const headers = {};
     if (!isFormData && body) headers['Content-Type'] = 'application/json';
