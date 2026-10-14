@@ -200,15 +200,19 @@ exports.getUserInfo = async (request, response, next) => {
                 adminLogged_in: true,
                 department: true,
                 level: true,
-                photo: true
+                photo: true,
+                password: true
             }
         });
+
+        const { password, ...userToAdd } = user
 
         response.status(200).json({
             status: 'success',
             message: 'user info retrieved successfully',
             data: {
-                ...user,
+                ...userToAdd,
+                password: user.password? true : false,
                 photo: user.photo ? `/v1/student/profile/photo/${decoded_token.id.toString()}` : null
             }
         });
