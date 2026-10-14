@@ -111,7 +111,7 @@ exports.microsoftLoginCallback = (req, res, next) => {
             if (process.env.NODE_ENV === 'production') {
                 options.secure = true
             }
-            response.cookie('jwt', token, options) //to add the jwt to cookies to use it later in the web application
+            res.cookie('jwt', token, options) //to add the jwt to cookies to use it later in the web application
             return res.redirect(`${process.env.USER_URL}/intro.html`);
 
 
