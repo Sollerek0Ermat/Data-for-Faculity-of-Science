@@ -112,7 +112,7 @@ exports.microsoftLoginCallback = (req, res, next) => {
                 options.secure = true
             }
             res.cookie('jwt', token, options) //to add the jwt to cookies to use it later in the web application
-            return res.redirect(`${process.env.USER_URL}/intro.html`);
+            return res.redirect(`https://data-for-faculity-of-science.onrender.com/index.html`);
 
 
 
