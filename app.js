@@ -109,7 +109,21 @@ const path = require('path');
 
 // serve the built frontend, AFTER the API routes
 const frontendPath = path.join(__dirname, 'package');
-app.use(express.static(frontendPath));
+
+// 1. redirect old .html addresses to clean ones (keeps ?query strings)
+app.use((request, response, next) => {
+    if (request.path.endsWith('.html')) {
+        const clean = request.path.replace(/\.html$/, '').replace(/\/index$/, '') || '/';
+        const query = request.url.includes('?') ? request.url.slice(request.url.indexOf('?')) : '';
+        return response.redirect(301, clean + query);
+    }
+    next();
+});
+
+// 2. serve /admin from admin.html, /login from login.html, etc.
+app.use(express.static(frontendPath, { extensions: ['html'] }));
+
+// app.use(express.static(frontendPath));
 app.get(/.*/, (request, response) => {
     response.sendFile(path.join(frontendPath, 'index.html'));
 });
