@@ -1,55 +1,51 @@
 /**
- * 🔌 API — متوافق 100% مع الباك
+ * API — متوافق مع الباك
  */
 
-const API = (() => {
+const API = (function() {
 
-  /* ═══════════════════════════════════════════
-     🔧 Core Request
-     ═══════════════════════════════════════════ */
-  async function request(path, options = {}) {
-    const { method = 'GET', body, isFormData = false } = options;
+  async function request(path, options) {
+    options = options || {};
+    const method = options.method || "GET";
+    const body = options.body;
+    const isFormData = options.isFormData || false;
 
     const url = CONFIG.API_URL
-      ? CONFIG.API_URL.replace(/\/$/, '') + '/' + path.replace(/^\//, '')
-      : '/' + path.replace(/^\//, '');
+      ? CONFIG.API_URL.replace(/\/$/, "") + "/" + path.replace(/^\//, "")
+      : "/" + path.replace(/^\//, "");
 
     const headers = {};
-    if (!isFormData && body) headers['Content-Type'] = 'application/json';
+    if (!isFormData && body) headers["Content-Type"] = "application/json";
 
-    const fetchOptions = {
-      method,
-      headers,
-      credentials: 'include',
-    };
+    const fetchOptions = { method: method, headers: headers, credentials: "include" };
     if (body) fetchOptions.body = isFormData ? body : JSON.stringify(body);
 
     let res;
     try {
       res = await fetch(url, fetchOptions);
     } catch (netErr) {
-      console.error('[API] Network error:', netErr);
-      throw new Error('Cannot reach server');
+      console.error("[API] Network error:", netErr);
+      throw new Error("Cannot reach server");
     }
 
     if (res.status === 401) {
       Auth.clearSession();
-      if (!location.pathname.includes('login.html')) {
-        window.location.href = 'login.html';
+      if (location.pathname.indexOf("login.html") === -1) {
+        window.location.href = "login.html";
       }
-      throw new Error('Unauthorized');
+      throw new Error("Unauthorized");
     }
 
-    const ctype = res.headers.get('content-type') || '';
-    if (!ctype.includes('application/json')) {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
+    const ctype = res.headers.get("content-type") || "";
+    if (ctype.indexOf("application/json") === -1) {
+      if (!res.ok) throw new Error("HTTP " + res.status);
       return await res.blob();
     }
 
-    const data = await res.json().catch(() => null);
+    const data = await res.json().catch(function() { return null; });
 
     if (!res.ok) {
-      const msg = (data && (data.message || data.error)) || ('HTTP ' + res.status);
+      const msg = (data && (data.message || data.error)) || ("HTTP " + res.status);
       throw new Error(msg);
     }
 
@@ -58,102 +54,92 @@ const API = (() => {
 
   const ep = CONFIG.ENDPOINTS;
 
-  /* ═══════════════════════════════════════════
-     🎓 Student — Profile
-     ═══════════════════════════════════════════ */
   async function getProfile() {
     const res = await request(ep.student.profile);
     return Mappers.profile(res.data);
   }
 
   function getProfilePhotoUrl(userId) {
-    return CONFIG.API_URL + '/' + ep.student.profilePhoto + '/' + userId;
+    return (CONFIG.API_URL || "") + "/" + ep.student.profilePhoto + "/" + userId;
   }
 
-  /* ═══════════════════════════════════════════
-     📁 Folders
-     ═══════════════════════════════════════════ */
-  async function getFolders(query = {}) {
-    const res = await request(buildUrl(ep.student.folders, query));
+  async function getFolders(query) {
+    const res = await request(buildUrl(ep.student.folders, query || {}));
     return res.data || [];
   }
 
   async function getFolderInfo(folder, folderName) {
-    const res = await request(
-      ep.student.folderInfo + '/' + folder + '/' + encodeURIComponent(folderName)
-    );
+    const res = await request(ep.student.folderInfo + "/" + folder + "/" + encodeURIComponent(folderName));
     return res.data || null;
   }
 
-  /* ═══════════════════════════════════════════
-     👨‍🏫 Doctors
-     ═══════════════════════════════════════════ */
   async function getDoctorWithSubjects() {
     const res = await request(ep.student.doctorWithSubjects);
     return Mappers.doctorWithSubjects(res.data);
   }
 
   function getDoctorPhotoUrl(doctorName) {
-    return CONFIG.API_URL + '/' + ep.student.doctorPhoto + '/' + encodeURIComponent(doctorName);
+    return (CONFIG.API_URL || "") + "/" + ep.student.doctorPhoto + "/" + encodeURIComponent(doctorName);
   }
 
   function getDoctorCertificationUrl(doctorName, n) {
-    return CONFIG.API_URL + '/' + ep.student.doctorCertifications + '/' + encodeURIComponent(doctorName) + '/' + n;
+    return (CONFIG.API_URL || "") + "/" + ep.student.doctorCertifications + "/" + encodeURIComponent(doctorName) + "/" + n;
   }
 
-  /* ═══════════════════════════════════════════
-     📚 Subjects & Doctors (Aliases)
-     ═══════════════════════════════════════════ */
   async function getSubjects() {
     const dws = await getDoctorWithSubjects();
     const map = new Map();
-
-    dws.forEach(item => {
-      item.subjects.forEach(s => {
-        if (!map.has(s.id)) map.set(s.id, s);
+    dws.forEach(function(item) {
+      (item.subjects || []).forEach(function(s) {
+        var name = s.name || s.id;
+        if (!name) return;
+        if (!map.has(name)) {
+          map.set(name, {
+            id:             name,
+            name:           name,
+            code:           s.code || '',
+            description:    s.description || '',
+            icon:           s.icon || '📚',
+            department:     s.department || null,
+            levelNumber:    s.levelNumber || null,
+            semesterNumber: s.semesterNumber || null,
+            link:           s.link || null
+          });
+        }
       });
     });
-
-    return Array.from(map.values());
+    return Array.from(map.values()).sort(function(a, b) { return a.name.localeCompare(b.name); });
   }
 
   async function getDoctors() {
     const dws = await getDoctorWithSubjects();
-    return dws.map(d => d.doctor);
+    return dws.map(function(d) { return d.doctor; });
   }
 
-  /* ═══════════════════════════════════════════
-     📂 Folder Content — بالاسم
-     ═══════════════════════════════════════════ */
-  async function getFolderContent({ subjectName, doctorName, dataType, semesterNumber }) {
+  async function getFolderContent(opts) {
+    let dt = opts.dataType;
+    if (dt === 'recourse') dt = 'resource';
     const query = {
-      department:     CONFIG.DEFAULTS.department,
-      levelNumber:    CONFIG.DEFAULTS.levelNumber,
-      semesterNumber: semesterNumber || CONFIG.DEFAULTS.semesterNumber,
-      subject:        subjectName,
-      doctor:         doctorName,
-      dataType:       dataType,
+      department:     opts.department     || CONFIG.DEFAULTS.department,
+      levelNumber:    opts.levelNumber    || CONFIG.DEFAULTS.levelNumber,
+      semesterNumber: opts.semesterNumber || CONFIG.DEFAULTS.semesterNumber,
+      subject:        opts.subjectName,
+      doctor:         opts.doctorName,
+      dataType:       dt
     };
-
     const res = await request(buildUrl(ep.student.folders, query));
     return res.data || [];
   }
 
-  /* ═══════════════════════════════════════════
-     📥 Download
-     ═══════════════════════════════════════════ */
   function downloadFile(dataType, dataName, mode) {
-    mode = mode || 'view';
-    const url = CONFIG.API_URL + '/' +
-      ep.student.download + '/' +
-      dataType + '/' +
-      encodeURIComponent(dataName) +
-      '/download?mode=' + mode;
+    mode = mode || "view";
+    let dt = dataType === 'recourse' ? 'resource' : dataType;
+    const base = CONFIG.API_URL || "";
+    const url = base + "/" + ep.student.download + "/" + dt + "/" + encodeURIComponent(dataName) + "/download?mode=" + mode;
 
-    if (mode === 'view') {
-      window.open(url, '_blank');
-    } else {
-      const a = document.createElement('a');
+    if (mode === "view") window.open(url, "_blank");
+    else {
+      const a = document.createElement("a");
       a.href = url;
       a.download = dataName;
       document.body.appendChild(a);
@@ -162,194 +148,86 @@ const API = (() => {
     }
   }
 
-  /* ═══════════════════════════════════════════
-     🛡️ Admin
-     ═══════════════════════════════════════════ */
-  async function adminLogin({ email, password }) {
-    await request(ep.admin.login, {
-      method: 'POST',
-      body: { password },
-    });
-
-    // بعد الـ login نجيب البروفايل
+  async function adminLogin(opts) {
+    await request(ep.admin.login, { method: "POST", body: { password: opts.password } });
     const profile = await getProfile();
-
-    return {
-      success: true,
-      session: {
-        email: profile?.email || email,
-        name:  profile?.name  || 'Admin',
-        role:  profile?.role  || 'user',
-      },
-    };
+    return { success: true, session: { email: (profile && profile.email) || opts.email, name: (profile && profile.name) || "Admin", role: (profile && profile.role) || "user" } };
+  }
+  async function adminLogout() { return await request(ep.admin.logout, { method: "POST" }); }
+  async function changePassword(opts) {
+    return await request(ep.admin.changePassword, { method: "PATCH", body: { old_password: opts.oldPassword, password: opts.password, confirm_password: opts.confirm_password } });
   }
 
-  async function adminLogout() {
-    return await request(ep.admin.logout, { method: 'POST' });
-  }
+  /* Moderator */
+  async function addSections(fd) { return await request(ep.moderator.addSections, { method: "POST", body: fd, isFormData: true }); }
+  async function deleteSections(t) { return await request(ep.moderator.deleteSections, { method: "DELETE", body: { sectionTitle: t } }); }
+  async function editSection(fd) { return await request(ep.moderator.editSection, { method: "PATCH", body: fd, isFormData: true }); }
+  async function addVideos(p) { return await request(ep.moderator.addVideos, { method: "POST", body: p }); }
+  async function deleteVideos(t) { return await request(ep.moderator.deleteVideos, { method: "DELETE", body: { videoTitle: t } }); }
+  async function editVideo(p) { return await request(ep.moderator.editVideo, { method: "PATCH", body: p }); }
+  async function addResources(fd) { return await request(ep.moderator.addResources, { method: "POST", body: fd, isFormData: true }); }
+  async function deleteResources(t) { return await request(ep.moderator.deleteResources, { method: "DELETE", body: { resourceTitle: t } }); }
+  async function editResource(fd) { return await request(ep.moderator.editResource, { method: "PATCH", body: fd, isFormData: true }); }
+  async function addSummaries(fd) { return await request(ep.moderator.addSummaries, { method: "POST", body: fd, isFormData: true }); }
+  async function deleteSummaries(t) { return await request(ep.moderator.deleteSummaries, { method: "DELETE", body: { summaryTitle: t } }); }
+  async function editSummary(fd) { return await request(ep.moderator.editSummary, { method: "PATCH", body: fd, isFormData: true }); }
 
-  async function changePassword({ oldPassword, password, confirm_password }) {
-    return await request(ep.admin.changePassword, {
-      method: 'PATCH',
-      body: {
-        old_password:     oldPassword,
-        password:         password,
-        confirm_password: confirm_password,
-      },
-    });
-  }
+  /* Owner */
+  async function addDoctors(fd) { return await request(ep.owner.addDoctors, { method: "POST", body: fd, isFormData: true }); }
+  async function deleteDoctors(n) { return await request(ep.owner.deleteDoctors, { method: "DELETE", body: { doctorName: Array.isArray(n) ? n : [n] } }); }
+  async function editDoctor(fd) { return await request(ep.owner.editDoctor, { method: "PATCH", body: fd, isFormData: true }); }
+  async function addSubjects(p) { return await request(ep.owner.addSubjects, { method: "POST", body: p }); }
+  async function deleteSubjects(p) { return await request(ep.owner.deleteSubjects, { method: "DELETE", body: p }); }
+  async function editSubject(p) { return await request(ep.owner.editSubject, { method: "PATCH", body: p }); }
+  async function addDepartments(p) { return await request(ep.owner.addDepartments, { method: "POST", body: p }); }
+  async function deleteDepartments(n) { return await request(ep.owner.deleteDepartments, { method: "DELETE", body: { departmentsName: Array.isArray(n) ? n : [n] } }); }
+  async function editDepartment(p) { return await request(ep.owner.editDepartment, { method: "PATCH", body: p }); }
+  async function addLevels(p) { return await request(ep.owner.addLevels, { method: "POST", body: p }); }
+  async function deleteLevels(p) { return await request(ep.owner.deleteLevels, { method: "DELETE", body: p }); }
+  async function addSemesters(p) { return await request(ep.owner.addSemesters, { method: "POST", body: p }); }
+  async function deleteSemesters(p) { return await request(ep.owner.deleteSemesters, { method: "DELETE", body: p }); }
+  async function linkDoctors(p) { return await request(ep.owner.linkDoctors, { method: "POST", body: p }); }
+  async function unlinkDoctors(p) { return await request(ep.owner.unlinkDoctors, { method: "DELETE", body: p }); }
+  async function garanteeRoles(p) { return await request(ep.owner.garanteeRoles, { method: "PATCH", body: p }); }
+  async function changeLock(p) { return await request(ep.owner.changeLock, { method: "PATCH", body: p }); }
 
-  function forgotPassword() {
-    window.location.href = CONFIG.API_URL + '/' + ep.admin.forgotPassword;
-  }
-
-  async function resetPassword(token, { password, confirm_password }) {
-    return await request(ep.admin.resetPassword + '/' + token, {
-      method: 'PATCH',
-      body: { password, confirm_password },
-    });
-  }
-
-  /* ═══════════════════════════════════════════
-     🧑‍🏫 Moderator — Sections
-     ═══════════════════════════════════════════ */
-  async function addSections(formData) {
-    return await request(ep.moderator.addSections, {
-      method: 'POST', body: formData, isFormData: true,
-    });
-  }
-
-  async function deleteSections(sectionTitle) {
-    return await request(ep.moderator.deleteSections, {
-      method: 'DELETE', body: { sectionTitle },
-    });
-  }
-
-  async function editSection(formData) {
-    return await request(ep.moderator.editSection, {
-      method: 'PATCH', body: formData, isFormData: true,
-    });
-  }
-
-  /* ═══════════════════════════════════════════
-     🧑‍🏫 Moderator — Videos
-     ═══════════════════════════════════════════ */
-  async function addVideos(payload) {
-    return await request(ep.moderator.addVideos, { method: 'POST', body: payload });
-  }
-  async function deleteVideos(videoTitle) {
-    return await request(ep.moderator.deleteVideos, { method: 'DELETE', body: { videoTitle } });
-  }
-  async function editVideo(payload) {
-    return await request(ep.moderator.editVideo, { method: 'PATCH', body: payload });
-  }
-
-  /* ═══════════════════════════════════════════
-     🧑‍🏫 Moderator — Resources
-     ═══════════════════════════════════════════ */
-  async function addResources(formData) {
-    return await request(ep.moderator.addResources, {
-      method: 'POST', body: formData, isFormData: true,
-    });
-  }
-  async function deleteResources(resourceTitle) {
-    return await request(ep.moderator.deleteResources, { method: 'DELETE', body: { resourceTitle } });
-  }
-  async function editResource(formData) {
-    return await request(ep.moderator.editResource, {
-      method: 'PATCH', body: formData, isFormData: true,
-    });
-  }
-
-  /* ═══════════════════════════════════════════
-     🧑‍🏫 Moderator — Summaries
-     ═══════════════════════════════════════════ */
-  async function addSummaries(formData) {
-    return await request(ep.moderator.addSummaries, {
-      method: 'POST', body: formData, isFormData: true,
-    });
-  }
-  async function deleteSummaries(summaryTitle) {
-    return await request(ep.moderator.deleteSummaries, { method: 'DELETE', body: { summaryTitle } });
-  }
-  async function editSummary(formData) {
-    return await request(ep.moderator.editSummary, {
-      method: 'PATCH', body: formData, isFormData: true,
-    });
-  }
-
-  /* ═══════════════════════════════════════════
-     🗑️ deleteFile
-     ═══════════════════════════════════════════ */
-  async function deleteFile(file) {
-    if (!file) throw new Error('No file provided');
-
-    switch (file.type) {
-      case 'section':  return await deleteSections(file.title);
-      case 'summary':  return await deleteSummaries(file.title);
-      case 'resource': return await deleteResources(file.title);
-      case 'video':    return await deleteVideos(file.title);
-      default: throw new Error('Unknown file type: ' + file.type);
-    }
-  }
-
-  /* ═══════════════════════════════════════════
-     🔧 Helpers
-     ═══════════════════════════════════════════ */
   function buildUrl(path, params) {
     params = params || {};
     const qs = new URLSearchParams();
-    Object.keys(params).forEach(function (k) {
+    Object.keys(params).forEach(function(k) {
       const v = params[k];
-      if (v !== undefined && v !== null && v !== '') qs.append(k, v);
+      if (v !== undefined && v !== null && v !== "") qs.append(k, v);
     });
     const q = qs.toString();
-    return q ? (path + '?' + q) : path;
+    return q ? (path + "?" + q) : path;
   }
 
-  /* ═══════════════════════════════════════════
-     🚀 Export
-     ═══════════════════════════════════════════ */
   return {
-    request,
-
-    /* Student */
-    getProfile,
-    getProfilePhotoUrl,
-    getFolders,
-    getFolderInfo,
-    getDoctorWithSubjects,
-    getDoctorPhotoUrl,
-    getDoctorCertificationUrl,
-
-    /* Aliases */
-    getSubjects,
-    getDoctors,
-    getFolderContent,
-
-    /* Download */
-    downloadFile,
-
-    /* Admin */
-    adminLogin,
-    adminLogout,
-    changePassword,
-    forgotPassword,
-    resetPassword,
-
-    /* Moderator — Sections */
-    addSections, deleteSections, editSection,
-
-    /* Moderator — Videos */
-    addVideos, deleteVideos, editVideo,
-
-    /* Moderator — Resources */
-    addResources, deleteResources, editResource,
-
-    /* Moderator — Summaries */
-    addSummaries, deleteSummaries, editSummary,
-
-    /* Misc */
-    deleteFile,
+    request: request,
+    getProfile: getProfile,
+    getProfilePhotoUrl: getProfilePhotoUrl,
+    getFolders: getFolders,
+    getFolderInfo: getFolderInfo,
+    getDoctorWithSubjects: getDoctorWithSubjects,
+    getDoctorPhotoUrl: getDoctorPhotoUrl,
+    getDoctorCertificationUrl: getDoctorCertificationUrl,
+    getSubjects: getSubjects,
+    getDoctors: getDoctors,
+    getFolderContent: getFolderContent,
+    downloadFile: downloadFile,
+    adminLogin: adminLogin,
+    adminLogout: adminLogout,
+    changePassword: changePassword,
+    addSections: addSections, deleteSections: deleteSections, editSection: editSection,
+    addVideos: addVideos, deleteVideos: deleteVideos, editVideo: editVideo,
+    addResources: addResources, deleteResources: deleteResources, editResource: editResource,
+    addSummaries: addSummaries, deleteSummaries: deleteSummaries, editSummary: editSummary,
+    addDoctors: addDoctors, deleteDoctors: deleteDoctors, editDoctor: editDoctor,
+    addSubjects: addSubjects, deleteSubjects: deleteSubjects, editSubject: editSubject,
+    addDepartments: addDepartments, deleteDepartments: deleteDepartments, editDepartment: editDepartment,
+    addLevels: addLevels, deleteLevels: deleteLevels,
+    addSemesters: addSemesters, deleteSemesters: deleteSemesters,
+    linkDoctors: linkDoctors, unlinkDoctors: unlinkDoctors,
+    garanteeRoles: garanteeRoles, changeLock: changeLock
   };
 })();

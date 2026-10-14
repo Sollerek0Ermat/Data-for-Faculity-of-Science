@@ -1,0 +1,267 @@
+/**
+ * Mappers — تحويل ردود الباك للفرونت
+ */
+
+const Mappers = {
+
+  /* ═══════════════════════════════════════════
+     User Profile
+     ═══════════════════════════════════════════ */
+  profile: function (raw) {
+    if (!raw) return null;
+    return {
+      id:            raw.userId ? raw.userId.toString() : null,
+      name:          raw.name || '',
+      email:         raw.colleageEmail || '',
+      role:          raw.role || 'user',
+      photo:         raw.photo || null,
+      department:    raw.department || null,
+      level:         raw.level ? raw.level.toString() : null,
+      adminLoggedIn: raw.admin_logged_in || raw.adminLogged_in || false
+    };
+  },
+
+  /* ═══════════════════════════════════════════
+     Subject
+     ═══════════════════════════════════════════ */
+  subject: function (raw) {
+    if (!raw) return null;
+    return {
+      id:          raw.subjectName || '',
+      name:        raw.subjectName || '',
+      code:        raw.code || raw.subjectCode || '',
+      description: raw.subjectDescription || '',
+      semsterId:   raw.semsterId ? raw.semsterId.toString() : null
+    };
+  },
+
+  /* ═══════════════════════════════════════════
+     Doctor
+     ═══════════════════════════════════════════ */
+  doctor: function (raw) {
+    if (!raw) return null;
+    return {
+      id:             raw.doctorName || '',
+      name:           raw.doctorName || '',
+      academicDegree: raw.doctorAcademicDegree || '',
+      description:    raw.doctorDescription || '',
+      photo:          raw.doctorPhoto || null,
+      certifications: raw.doctorCertifications || []
+    };
+  },
+
+  /* ═══════════════════════════════════════════
+     File — Section/Summary/Resource/Video
+     ═══════════════════════════════════════════ */
+  file: function (raw, type) {
+    if (!raw) return null;
+
+    var titles = {
+      section:  raw.sectionTitle,
+      summary:  raw.summaryTitle,
+      resource: raw.resourceTitle || raw.recourseTitle,
+      video:    raw.videoTitle
+    };
+
+    var publishers = {
+      section:  raw.sectionPublishedBy,
+      summary:  raw.summaryPublishedBy,
+      resource: raw.resourcePublishedBy || raw.recoursePublishedBy,
+      video:    raw.videoPublishedBy
+    };
+
+    var dates = {
+      section:  raw.sectionPublishDate,
+      summary:  raw.summaryPublishDate,
+      resource: raw.resourcePublishDate || raw.recoursePublishDate,
+      video:    raw.videoPublishDate
+    };
+
+    var editDates = {
+      section:  raw.sectionLastEditDate,
+      summary:  raw.summaryLastEditDate,
+      resource: raw.resourceLastEditDate || raw.recourseLastEditDate,
+      video:    raw.videoLastEditDate
+    };
+
+    return {
+      id:         titles[type] || (type + '_' + Date.now()),
+      title:      titles[type] || '',
+      type:       type,
+      publisher:  publishers[type] || '—',
+      url:        raw[type] || null,
+      fileType:   raw.fileType || null,
+      created_at: dates[type] || null,
+      edited_at:  editDates[type] || null,
+      link:       raw.link || null,
+      size:       raw.size || null,
+      status:     'approved'
+    };
+  },
+
+  /* ═══════════════════════════════════════════
+     Folder — التصفح الهرمي
+     ═══════════════════════════════════════════ */
+  folder: function (raw, level) {
+    if (!raw) return null;
+
+    /* Department */
+    if (raw.depName) {
+      return {
+        level: 'department',
+        id:    raw.depName,
+        name:  raw.depName,
+        code:  raw.code || '',
+        link:  raw.link || null,
+        info:  raw.departmentInfo || null
+      };
+    }
+
+    /* Level */
+    if (raw.levelNumber !== undefined) {
+      return {
+        level:       'level',
+        id:          'level_' + raw.levelNumber,
+        levelNumber: raw.levelNumber,
+        link:        raw.link || null
+      };
+    }
+
+    /* Semester */
+    if (raw.semesterNumber !== undefined) {
+      return {
+        level:          'semester',
+        id:             'sem_' + raw.semesterNumber,
+        semesterNumber: raw.semesterNumber,
+        link:           raw.link || null
+      };
+    }
+
+    /* Subject */
+    if (raw.subjectName) {
+      return {
+        level: 'subject',
+        id:    raw.subjectName,
+        name:  raw.subjectName,
+        link:  raw.link || null,
+        info:  raw.subjectInfo || null
+      };
+    }
+
+    /* Doctor */
+    if (raw.doctorName) {
+      return {
+        level: 'doctor',
+        id:    raw.doctorName,
+        name:  raw.doctorName,
+        link:  raw.link || null,
+        info:  raw.doctorInfo || null
+      };
+    }
+
+    /* DataType — sections/videos/summaries/recourses */
+    if (raw.dataType) {
+      return {
+        level:    'dataType',
+        id:       raw.dataType,
+        dataType: raw.dataType,
+        link:     raw.link || null
+      };
+    }
+
+    /* Fallback */
+    return {
+      level: 'unknown',
+      id:    JSON.stringify(raw),
+      raw:   raw
+    };
+  },
+
+  folderList: function (raw, level) {
+    if (!raw || !Array.isArray(raw)) return [];
+    return raw.map(function (item) {
+      return Mappers.folder(item, level);
+    });
+  },
+
+  /* ═══════════════════════════════════════════
+     DoctorWithSubjects
+     ═══════════════════════════════════════════ */
+  doctorWithSubjects: function (raw) {
+    if (!raw) return [];
+    var list = Array.isArray(raw) ? raw : (raw.data || []);
+    var docMap = new Map();
+
+    list.forEach(function (item) {
+      var docName  = item.doctorName;
+      var subjName = item.subjectName;
+      if (!docName || !subjName) return;
+
+      if (!docMap.has(docName)) {
+        docMap.set(docName, {
+          doctor: {
+            id:             docName,
+            name:           docName,
+            academicDegree: '',
+            description:    '',
+            photo:          null,
+            certifications: []
+          },
+          subjects: []
+        });
+      }
+
+      var entry = docMap.get(docName);
+      if (!entry.subjects.some(function (s) { return s.name === subjName; })) {
+        entry.subjects.push({
+          id:          subjName,
+          name:        subjName,
+          code:        '',
+          description: '',
+          link:        item.link
+        });
+      }
+    });
+
+    return Array.from(docMap.values());
+  },
+
+  /* ═══════════════════════════════════════════
+     Folder Info — Doctor/Subject/Department
+     ═══════════════════════════════════════════ */
+  folderInfo: function (raw, type) {
+    if (!raw) return null;
+
+    if (type === 'doctor') {
+      return {
+        type:           'doctor',
+        name:           raw.doctorName || '',
+        academicDegree: raw.doctorAcademicDegree || '',
+        description:    raw.doctorDescription || '',
+        photo:          raw.doctorPhoto || null,
+        certifications: raw.doctorCertifications || []
+      };
+    }
+
+    if (type === 'subject') {
+      return {
+        type:        'subject',
+        name:        raw.subjectName || '',
+        code:        raw.code || '',
+        description: raw.subjectDescription || ''
+      };
+    }
+
+    if (type === 'department') {
+      return {
+        type:            'department',
+        name:            raw.depName || '',
+        code:            raw.code || '',
+        description:     raw.departmentDescription || '',
+        expectedJobs:    raw.departmentExpectedJobs || ''
+      };
+    }
+
+    return raw;
+  }
+};

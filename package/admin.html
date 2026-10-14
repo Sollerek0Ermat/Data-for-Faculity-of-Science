@@ -21,21 +21,33 @@
     <section class="container">
       <div class="hero hero-home">
         <div class="hero-content">
-          <h1 id="welcomeTitle">👋 Welcome Admin</h1>
-          <p>Leaving a mark, reaching new heights</p>
+          <h1 id="welcomeTitle">👋 Welcome</h1>
+          <p id="userRole">Loading...</p>
         </div>
       </div>
     </section>
 
     <div class="container">
-      <div class="tabs" id="adminTabs">
-        <button class="tab active" data-tab="upload">📤 Upload</button>
-        <button class="tab"        data-tab="published">📚 Published</button>
-        <button class="tab"        data-tab="doctors">👨‍🏫 Doctors</button>
-        <button class="tab"        data-tab="subjects">📖 Subjects</button>
+      <div class="tabs" id="adminTabs" style="flex-wrap:wrap;gap:6px">
+        <button class="tab active" data-tab="overview">📊 Overview</button>
+        <button class="tab" data-tab="upload">📤 Upload</button>
+        <button class="tab" data-tab="published">📚 Published</button>
+        <button class="tab" data-tab="doctors">👨‍🏫 Doctors</button>
+        <button class="tab" data-tab="subjects">📖 Subjects</button>
+        <button class="tab" data-tab="departments">🏛️ Departments</button>
+        <button class="tab" data-tab="levels">📊 Levels</button>
+        <button class="tab" data-tab="semesters">📅 Semesters</button>
+        <button class="tab" data-tab="link">🔗 Link Doctors</button>
+        <button class="tab" data-tab="users">👥 Users</button>
       </div>
 
-      <div class="tab-content" id="tab-upload">
+      <!-- ═══ Overview ═══ -->
+      <div class="tab-content" id="tab-overview">
+        <div class="stats-grid" id="statsGrid"></div>
+      </div>
+
+      <!-- ═══ Upload ═══ -->
+      <div class="tab-content hidden" id="tab-upload">
         <div class="table-wrap" style="padding:24px">
           <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">📤 Upload New File</h2>
 
@@ -55,6 +67,21 @@
           </div>
 
           <div class="field">
+            <label>Department</label>
+            <select id="fileDepartment"></select>
+          </div>
+
+          <div class="field">
+            <label>Level</label>
+            <select id="fileLevel"></select>
+          </div>
+
+          <div class="field">
+            <label>Semester</label>
+            <select id="fileSemester"></select>
+          </div>
+
+          <div class="field">
             <label>Subject</label>
             <select id="fileSubject"></select>
           </div>
@@ -64,7 +91,12 @@
             <select id="fileDoctor"></select>
           </div>
 
-          <div class="field">
+          <div class="field" id="videoUrlField" style="display:none">
+            <label>Video URL</label>
+            <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
+          </div>
+
+          <div class="field" id="fileInputField">
             <label>File</label>
             <input type="file" id="fileInput">
           </div>
@@ -73,6 +105,7 @@
         </div>
       </div>
 
+      <!-- ═══ Published ═══ -->
       <div class="tab-content hidden" id="tab-published">
         <div class="table-wrap">
           <div style="padding:18px 24px;border-bottom:1px solid var(--line)">
@@ -80,19 +113,14 @@
           </div>
           <table>
             <thead>
-              <tr>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Subject</th>
-                <th>Date</th>
-                <th>Actions</th>
-              </tr>
+              <tr><th>Title</th><th>Type</th><th>Published By</th><th>Actions</th></tr>
             </thead>
             <tbody id="filesBody"></tbody>
           </table>
         </div>
       </div>
 
+      <!-- ═══ Doctors ═══ -->
       <div class="tab-content hidden" id="tab-doctors">
         <div class="table-wrap" style="padding:24px">
           <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">👨‍🏫 Manage Doctors</h2>
@@ -100,23 +128,114 @@
           <div class="field"><label>Doctor Name</label><input type="text" id="doctorName" placeholder="Amgad Salama"></div>
           <div class="field"><label>Academic Degree</label><input type="text" id="doctorDegree" placeholder="PhD / MSc"></div>
           <div class="field"><label>Description</label><input type="text" id="doctorDesc" placeholder="Professor of Algorithms"></div>
+          <div class="field"><label>Photo (optional)</label><input type="file" id="doctorPhoto" accept="image/*"></div>
           <button class="btn btn-primary" id="addDoctorBtn">➕ Add Doctor</button>
 
           <div id="doctorsList" style="margin-top:24px"></div>
         </div>
       </div>
 
+      <!-- ═══ Subjects ═══ -->
       <div class="tab-content hidden" id="tab-subjects">
         <div class="table-wrap" style="padding:24px">
           <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">📖 Manage Subjects</h2>
 
+          <div class="field"><label>Department Name</label><input type="text" id="subjDept" placeholder="computer science"></div>
+          <div class="field"><label>Level Number</label><input type="number" id="subjLevel" value="2"></div>
+          <div class="field"><label>Semester Number</label><input type="number" id="subjSem" value="1"></div>
           <div class="field"><label>Subject Name</label><input type="text" id="subjectName" placeholder="algorithm"></div>
-          <div class="field"><label>Icon</label><input type="text" id="subjectIcon" placeholder="🧮" maxlength="2"></div>
+          <div class="field"><label>Subject Description</label><input type="text" id="subjectDesc" placeholder="..."></div>
+          <div class="field"><label>Subject Code</label><input type="text" id="subjectCode" placeholder="ALG101"></div>
           <button class="btn btn-primary" id="addSubjectBtn">➕ Add Subject</button>
 
           <div id="subjectsList" style="margin-top:24px"></div>
         </div>
       </div>
+
+      <!-- ═══ Departments ═══ -->
+      <div class="tab-content hidden" id="tab-departments">
+        <div class="table-wrap" style="padding:24px">
+          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">🏛️ Manage Departments</h2>
+
+          <div class="field"><label>Department Name</label><input type="text" id="deptName" placeholder="computer science"></div>
+          <div class="field"><label>Description</label><input type="text" id="deptDesc" placeholder="..."></div>
+          <div class="field"><label>Expected Jobs</label><input type="text" id="deptJobs" placeholder="..."></div>
+          <div class="field"><label>Department Code</label><input type="text" id="deptCode" placeholder="CS"></div>
+          <button class="btn btn-primary" id="addDeptBtn">➕ Add Department</button>
+
+          <div id="deptsList" style="margin-top:24px"></div>
+        </div>
+      </div>
+
+      <!-- ═══ Levels ═══ -->
+      <div class="tab-content hidden" id="tab-levels">
+        <div class="table-wrap" style="padding:24px">
+          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">📊 Manage Levels</h2>
+
+          <div class="field"><label>Department Name</label><input type="text" id="lvlDept" placeholder="computer science"></div>
+          <div class="field"><label>Level Number</label><input type="number" id="lvlNum" value="1"></div>
+          <button class="btn btn-primary" id="addLevelBtn">➕ Add Level</button>
+
+          <div id="levelsList" style="margin-top:24px"></div>
+        </div>
+      </div>
+
+      <!-- ═══ Semesters ═══ -->
+      <div class="tab-content hidden" id="tab-semesters">
+        <div class="table-wrap" style="padding:24px">
+          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">📅 Manage Semesters</h2>
+
+          <div class="field"><label>Department Name</label><input type="text" id="semDept" placeholder="computer science"></div>
+          <div class="field"><label>Level Number</label><input type="number" id="semLvl" value="1"></div>
+          <div class="field"><label>Semester Number</label><input type="number" id="semNum" value="1"></div>
+          <button class="btn btn-primary" id="addSemBtn">➕ Add Semester</button>
+
+          <div id="semestersList" style="margin-top:24px"></div>
+        </div>
+      </div>
+
+      <!-- ═══ Link Doctors ═══ -->
+      <div class="tab-content hidden" id="tab-link">
+        <div class="table-wrap" style="padding:24px">
+          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">🔗 Link Doctors to Subjects</h2>
+
+          <div class="field"><label>Department Name</label><input type="text" id="lnkDept" placeholder="computer science"></div>
+          <div class="field"><label>Level Number</label><input type="number" id="lnkLvl" value="2"></div>
+          <div class="field"><label>Semester Number</label><input type="number" id="lnkSem" value="1"></div>
+          <div class="field"><label>Subject Name</label><input type="text" id="lnkSubject" placeholder="algorithm"></div>
+          <div class="field"><label>Doctor Name</label><input type="text" id="lnkDoctor" placeholder="Amgad Salama"></div>
+          <button class="btn btn-primary" id="linkBtn">🔗 Link Doctor</button>
+          <button class="btn btn-danger" id="unlinkBtn" style="margin-left:8px">🔓 Unlink</button>
+
+          <div id="linksList" style="margin-top:24px"></div>
+        </div>
+      </div>
+
+      <!-- ═══ Users ═══ -->
+      <div class="tab-content hidden" id="tab-users">
+        <div class="table-wrap" style="padding:24px">
+          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">👥 Manage Users (Role + Lock)</h2>
+
+          <div class="field"><label>Student Emails (one per line)</label>
+            <textarea id="userEmails" rows="4" placeholder="user1@science.tanta.edu.eg&#10;user2@science.tanta.edu.eg"></textarea>
+          </div>
+          <div class="field">
+            <label>New Role</label>
+            <select id="userRole">
+              <option value="user">User (Student)</option>
+              <option value="doctor">Doctor</option>
+              <option value="moderator">Moderator</option>
+              <option value="owner">Owner</option>
+            </select>
+          </div>
+          <div class="field"><label>Department</label><input type="text" id="userDept" placeholder="computer science"></div>
+          <div class="field"><label>Level</label><input type="number" id="userLevel" value="1"></div>
+          <button class="btn btn-primary" id="changeRoleBtn">🔄 Change Role</button>
+          <button class="btn btn-success" id="unlockBtn" style="margin-left:8px">🔓 Unlock</button>
+          <button class="btn btn-danger" id="lockBtn" style="margin-left:8px">🔒 Lock</button>
+        </div>
+      </div>
+
     </div>
 
     <div id="footerPlaceholder"></div>
@@ -129,8 +248,7 @@
   <script src="js/auth.js"            defer></script>
   <script src="js/mappers.js"         defer></script>
   <script src="js/api.js"             defer></script>
-  <script src="js/mockApi.js"         defer></script>
-  <script src="js/matrix.js" defer></script>
+  <script src="js/matrix.js"          defer></script>
   <script src="js/topbar.js"          defer></script>
   <script src="js/pages/admin.js"     defer></script>
 </body>

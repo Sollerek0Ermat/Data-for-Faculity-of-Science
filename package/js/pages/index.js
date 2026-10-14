@@ -1,37 +1,33 @@
 /**
- * 🏠 Home page
+ * Home page
  */
 
-document.addEventListener('DOMContentLoaded', async () => {
-  // ═══════════════════════════════════════════
-  // 🔐 تحقق من الجلسة
-  // ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async function() {
+  const introSeen = localStorage.getItem('intro_seen_v3');
+  const skipIntro = new URLSearchParams(location.search).get('skip_intro');
+
+  if (!introSeen && !skipIntro) {
+    localStorage.setItem('intro_seen_v3', '1');
+    window.location.replace('intro.html?next=index.html');
+    return;
+  }
+
   try {
     const profile = await API.getProfile();
-    if (profile) {
+    if (profile && profile.role) {
       Auth.setSession({
         id:    profile.id,
         name:  profile.name,
         email: profile.email,
         role:  profile.role,
+        photo: profile.photo
       });
-
-      // لو admin → admin.html
-      if (profile.role === 'owner' || 
-          profile.role === 'moderator' || 
-          profile.role === 'doctor') {
-        window.location.href = 'admin.html';
-        return;
-      }
     }
   } catch (err) {
-    // مش مسجّل — عادي
     console.log('Not logged in:', err.message);
+    if (err.message === 'Unauthorized') Auth.clearSession();
   }
 
-  // ═══════════════════════════════════════════
-  // 🏠 عرض الرئيسية
-  // ═══════════════════════════════════════════
   renderTopbar('index.html');
   const footer = document.getElementById('footerPlaceholder');
   if (footer) footer.outerHTML = renderFooter();
@@ -56,7 +52,7 @@ async function loadHome() {
     renderSubjects(subjects);
   } catch (err) {
     console.error(err);
-    UI.error(err.message || I18N.t('msg_error'));
+    UI.error(err.message || 'Failed to load');
     setEmpty(subjectsGrid, err.message || 'Failed to load');
   }
 }
@@ -70,12 +66,28 @@ function renderSubjects(list) {
     return;
   }
 
-  grid.innerHTML = list.map(s => `
-    <a href="subject.html?id=${encodeURIComponent(s.name)}" class="subject-card">
-      <span class="subject-code">${escapeHtml(s.code || '')}</span>
-      <span class="subject-icon">📚</span>
-      <h3>${escapeHtml(s.name)}</h3>
-      <p>${escapeHtml(s.description || '')}</p>
-    </a>
-  `).join('');
+  const html = list.map(function(s) {
+    const name = escapeHtml(s.name || '');
+    const code = escapeHtml(s.code || '');
+    const desc = escapeHtml(s.description || '');
+    const icon = s.icon || '📚';
+    const link = 'subject.html?id=' + encodeURIComponent(s.name || '');
+    const metaParts = [];
+    if (s.department)     metaParts.push(escapeHtml(s.department));
+    if (s.levelNumber)    metaParts.push('Level ' + escapeHtml(String(s.levelNumber)));
+    if (s.semesterNumber) metaParts.push('Sem ' + escapeHtml(String(s.semesterNumber)));
+    const meta = metaParts.join(' • ');
+
+    return [
+      '<a href="' + link + '" class="subject-card">',
+      code ? '  <span class="subject-code">' + code + '</span>' : '',
+      '  <span class="subject-icon">' + icon + '</span>',
+      '  <h3>' + name + '</h3>',
+      meta ? '  <p style="font-size:11px;opacity:.7">' + meta + '</p>' : '',
+      desc ? '  <p>' + desc + '</p>' : '',
+      '</a>'
+    ].join('');
+  }).join('');
+
+  grid.innerHTML = html;
 }

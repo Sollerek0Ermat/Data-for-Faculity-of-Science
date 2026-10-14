@@ -1,0 +1,86 @@
+/**
+ * Home page
+ */
+
+document.addEventListener('DOMContentLoaded', async function() {
+  // Intro — مرة واحدة
+  const introSeen = localStorage.getItem('intro_seen_v3');
+  const skipIntro = new URLSearchParams(location.search).get('skip_intro');
+
+  if (!introSeen && !skipIntro) {
+    localStorage.setItem('intro_seen_v3', '1');
+    window.location.replace('intro.html?next=index.html');
+    return;
+  }
+
+  // Session — بدون تحويل
+  try {
+    const profile = await API.getProfile();
+    if (profile && profile.role) {
+      Auth.setSession({
+        id:    profile.id,
+        name:  profile.name,
+        email: profile.email,
+        role:  profile.role
+      });
+    }
+  } catch (err) {
+    console.log('Not logged in:', err.message);
+  }
+
+  renderTopbar('index.html');
+  const footer = document.getElementById('footerPlaceholder');
+  if (footer) footer.outerHTML = renderFooter();
+
+  await loadHome();
+});
+
+async function loadHome() {
+  const subjectsGrid = document.getElementById('subjectsGrid');
+  if (!subjectsGrid) return;
+
+  setLoading(subjectsGrid);
+
+  try {
+    const subjects = await API.getSubjects();
+
+    if (!subjects || !subjects.length) {
+      setEmpty(subjectsGrid, 'No courses available');
+      return;
+    }
+
+    renderSubjects(subjects);
+  } catch (err) {
+    console.error(err);
+    UI.error(err.message || I18N.t('msg_error'));
+    setEmpty(subjectsGrid, err.message || 'Failed to load');
+  }
+}
+
+function renderSubjects(list) {
+  const grid = document.getElementById('subjectsGrid');
+  if (!grid) return;
+
+  if (!list || !list.length) {
+    setEmpty(grid, 'No courses');
+    return;
+  }
+
+  const html = list.map(function(s) {
+    const name = escapeHtml(s.name);
+    const code = escapeHtml(s.code || '');
+    const desc = escapeHtml(s.description || '');
+    const link = 'subject.html?id=' + encodeURIComponent(s.name);
+
+    return [
+      '<a href="' + link + '" class="subject-card">',
+      code ? '  <span class="subject-code">' + code + '</span>' : '',
+      '  <span class="subject-icon">' + (s.icon || '📚') + '</span>',
+      '  <h3>' + name + '</h3>',
+      '  <p>' + desc + '</p>',
+      '</a>'
+    ].join('');
+  }).join('');
+
+  grid.innerHTML = html;
+}

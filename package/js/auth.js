@@ -1,5 +1,5 @@
 /**
- * 🔐 Authentication
+ * Authentication
  */
 
 const Auth = {
@@ -26,7 +26,8 @@ const Auth = {
   },
 
   getRole() {
-    return this.getSession()?.role || null;
+    const s = this.getSession();
+    return s && s.role ? s.role : null;
   },
 
   isOwner()     { return this.getRole() === CONFIG.ROLES.OWNER; },
@@ -41,44 +42,44 @@ const Auth = {
         || r === CONFIG.ROLES.DOCTOR;
   },
 
-  /* ═══════════════════════════════════════════
-     🔑 Login (Microsoft OAuth)
-     ═══════════════════════════════════════════ */
   loginWithMicrosoft() {
     window.location.href = CONFIG.API_URL + '/' + CONFIG.ENDPOINTS.student.microsoftLogin;
   },
 
-  /* ═══════════════════════════════════════════
-     🎓 Login (Admin - password only)
-     ═══════════════════════════════════════════ */
   async login(email, password) {
     const res = await API.adminLogin({ email, password });
-    if (res?.success) {
+    if (res && res.success) {
       this.setSession(res.session);
     }
     return res;
   },
 
   async logout() {
-    try { await API.adminLogout(); } catch {}
+    try { await API.adminLogout(); } catch (err) {}
     this.clearSession();
     window.location.href = 'login.html';
   },
 
-  /* ═══════════════════════════════════════════
-     🛡️ Role Check
-     ═══════════════════════════════════════════ */
-  requireAuth(allowedRoles = []) {
+  requireAuth(allowedRoles) {
+    allowedRoles = allowedRoles || [];
+
+    // ═══ لو مش مسجّل → login.html ═══
     if (!this.isLoggedIn()) {
+      console.log('Not logged in → login.html');
       window.location.href = 'login.html';
       return false;
     }
 
+    // ═══ لو مسجّل بس role غير مسموح ═══
     if (allowedRoles.length) {
       const role = this.getRole();
-      if (!allowedRoles.includes(role)) {
-        UI.error('Access denied');
-        setTimeout(() => window.location.href = 'index.html', 1200);
+      if (allowedRoles.indexOf(role) === -1) {
+        console.log('Access denied. Role:', role);
+        // لو الـ role = user → روح index
+        UI.error('Access denied. Only admins can access this page.');
+        setTimeout(function() {
+          window.location.href = 'index.html';
+        }, 2000);
         return false;
       }
     }
@@ -90,13 +91,10 @@ const Auth = {
     return await API.changePassword({
       oldPassword:      oldPassword,
       password:         newPassword,
-      confirm_password: newPassword,
+      confirm_password: newPassword
     });
   },
 
-  /* ═══════════════════════════════════════════
-     📥 Sync Session from Server
-     ═══════════════════════════════════════════ */
   async syncSession() {
     try {
       const profile = await API.getProfile();
@@ -106,7 +104,7 @@ const Auth = {
           name:  profile.name,
           email: profile.email,
           role:  profile.role,
-          photo: profile.photo,
+          photo: profile.photo
         });
       }
       return profile;
@@ -114,5 +112,5 @@ const Auth = {
       console.warn('Session sync failed:', err.message);
       return null;
     }
-  },
+  }
 };

@@ -1,12 +1,13 @@
 /**
- * 📚 All Courses page
+ * All Courses page
  */
 
 let _allSubjects = [];
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', async function() {
   renderTopbar('subjects.html');
-  document.getElementById('footerPlaceholder').outerHTML = renderFooter();
+  const footer = document.getElementById('footerPlaceholder');
+  if (footer) footer.outerHTML = renderFooter();
 
   const grid = document.getElementById('subjectsGrid');
   setLoading(grid);
@@ -21,15 +22,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const input = document.getElementById('searchInput');
   if (input) {
-    input.addEventListener('input', () => {
+    input.addEventListener('input', function() {
       const q = input.value.trim().toLowerCase();
       const filtered = !q
         ? _allSubjects
-        : _allSubjects.filter(s =>
-            (s.name || '').toLowerCase().includes(q) ||
-            (s.code || '').toLowerCase().includes(q) ||
-            (s.description || '').toLowerCase().includes(q)
-          );
+        : _allSubjects.filter(function(s) {
+            return (s.name || '').toLowerCase().indexOf(q) !== -1 ||
+                   (s.code || '').toLowerCase().indexOf(q) !== -1 ||
+                   (s.description || '').toLowerCase().indexOf(q) !== -1;
+          });
       renderSubjects(filtered);
     });
   }
@@ -39,17 +40,33 @@ function renderSubjects(list) {
   const grid = document.getElementById('subjectsGrid');
   if (!grid) return;
 
-  if (!list.length) {
+  if (!list || !list.length) {
     setEmpty(grid, 'No courses');
     return;
   }
 
-  grid.innerHTML = list.map(s => `
-    <a href="subject.html?id=${encodeURIComponent(s.name)}" class="subject-card">
-      <span class="subject-code">${escapeHtml(s.code || '')}</span>
-      <span class="subject-icon">📚</span>
-      <h3>${escapeHtml(s.name)}</h3>
-      <p>${escapeHtml(s.description || '')}</p>
-    </a>
-  `).join('');
+  const html = list.map(function(s) {
+    const name = escapeHtml(s.name || '');
+    const code = escapeHtml(s.code || '');
+    const desc = escapeHtml(s.description || '');
+    const icon = s.icon || '📚';
+    const link = 'subject.html?id=' + encodeURIComponent(s.name || '');
+    const metaParts = [];
+    if (s.department)     metaParts.push(escapeHtml(s.department));
+    if (s.levelNumber)    metaParts.push('Level ' + escapeHtml(String(s.levelNumber)));
+    if (s.semesterNumber) metaParts.push('Sem ' + escapeHtml(String(s.semesterNumber)));
+    const meta = metaParts.join(' • ');
+
+    return [
+      '<a href="' + link + '" class="subject-card">',
+      code ? '  <span class="subject-code">' + code + '</span>' : '',
+      '  <span class="subject-icon">' + icon + '</span>',
+      '  <h3>' + name + '</h3>',
+      meta ? '  <p style="font-size:11px;opacity:.7">' + meta + '</p>' : '',
+      desc ? '  <p>' + desc + '</p>' : '',
+      '</a>'
+    ].join('');
+  }).join('');
+
+  grid.innerHTML = html;
 }

@@ -1,0 +1,233 @@
+/**
+ * Folder Browser — التصفح الهرمي
+ */
+
+var _currentLevel = 'department';
+var _params = {};
+
+document.addEventListener('DOMContentLoaded', async function () {
+  renderTopbar();
+  var footer = document.getElementById('footerPlaceholder');
+  if (footer) footer.outerHTML = renderFooter();
+
+  // اقرأ الـ params من الـ URL
+  var urlParams = new URLSearchParams(location.search);
+  _params = {
+    department:     urlParams.get('dept'),
+    levelNumber:    urlParams.get('level'),
+    semesterNumber: urlParams.get('sem'),
+    subject:        urlParams.get('subject'),
+    doctor:         urlParams.get('doctor'),
+    dataType:       urlParams.get('type')
+  };
+
+  // حدد المستوى الحالي
+  if (_params.dataType)      _currentLevel = 'file';
+  else if (_params.doctor)   _currentLevel = 'dataType';
+  else if (_params.subject)  _currentLevel = 'doctor';
+  else if (_params.semesterNumber) _currentLevel = 'subject';
+  else if (_params.levelNumber)    _currentLevel = 'semester';
+  else if (_params.department)     _currentLevel = 'level';
+  else                              _currentLevel = 'department';
+
+  renderBreadcrumbs();
+  await loadFolder();
+});
+
+function renderBreadcrumbs() {
+  var el = document.getElementById('breadcrumbs');
+  if (!el) return;
+
+  var items = [];
+  items.push('<a href="folder.html">Browse</a>');
+
+  if (_params.department) {
+    items.push('<a href="folder.html?dept=' + encodeURIComponent(_params.department) + '">' + escapeHtml(_params.department) + '</a>');
+  }
+  if (_params.levelNumber) {
+    items.push('<a href="folder.html?dept=' + encodeURIComponent(_params.department) + '&level=' + _params.levelNumber + '">Level ' + _params.levelNumber + '</a>');
+  }
+  if (_params.semesterNumber) {
+    items.push('<a href="folder.html?dept=' + encodeURIComponent(_params.department) + '&level=' + _params.levelNumber + '&sem=' + _params.semesterNumber + '">Semester ' + _params.semesterNumber + '</a>');
+  }
+  if (_params.subject) {
+    items.push('<a href="folder.html?dept=' + encodeURIComponent(_params.department) + '&level=' + _params.levelNumber + '&sem=' + _params.semesterNumber + '&subject=' + encodeURIComponent(_params.subject) + '">' + escapeHtml(_params.subject) + '</a>');
+  }
+  if (_params.doctor) {
+    items.push('<a href="folder.html?dept=' + encodeURIComponent(_params.department) + '&level=' + _params.levelNumber + '&sem=' + _params.semesterNumber + '&subject=' + encodeURIComponent(_params.subject) + '&doctor=' + encodeURIComponent(_params.doctor) + '">' + escapeHtml(_params.doctor) + '</a>');
+  }
+  if (_params.dataType) {
+    items.push('<span>' + escapeHtml(_params.dataType) + '</span>');
+  }
+
+  el.innerHTML = items.join(' <span class="breadcrumb-sep">/</span> ');
+}
+
+async function loadFolder() {
+  var grid = document.getElementById('folderGrid');
+  var titleEl = document.getElementById('folderTitle');
+  setLoading(grid);
+
+  try {
+    var query = {};
+    if (_params.department)     query.department = _params.department;
+    if (_params.levelNumber)    query.levelNumber = _params.levelNumber;
+    if (_params.semesterNumber) query.semesterNumber = _params.semesterNumber;
+    if (_params.subject)        query.subject = _params.subject;
+    if (_params.doctor)         query.doctor = _params.doctor;
+    if (_params.dataType)       query.dataType = _params.dataType;
+
+    // نادِ الباك
+    var raw = await API.getFolders(query);
+    var items = Mappers.folderList(raw, _currentLevel);
+
+    if (!items.length) {
+      setEmpty(grid, 'No items');
+      return;
+    }
+
+    // غيّر العنوان
+    var titles = {
+      department: 'Departments',
+      level:      'Levels',
+      semester:   'Semesters',
+      subject:    'Subjects',
+      doctor:     'Doctors',
+      dataType:   'Content Types',
+      file:       'Files'
+    };
+    if (titleEl) titleEl.textContent = titles[_currentLevel] || 'Browse';
+
+    // لو المستوى file — استخدم كروت الملفات
+    if (_currentLevel === 'file') {
+      grid.className = '';
+      grid.innerHTML = items.map(function (item) {
+        return renderFileCard(item, _params.dataType);
+      }).join('');
+      bindFileActions(grid);
+    } else if (_currentLevel === 'dataType') {
+      // 4 كروت كبيرة (Sections/Videos/Summaries/Resources)
+      grid.className = 'dataType-grid';
+      grid.innerHTML = items.map(function (item) {
+        return renderDataTypeCard(item);
+      }).join('');
+    } else {
+      grid.className = 'grid';
+      grid.innerHTML = items.map(function (item) {
+        return renderFolderCard(item);
+      }).join('');
+    }
+  } catch (err) {
+    console.error(err);
+    setEmpty(grid, err.message || 'Failed to load');
+  }
+}
+
+function renderFolderCard(item) {
+  var icons = {
+    department: '🏛️',
+    level:      '📊',
+    semester:   '📅',
+    subject:    '📚',
+    doctor:     '👨‍🏫'
+  };
+  var icon = icons[item.level] || '📁';
+
+  var label = item.name
+    || (item.levelNumber ? 'Level ' + item.levelNumber : '')
+    || (item.semesterNumber ? 'Semester ' + item.semesterNumber : '');
+
+  var nextUrl = buildNextUrl(item);
+  var link = 'folder.html?' + nextUrl;
+
+  return [
+    '<a href="' + link + '" class="subject-card">',
+    '  <span class="subject-icon">' + icon + '</span>',
+    '  <h3>' + escapeHtml(String(label)) + '</h3>',
+    item.code ? '  <span class="subject-code">' + escapeHtml(item.code) + '</span>' : '',
+    '</a>'
+  ].join('');
+}
+
+function renderDataTypeCard(item) {
+  var labels = {
+    sections:  { icon: '📄', label: 'Sections',  desc: 'Chapters and topics' },
+    videos:    { icon: '🎬', label: 'Videos',    desc: 'Recorded lectures' },
+    summaries: { icon: '📝', label: 'Summaries', desc: 'Condensed overviews' },
+    recourses: { icon: '📦', label: 'Resources', desc: 'Reference sheets' },
+    resources: { icon: '📦', label: 'Resources', desc: 'Reference sheets' }
+  };
+  var meta = labels[item.dataType] || { icon: '📁', label: item.dataType, desc: '' };
+
+  var nextUrl = buildNextUrl(item);
+  var link = 'folder.html?' + nextUrl;
+
+  return [
+    '<a href="' + link + '" class="dataType-card">',
+    '  <div class="dataType-icon">' + meta.icon + '</div>',
+    '  <div class="dataType-info">',
+    '    <h3>' + meta.label + '</h3>',
+    '    <p>' + meta.desc + '</p>',
+    '  </div>',
+    '</a>'
+  ].join('');
+}
+
+function renderFileCard(item, type) {
+  var icons = { section: 'S', summary: 'M', resource: 'R', video: 'V' };
+  var icon = icons[type] || 'F';
+
+  return [
+    '<div class="file-card">',
+    '  <div class="file-card-head">',
+    '    <div class="file-card-icon">' + icon + '</div>',
+    '    <div class="file-card-info">',
+    '      <h4>' + escapeHtml(item.title) + '</h4>',
+    '      <div class="file-card-meta">',
+    '        <span>Published ' + formatDate(item.created_at) + '</span>',
+    '        <span>By ' + escapeHtml(item.publisher) + '</span>',
+    item.size ? '        <span>' + escapeHtml(String(item.size)) + ' MB</span>' : '',
+    '      </div>',
+    '    </div>',
+    '  </div>',
+    '  <div class="file-card-actions">',
+    '    <button class="file-action-btn" data-action="view" data-name="' + escapeHtml(item.title) + '">View</button>',
+    '    <button class="file-action-btn primary" data-action="download" data-name="' + escapeHtml(item.title) + '">Download</button>',
+    '  </div>',
+    '</div>'
+  ].join('');
+}
+
+function bindFileActions(grid) {
+  grid.querySelectorAll('[data-action="view"]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      API.downloadFile(_params.dataType, btn.dataset.name, 'view');
+    });
+  });
+  grid.querySelectorAll('[data-action="download"]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      API.downloadFile(_params.dataType, btn.dataset.name, 'download');
+    });
+  });
+}
+
+function buildNextUrl(item) {
+  var p = Object.assign({}, _params);
+
+  if (item.level === 'department')  p.department = item.name;
+  if (item.level === 'level')       p.levelNumber = item.levelNumber;
+  if (item.level === 'semester')    p.semesterNumber = item.semesterNumber;
+  if (item.level === 'subject')     p.subject = item.name;
+  if (item.level === 'doctor')      p.doctor = item.name;
+  if (item.level === 'dataType')    p.dataType = item.dataType.replace(/s$/, '').replace('recourse', 'resource');
+
+  var qs = [];
+  if (p.department)     qs.push('dept=' + encodeURIComponent(p.department));
+  if (p.levelNumber)    qs.push('level=' + p.levelNumber);
+  if (p.semesterNumber) qs.push('sem=' + p.semesterNumber);
+  if (p.subject)        qs.push('subject=' + encodeURIComponent(p.subject));
+  if (p.doctor)         qs.push('doctor=' + encodeURIComponent(p.doctor));
+  if (p.dataType)       qs.push('type=' + p.dataType);
+
+  return qs.join('&');
+}

@@ -1,13 +1,10 @@
 /**
- * ⚙️ Configuration
+ * Ã¢Å¡â„¢Ã¯Â¸Â Configuration
  */
 
 const CONFIG = {
   USE_MOCK: false,
-  DEV_MODE: true,   // ← دخول مباشر للأدمن (للتطوير)
-  // API_URL: 'http://localhost:3000',
   API_URL: '',
-
 
   DEFAULTS: {
     department: 'computer science',
@@ -29,26 +26,31 @@ const CONFIG = {
   },
 
   ENDPOINTS: {
+    /* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â Ã°Å¸Å½â€œ Student Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */
     student: {
       microsoftLogin:        'v1/student/auth/microsoft/login',
       microsoftCallback:     'v1/student/auth/microsoft/login/callback',
       profile:               'v1/student/profile',
       profilePhoto:          'v1/student/profile/photo',
       folders:               'v1/student/folder',
-      folderInfo:            'v1/student/folderInfo',
+      folderInfo:            'v1/student/folderInfo',          // Ã¢Å¡Â Ã¯Â¸Â Ã˜Â­Ã˜Â±Ã™Â I Ã™Æ’Ã˜Â¨Ã™Å Ã˜Â±
       doctorPhoto:           'v1/student/profile/photo/doctor',
       doctorCertifications:  'v1/student/doctor/certifications',
       doctorWithSubjects:    'v1/student/doctorWithSubjects',
-      download:              'v1/student/file',
+      download:              'v1/student/file',                 // Ã˜Â¨Ã˜Â¯Ã™Ë†Ã™â€  auth
     },
+
+    /* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â Ã°Å¸â€ºÂ¡Ã¯Â¸Â Admin Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */
     admin: {
       login:                 'v1/admin/login',
       logout:                'v1/admin/logout',
       changePassword:        'v1/admin/changePassword',
       forgotPassword:        'v1/admin/auth/microsoft/forgotPassword',
-      forgotPasswordCallback:'v1/admin/auth/microsoft/forgotPassword/callback',
+      forgotPasswordCallback:'v1/admin/auth/microsoft/passwordReset/callback',
       resetPassword:         'v1/admin/resetPassword',
     },
+
+    /* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â Ã°Å¸Â§â€˜Ã¢â‚¬ÂÃ°Å¸ÂÂ« Moderator Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */
     moderator: {
       addSections:    'v1/moderator/sections/AddNewSections',
       deleteSections: 'v1/moderator/sections/deleteSections',
@@ -63,6 +65,8 @@ const CONFIG = {
       deleteSummaries: 'v1/moderator/summaries/deleteSummaries',
       editSummary:     'v1/moderator/summaries/EditSummary',
     },
+
+    /* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â Ã°Å¸â€˜â€˜ Owner Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */
     owner: {
       garanteeRoles: 'v1/owner/admins/garanteeRoles',
       changeLock:    'v1/owner/admins/changeLock',
@@ -84,6 +88,15 @@ const CONFIG = {
     },
   },
 
-  DEFAULT_SUBJECT_ICON: '📚',
+  DEFAULT_SUBJECT_ICON: 'Ã°Å¸â€œÅ¡',
   TOAST_DURATION: 3000,
+
+  // ðŸ”¥ Ø¬Ø¯ÙŠØ¯: Ø®Ø±ÙŠØ·Ø© Ù„Ù„ØªØ¹Ø§Ù…Ù„ Ù…Ø¹ recourse/resource
+  DATA_TYPE_MAP: {
+    'section':  { prismaKey: 'section',  titleKey: 'sectionTitle'  },
+    'video':    { prismaKey: 'video',    titleKey: 'videoTitle'    },
+    'summary':  { prismaKey: 'summary',  titleKey: 'summaryTitle'  },
+    'resource': { prismaKey: 'resource', titleKey: 'resourceTitle' },
+    'recourse': { prismaKey: 'resource', titleKey: 'resourceTitle' },
+  },
 };

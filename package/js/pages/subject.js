@@ -1,42 +1,41 @@
 /**
- * 📖 Subject Details page
+ * Subject Details page
  */
 
 let _subject = null;
 let _doctors = [];
 let _currentTab = 'section';
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', async function() {
   renderTopbar();
-  document.getElementById('footerPlaceholder').outerHTML = renderFooter();
+  var footer = document.getElementById('footerPlaceholder');
+  if (footer) footer.outerHTML = renderFooter();
 
-  const id = getQueryParam('id');   // ← id = subjectName
-  if (!id) {
-    showNotFound();
-    return;
-  }
+  var id = getQueryParam('id');
+  if (!id) { showNotFound(); return; }
 
   try {
-    // 1. Get all subjects
-    const subjects = await API.getSubjects();
-    _subject = subjects.find(s => s.name === id || s.id === id);
-    if (!_subject) {
-      showNotFound();
-      return;
-    }
+    var subjects = await API.getSubjects();
+    _subject = subjects.find(function(s) { return s.name === id || s.id === id; });
 
-    document.getElementById('subjectTitle').textContent = '📚 ' + _subject.name;
-    document.getElementById('subjectInfo').textContent = _subject.description || '';
+    if (!_subject) { showNotFound(); return; }
 
-    // 2. Get doctors for this subject
-    const dws = await API.getDoctorWithSubjects();
-    const entry = dws.find(d => d.subjects.some(s => s.name === _subject.name));
-    _doctors = entry ? [entry.doctor] : [];
+    document.getElementById('subjectTitle').textContent = _subject.icon + ' ' + _subject.name;
+    document.getElementById('subjectInfo').textContent = _subject.description || (_subject.department ? _subject.department + ' • Level ' + _subject.levelNumber + ' • Sem ' + _subject.semesterNumber : '');
 
-    // 3. Tabs
-    document.querySelectorAll('#tabsBar .tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('#tabsBar .tab').forEach(t => t.classList.remove('active'));
+    // جيب الدكاترة المرتبطين بالمادة
+    var dws = await API.getDoctorWithSubjects();
+    _doctors = [];
+    dws.forEach(function(d) {
+      if (d.subjects.some(function(s) { return s.name === _subject.name; })) {
+        _doctors.push(d.doctor);
+      }
+    });
+
+    // Tabs
+    document.querySelectorAll('#tabsBar .tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('#tabsBar .tab').forEach(function(t) { t.classList.remove('active'); });
         tab.classList.add('active');
         renderTab(tab.dataset.tab);
       });
@@ -56,24 +55,34 @@ function showNotFound() {
 
 async function renderTab(type) {
   _currentTab = type;
-  const grid = document.getElementById('sectionsGrid');
+  var grid = document.getElementById('sectionsGrid');
   setLoading(grid);
 
   if (!_doctors.length) {
-    setEmpty(grid, 'No content');
+    setEmpty(grid, 'No doctors linked to this subject yet');
     return;
   }
 
   try {
-    // نجيب الملفات لكل دكتور
-    const allFiles = [];
-    for (const doctor of _doctors) {
-      const files = await API.getFolderContent({
-        subjectName: _subject.name,
-        doctorName:  doctor.name,
-        dataType:    type,
-      });
-      files.forEach(f => allFiles.push(f));
+    var allFiles = [];
+    for (var i = 0; i < _doctors.length; i++) {
+      var doctor = _doctors[i];
+      try {
+        var files = await API.getFolderContent({
+          subjectName: _subject.name,
+          doctorName:  doctor.name,
+          department:  _subject.department,
+          levelNumber: _subject.levelNumber,
+          semesterNumber: _subject.semesterNumber,
+          dataType:    type
+        });
+        files.forEach(function(f) {
+          f._doctorName = doctor.name;
+          allFiles.push(f);
+        });
+      } catch (e) {
+        console.warn('Failed for doctor:', doctor.name, e.message);
+      }
     }
 
     if (!allFiles.length) {
@@ -81,83 +90,61 @@ async function renderTab(type) {
       return;
     }
 
-    grid.innerHTML = allFiles.map(f => sectionCardHTML(f, type)).join('');
+    grid.innerHTML = allFiles.map(function(f) {
+      return fileCardHTML(f, type);
+    }).join('');
 
-    grid.querySelectorAll('[data-action]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const name = btn.dataset.name;
-        const action = btn.dataset.action;
-        if (action === 'view') viewSection(name, type);
-        if (action === 'download') downloadSection(name, type);
-      });
-    });
+    bindFileActions(grid, type);
   } catch (err) {
     console.error(err);
     setEmpty(grid, err.message || 'Failed to load');
   }
 }
 
-function sectionCardHTML(file, type) {
-  const icons = { section: '📄', summary: '📝', resource: '📦', video: '🎬' };
-  const icon = icons[type] || '📄';
+function fileCardHTML(file, type) {
+  var t = (type === 'recourse') ? 'resource' : type;
 
-  const titleKey = {
-    section:  'sectionTitle',
-    summary:  'summaryTitle',
-    resource: 'resourceTitle',
-    video:    'videoTitle',
-  }[type];
+  var titleKey = { section: 'sectionTitle', summary: 'summaryTitle', resource: 'resourceTitle', video: 'videoTitle' }[t];
+  var publisherKey = { section: 'sectionPublishedBy', summary: 'summaryPublishedBy', resource: 'resourcePublishedBy', video: 'videoPublishedBy' }[t];
+  var dateKey = { section: 'sectionPublishDate', summary: 'summaryPublishDate', resource: 'resourcePublishDate', video: 'videoPublishDate' }[t];
+  var editKey = { section: 'sectionLastEditDate', summary: 'summaryLastEditDate', resource: 'resourceLastEditDate', video: 'videoLastEditDate' }[t];
 
-  const publisherKey = {
-    section:  'sectionPublishedBy',
-    summary:  'summaryPublishedBy',
-    resource: 'resourcePublishedBy',
-    video:    'videoPublishedBy',
-  }[type];
+  var icons = { section: 'S', summary: 'M', resource: 'R', video: 'V' };
 
-  const dateKey = {
-    section:  'sectionPublishDate',
-    summary:  'summaryPublishDate',
-    resource: 'resourcePublishDate',
-    video:    'videoPublishDate',
-  }[type];
+  var title     = file[titleKey] || file['recourseTitle'] || '';
+  var publisher = file[publisherKey] || file['recoursePublishedBy'] || '—';
+  var date      = file[dateKey] || file['recoursePublishDate'];
+  var editDate  = file[editKey] || file['recourseLastEditDate'];
+  var size      = file.size;
+  var icon      = icons[t] || 'F';
 
-  const title     = file[titleKey] || '';
-  const publisher = file[publisherKey] || '—';
-  const date      = file[dateKey];
-  const size      = file.size || null;
-
-  return `
-    <div class="section-card" data-id="${escapeHtml(title)}">
-      <div class="section-head">
-        <div class="section-icon">${icon}</div>
-        <div class="section-info">
-          <h4>${escapeHtml(title)}</h4>
-          <div class="section-meta">
-            <span>👤 ${escapeHtml(publisher)}</span>
-            <span>📅 ${formatDate(date)}</span>
-            ${size ? `<span>💾 ${size} MB</span>` : ''}
-          </div>
-        </div>
-      </div>
-      <div class="section-actions">
-        <button class="action-btn" data-action="view" data-name="${escapeHtml(title)}">
-          <span>👁️</span> View
-        </button>
-        <button class="action-btn primary" data-action="download" data-name="${escapeHtml(title)}">
-          <span>⬇️</span> Download
-        </button>
-      </div>
-    </div>
-  `;
+  return [
+    '<div class="file-card">',
+    '  <div class="file-card-head">',
+    '    <div class="file-card-icon">' + icon + '</div>',
+    '    <div class="file-card-info">',
+    '      <h4>' + escapeHtml(title) + '</h4>',
+    '      <div class="file-card-meta">',
+    '        <span>Published ' + formatDate(date) + '</span>',
+    '        <span>By ' + escapeHtml(publisher) + '</span>',
+    editDate ? '        <span>Last edit ' + formatDate(editDate) + '</span>' : '',
+    size ? '        <span>' + escapeHtml(String(size)) + ' MB</span>' : '',
+    '      </div>',
+    '    </div>',
+    '  </div>',
+    '  <div class="file-card-actions">',
+    '    <button class="file-action-btn" data-action="view" data-name="' + escapeHtml(title) + '">View</button>',
+    '    <button class="file-action-btn primary" data-action="download" data-name="' + escapeHtml(title) + '">Download</button>',
+    '  </div>',
+    '</div>'
+  ].join('');
 }
 
-function viewSection(name, type) {
-  UI.info(`👁️ View: ${name}`);
-  API.downloadFile(type, name, 'view');
-}
-
-function downloadSection(name, type) {
-  UI.success(`⬇️ Download: ${name}`);
-  API.downloadFile(type, name, 'download');
+function bindFileActions(grid, type) {
+  grid.querySelectorAll('[data-action="view"]').forEach(function(btn) {
+    btn.addEventListener('click', function() { API.downloadFile(type, btn.dataset.name, 'view'); });
+  });
+  grid.querySelectorAll('[data-action="download"]').forEach(function(btn) {
+    btn.addEventListener('click', function() { API.downloadFile(type, btn.dataset.name, 'download'); });
+  });
 }
