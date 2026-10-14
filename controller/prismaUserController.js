@@ -51,7 +51,7 @@ const create_send_responce = async (user, status_code, response, next, save_jwt,
         if (save_jwt) {
             const options = {
                 maxAge: userControllerMethods.parseExpirationToMs(process.env.login_expires),
-                secure: true, //only put on secure connection https
+                secure: false, //only put on secure connection https
                 httpOnly: true //not accessible by js only by https
             }
             if (process.env.NODE_ENV === 'production') {
@@ -105,8 +105,9 @@ exports.microsoftLoginCallback = (req, res, next) => {
             const token = sign_token(user.userId, user.name)
             const options = {
                 maxAge: userControllerMethods.parseExpirationToMs(process.env.login_expires),
-                secure: true, //only put on secure connection https
-                httpOnly: true //not accessible by js only by https
+                secure: false, //only put on secure connection https
+                httpOnly: true, //not accessible by js only by https,
+                sameSite: 'lax',
             }
             if (process.env.NODE_ENV === 'production') {
                 options.secure = true

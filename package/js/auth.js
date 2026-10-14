@@ -33,16 +33,16 @@ const Auth = {
     return s && s.role ? s.role : null;
   },
 
-  isOwner()     { return this.getRole() === CONFIG.ROLES.OWNER; },
+  isOwner() { return this.getRole() === CONFIG.ROLES.OWNER; },
   isModerator() { return this.getRole() === CONFIG.ROLES.MODERATOR; },
-  isDoctor()    { return this.getRole() === CONFIG.ROLES.DOCTOR; },
-  isUser()      { return this.getRole() === CONFIG.ROLES.USER; },
+  isDoctor() { return this.getRole() === CONFIG.ROLES.DOCTOR; },
+  isUser() { return this.getRole() === CONFIG.ROLES.USER; },
 
   isStaff() {
     const r = this.getRole();
     return r === CONFIG.ROLES.OWNER
-        || r === CONFIG.ROLES.MODERATOR
-        || r === CONFIG.ROLES.DOCTOR;
+      || r === CONFIG.ROLES.MODERATOR
+      || r === CONFIG.ROLES.DOCTOR;
   },
 
   isAdminLoggedIn() {
@@ -61,21 +61,36 @@ const Auth = {
   /* ─────────────────────────────────────────────────────────── */
   async syncSession() {
     try {
-      const profile = await API.getProfile();      // GET /v1/student/profile
+      const profile = await API.getProfile();
       if (!profile) throw new Error('no profile');
       this.setSession({
-        id:            profile.id,
-        name:          profile.name,
-        email:         profile.email,
-        role:          profile.role,
-        photo:         profile.photo,
+        id: profile.id,
+        name: profile.name,
+        email: profile.email,
+        role: profile.role,
+        photo: profile.photo,
         adminLoggedIn: !!profile.adminLoggedIn,
       });
       return profile;
     } catch (err) {
-      console.warn('[Auth] syncSession failed:', err.message);
-      this.clearSession();
-      return null;
+      const msg = String((err && err.message) || '');
+
+      // ONLY clear if the server explicitly said "not authorized"
+      const isRealAuthFailure =
+        msg.indexOf('Unauthorized') !== -1 ||
+        msg.indexOf('not logged in') !== -1 ||
+        msg.indexOf('login expired') !== -1 ||
+        msg.indexOf('no user with this email') !== -1;
+
+      if (isRealAuthFailure) {
+        console.warn('[Auth] Unauthorized → clearing session');
+        this.clearSession();
+        return null;
+      }
+
+      // Any other error: keep the existing session, let the page decide
+      console.warn('[Auth] syncSession soft-failed:', msg);
+      return this.getSession();
     }
   },
 
@@ -170,8 +185,8 @@ const Auth = {
 
   async changePassword(oldPassword, newPassword) {
     return await API.changePassword({
-      oldPassword:      oldPassword,
-      password:         newPassword,
+      oldPassword: oldPassword,
+      password: newPassword,
       confirm_password: newPassword,
     });
   },
