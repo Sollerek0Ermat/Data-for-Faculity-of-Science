@@ -254,27 +254,27 @@ exports.getFolders = async (request, response, next) => {
                 const dataTitle = (dataType === 'section') ? 'sectionTitle'
                     : (dataType === 'video') ? 'videoTitle'
                         : (dataType === 'summary') ? 'summaryTitle'
-                            : 'recourseTitle';
+                            : 'resourseTitle';
 
                 const toOmit = (dataType === 'section') ? { section: true, sectionId: true, subDocId: true, fileType: true }
                     : (dataType === 'video') ? { video: true, videoId: true, subDocId: true, fileType: true }
                         : (dataType === 'summary') ? { summary: true, summaryId: true, subDocId: true, fileType: true }
-                            : { recourse: true, recourseId: true, subDocId: true, fileType: true };
+                            : { resourse: true, resourseId: true, subDocId: true, fileType: true };
 
                 const publishedBy = (dataType === 'section') ? 'sectionPublishedBy'
                     : (dataType === 'video') ? 'videoPublishedBy'
                         : (dataType === 'summary') ? 'summaryPublishedBy'
-                            : 'recoursePublishedBy';
+                            : 'resoursePublishedBy';
 
                 const publishedAt = (dataType === 'section') ? 'sectionPublishDate'
                     : (dataType === 'video') ? 'videoPublishDate'
                         : (dataType === 'summary') ? 'summaryPublishDate'
-                            : 'recoursePublishDate';
+                            : 'resoursePublishDate';
 
                 const lastEditeDate = (dataType === 'section') ? 'sectionLastEditDate'
                     : (dataType === 'video') ? 'videoLastEditDate'
                         : (dataType === 'summary') ? 'summaryLastEditDate'
-                            : 'recourseLastEditDate';
+                            : 'resourseLastEditDate';
 
                 folders = await tx[dataType].findMany({
                     where: { subjectDoctor: { doctor: { doctorName: doctor }, subject: { subjectName: subject, semester: { semesterNumber: semesterNumber, level: { levelNumber: levelNumber, department: { depName: department } } } } } },
