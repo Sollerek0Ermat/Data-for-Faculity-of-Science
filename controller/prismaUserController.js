@@ -101,9 +101,9 @@ exports.microsoftLoginCallback = (req, res, next) => {
             // const message = `you have successfully logged in to your account using Microsoft`
             const message = `welcome ${user.name}`
             // await userControllerMethods.sendEmail(req, user, 'Microsoft Login Successful', message)
-            // res.redirect(`${process.env.USER_URL}/dashboard`);
 
             create_send_responce(user, 200, res, next, true, message)
+            res.redirect(`${process.env.USER_URL}/intro.html`);
 
 
         } catch (error) {
