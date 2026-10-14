@@ -34,16 +34,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Not logged in → render the Microsoft button.
   renderTopbar();
-  const msBtn = document.getElementById('msLoginBtn');
-  if (msBtn) {
-    // renderTopbar already binds loginWithMicrosoft, no-op here.
+  const centerBtn = document.getElementById('centerMsLoginBtn');
+  if (centerBtn) {
+    centerBtn.addEventListener('click', function () {
+      Auth.loginWithMicrosoft();
+    });
   }
-
-  // Show a friendly error if we were redirected back with one.
-  const params = new URLSearchParams(location.search);
-  const err = params.get('error');
-  if (err) {
-    UI.error('Login failed: ' + decodeURIComponent(err));
-    history.replaceState({}, '', 'login.html');
-  }
-});
+  
+})

@@ -102,7 +102,21 @@ exports.microsoftLoginCallback = (req, res, next) => {
             const message = `welcome ${user.name}`
             // await userControllerMethods.sendEmail(req, user, 'Microsoft Login Successful', message)
 
-            create_send_responce(user, 200, res, next, true, message)
+            const token = sign_token(user.userId, user.name)
+            const options = {
+                maxAge: userControllerMethods.parseExpirationToMs(process.env.login_expires),
+                secure: true, //only put on secure connection https
+                httpOnly: true //not accessible by js only by https
+            }
+            if (process.env.NODE_ENV === 'production') {
+                options.secure = true
+            }
+            response.cookie('jwt', token, options) //to add the jwt to cookies to use it later in the web application
+            return res.redirect(`${process.env.USER_URL}/intro.html`);
+
+
+
+            // create_send_responce(user, 200, res, next, true, message)
             // res.redirect(`${process.env.USER_URL}/intro.html`);
 
 
