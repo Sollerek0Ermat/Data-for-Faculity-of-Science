@@ -1,5 +1,9 @@
 /**
  * Admin Dashboard — Full
+ * Gated by:
+ *   1. Microsoft login (cookie)
+ *   2. Staff role (owner / moderator / doctor)
+ *   3. adminLoggedIn === true (set by POST /v1/admin/login)
  */
 
 let _subjects = [];
@@ -9,8 +13,100 @@ let _userRole = "user";
 let _userName = "";
 
 document.addEventListener("DOMContentLoaded", async () => {
-  if (!Auth.requireAuth(["owner", "moderator", "doctor"])) return;
+  // ── 1. Auth bootstrap ───────────────────────────────────────
+  const profile = await Auth.bootstrap({
+    requireLogin: true,
+    requireRole: ['owner', 'moderator', 'doctor'],
+  });
 
+  if (!profile) return; // redirected already
+
+  // ── 2. Admin password gate ──────────────────────────────────
+  if (!Auth.isAdminLoggedIn()) {
+    showAdminPasswordGate();
+    return; // don't render the dashboard until the gate is passed
+  }
+
+  await startDashboard();
+});
+
+/* ─────────────────────────────────────────────────────────── */
+/*  Password gate                                              */
+/* ─────────────────────────────────────────────────────────── */
+function showAdminPasswordGate() {
+  // Hide everything in the page except our overlay.
+  const page = document.querySelector('.page');
+  if (page) page.style.visibility = 'hidden';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'adminGateOverlay';
+  overlay.innerHTML = [
+    '<div class="admin-gate-card">',
+    '  <div class="login-icon">🔐</div>',
+    '  <h1>Admin Access</h1>',
+    '  <p>Enter your admin password to continue.</p>',
+    '  <form id="adminGateForm">',
+    '    <div class="field">',
+    '      <label for="adminPassword">Password</label>',
+    '      <input type="password" id="adminPassword" placeholder="••••••••" required autofocus>',
+    '    </div>',
+    '    <button type="submit" class="btn btn-primary btn-block" id="adminGateBtn" style="height:52px;font-size:16px">',
+    '      Continue →',
+    '    </button>',
+    '    <p id="adminGateMsg" class="text-center" style="margin-top:12px;font-weight:700;font-size:14px;min-height:20px"></p>',
+    '  </form>',
+    '  <div style="text-align:center;margin-top:16px">',
+    '    <a href="#" id="adminGateLogout" style="color:var(--muted);font-size:13px;font-weight:600">Logout</a>',
+    '  </div>',
+    '</div>',
+  ].join('');
+  document.body.appendChild(overlay);
+
+  const form = document.getElementById('adminGateForm');
+  const btn  = document.getElementById('adminGateBtn');
+  const msg  = document.getElementById('adminGateMsg');
+  const input = document.getElementById('adminPassword');
+
+  document.getElementById('adminGateLogout').addEventListener('click', function (e) {
+    e.preventDefault();
+    Auth.logout();
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const password = input.value;
+    if (!password) return;
+
+    msg.textContent = '';
+    msg.style.color = 'var(--muted)';
+    btn.disabled = true;
+    msg.textContent = 'Checking...';
+
+    try {
+      // POST /v1/admin/login  →  backend checks, or sets on first use
+      await Auth.adminLogin(password);
+
+      // Success!  Backend returned 200 and we refreshed our session.
+      overlay.remove();
+      const page = document.querySelector('.page');
+      if (page) page.style.visibility = 'visible';
+
+      await startDashboard();
+    } catch (err) {
+      console.error(err);
+      msg.textContent = '❌ ' + (err.message || 'Incorrect password');
+      msg.style.color = 'var(--danger)';
+      input.value = '';
+      input.focus();
+      btn.disabled = false;
+    }
+  });
+}
+
+/* ─────────────────────────────────────────────────────────── */
+/*  Dashboard (original code below)                            */
+/* ─────────────────────────────────────────────────────────── */
+async function startDashboard() {
   renderTopbar('admin.html');
   const footer = document.getElementById("footerPlaceholder");
   if (footer) footer.outerHTML = renderFooter();
@@ -23,8 +119,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("userRole").textContent = "Role: " + _userRole.toUpperCase();
 
   // Tabs
-  document.querySelectorAll("#adminTabs .tab").forEach(function(tab) {
-    tab.addEventListener("click", function() {
+  document.querySelectorAll("#adminTabs .tab").forEach(function (tab) {
+    tab.addEventListener("click", function () {
       document.querySelectorAll("#adminTabs .tab").forEach(t => t.classList.remove("active"));
       document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
       tab.classList.add("active");
@@ -48,7 +144,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     UI.error(err.message || "Failed to load data");
   }
 
-  // Binds
   bindUpload();
   bindAddDoctor();
   bindAddSubject();
@@ -59,8 +154,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   bindUsers();
 
   applyRolePermissions();
-});
+}
 
+/* Everything below this line is UNCHANGED from your original
+   admin.js, starting at `async function loadDoctorsDetails()`.
+   Only the DOMContentLoaded handler at the top changed. */
 async function loadDoctorsDetails() {
   if (!_doctors.length) return;
   try {

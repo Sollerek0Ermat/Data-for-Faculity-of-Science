@@ -2384,3 +2384,165 @@ tbody tr:last-child td { border-bottom: none; }
   .file-card-info h4 { font-size: 15px; }
 }
 
+/* ═══════════════════════════════════════════════════
+   Topbar right slot (MS login button + profile chip)
+   ═══════════════════════════════════════════════════ */
+.topbar-right {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  gap: 12px;
+}
+
+/* ─── Sign in with Microsoft button ─── */
+.btn-ms-login {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: 30px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #0078d4, #005a9e);
+  border: 1px solid rgba(255, 255, 255, .15);
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+  box-shadow: 0 4px 14px rgba(0, 120, 212, .35);
+}
+.btn-ms-login:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(0, 120, 212, .5);
+}
+.ms-logo {
+  width: 18px;
+  height: 18px;
+  background:
+    linear-gradient(#f25022, #f25022) 0 0 / 8px 8px no-repeat,
+    linear-gradient(#7fba00, #7fba00) 10px 0 / 8px 8px no-repeat,
+    linear-gradient(#00a4ef, #00a4ef) 0 10px / 8px 8px no-repeat,
+    linear-gradient(#ffb900, #ffb900) 10px 10px / 8px 8px no-repeat;
+}
+
+/* ─── Profile chip ─── */
+.profile-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 30px;
+  background: rgba(4, 24, 66, .6);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: border-color .2s, box-shadow .2s;
+  user-select: none;
+}
+.profile-chip:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 0 14px rgba(31, 213, 255, .35);
+}
+.profile-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(0, 229, 255, .25), rgba(5, 44, 110, .7) 70%);
+  border: 1px solid var(--cyan);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--cyan);
+}
+.profile-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.profile-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  padding: 6px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+  display: none;
+  z-index: 200;
+}
+.profile-menu.open { display: block; }
+.profile-menu-item {
+  display: block;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.profile-menu-item:hover {
+  background: rgba(0, 229, 255, .08);
+  color: var(--cyan);
+}
+
+/* ─── Admin password gate overlay ─── */
+#adminGateOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: grid;
+  place-items: center;
+  background: rgba(2, 10, 36, .85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 24px;
+}
+.admin-gate-card {
+  width: min(420px, 100%);
+  padding: 36px 28px;
+  background: var(--card);
+  border: 1px solid var(--cyan);
+  border-radius: 6px;
+  box-shadow: var(--shadow-card);
+  position: relative;
+}
+.admin-gate-card::before {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border: 1px solid rgba(31, 213, 255, .3);
+  border-radius: 3px;
+  pointer-events: none;
+}
+.admin-gate-card h1 {
+  text-align: center;
+  font-weight: 600;
+  font-size: 26px;
+  color: var(--cyan);
+  margin: 4px 0 6px;
+  text-shadow: 0 0 15px rgba(31, 213, 255, .5);
+}
+.admin-gate-card p {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 900px) {
+  .topbar-right {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .profile-name { max-width: 90px; }
+}

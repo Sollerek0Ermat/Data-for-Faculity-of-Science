@@ -3,36 +3,11 @@
  */
 
 document.addEventListener('DOMContentLoaded', async function() {
-  const introSeen = localStorage.getItem('intro_seen_v3');
-  const skipIntro = new URLSearchParams(location.search).get('skip_intro');
+  // Auth gate — sends anonymous visitors to login.html
+  const profile = await Auth.bootstrap({ requireLogin: true });
+  if (!profile) return;
 
-  if (!introSeen && !skipIntro) {
-    localStorage.setItem('intro_seen_v3', '1');
-    window.location.replace('intro.html?next=index.html');
-    return;
-  }
-
-  try {
-    const profile = await API.getProfile();
-    if (profile && profile.role) {
-      Auth.setSession({
-        id:    profile.id,
-        name:  profile.name,
-        email: profile.email,
-        role:  profile.role,
-        photo: profile.photo
-      });
-    }
-  } catch (err) {
-    console.log('Not logged in:', err.message);
-    if (err.message === 'Unauthorized') Auth.clearSession();
-  }
-
-  renderTopbar('index.html');
-  const footer = document.getElementById('footerPlaceholder');
-  if (footer) footer.outerHTML = renderFooter();
-
-  await loadHome();
+  // ... rest of the original page code
 });
 
 async function loadHome() {

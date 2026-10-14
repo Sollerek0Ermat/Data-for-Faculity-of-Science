@@ -91,7 +91,7 @@ const getJWTToken = async (request) => {
 
     //2 validate the token
     const verifyAsync = util.promisify(jwt.verify);
-    const decoded_token = await verifyAsync(token, process.env.secret_string, { ignoreExpiration: true });
+    const decoded_token = await verifyAsync(token, process.env.secret_string);
 
     // console.log(decoded_token)
 

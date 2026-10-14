@@ -48,7 +48,7 @@ const create_send_responce = async (user, status_code, response, next, save_jwt,
         if (save_jwt) {
             const options = {
                 maxAge: userControllerMethods.parseExpirationToMs(process.env.login_expires),
-                secure: false, //only put on secure connection https
+                secure: true, //only put on secure connection https
                 httpOnly: true //not accessible by js only by https
             }
             if (process.env.NODE_ENV === 'production') {

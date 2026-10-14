@@ -2,7 +2,7 @@
  * API — متوافق مع الباك
  */
 
-const API = (function() {
+const API = (function () {
 
   async function request(path, options) {
     options = options || {};
@@ -42,7 +42,7 @@ const API = (function() {
       return await res.blob();
     }
 
-    const data = await res.json().catch(function() { return null; });
+    const data = await res.json().catch(function () { return null; });
 
     if (!res.ok) {
       const msg = (data && (data.message || data.error)) || ("HTTP " + res.status);
@@ -89,43 +89,43 @@ const API = (function() {
   async function getSubjects() {
     const dws = await getDoctorWithSubjects();
     const map = new Map();
-    dws.forEach(function(item) {
-      (item.subjects || []).forEach(function(s) {
+    dws.forEach(function (item) {
+      (item.subjects || []).forEach(function (s) {
         var name = s.name || s.id;
         if (!name) return;
         if (!map.has(name)) {
           map.set(name, {
-            id:             name,
-            name:           name,
-            code:           s.code || '',
-            description:    s.description || '',
-            icon:           s.icon || '📚',
-            department:     s.department || null,
-            levelNumber:    s.levelNumber || null,
+            id: name,
+            name: name,
+            code: s.code || '',
+            description: s.description || '',
+            icon: s.icon || '📚',
+            department: s.department || null,
+            levelNumber: s.levelNumber || null,
             semesterNumber: s.semesterNumber || null,
-            link:           s.link || null
+            link: s.link || null
           });
         }
       });
     });
-    return Array.from(map.values()).sort(function(a, b) { return a.name.localeCompare(b.name); });
+    return Array.from(map.values()).sort(function (a, b) { return a.name.localeCompare(b.name); });
   }
 
   async function getDoctors() {
     const dws = await getDoctorWithSubjects();
-    return dws.map(function(d) { return d.doctor; });
+    return dws.map(function (d) { return d.doctor; });
   }
 
   async function getFolderContent(opts) {
     let dt = opts.dataType;
     if (dt === 'recourse') dt = 'resource';
     const query = {
-      department:     opts.department     || CONFIG.DEFAULTS.department,
-      levelNumber:    opts.levelNumber    || CONFIG.DEFAULTS.levelNumber,
+      department: opts.department || CONFIG.DEFAULTS.department,
+      levelNumber: opts.levelNumber || CONFIG.DEFAULTS.levelNumber,
       semesterNumber: opts.semesterNumber || CONFIG.DEFAULTS.semesterNumber,
-      subject:        opts.subjectName,
-      doctor:         opts.doctorName,
-      dataType:       dt
+      subject: opts.subjectName,
+      doctor: opts.doctorName,
+      dataType: dt
     };
     const res = await request(buildUrl(ep.student.folders, query));
     return res.data || [];
@@ -149,13 +149,19 @@ const API = (function() {
   }
 
   async function adminLogin(opts) {
-    await request(ep.admin.login, { method: "POST", body: { password: opts.password } });
-    const profile = await getProfile();
-    return { success: true, session: { email: (profile && profile.email) || opts.email, name: (profile && profile.name) || "Admin", role: (profile && profile.role) || "user" } };
+    // Requires an existing Microsoft JWT cookie (see backend is_user middleware)
+    return await request(ep.admin.login, {
+      method: "POST",
+      body: { password: opts.password }
+    });
   }
-  async function adminLogout() { return await request(ep.admin.logout, { method: "POST" }); }
-  async function changePassword(opts) {
-    return await request(ep.admin.changePassword, { method: "PATCH", body: { old_password: opts.oldPassword, password: opts.password, confirm_password: opts.confirm_password } });
+
+  async function adminLogout() {
+    try {
+      return await request(ep.admin.logout, { method: "POST" });
+    } catch (e) {
+      return { status: 'success' }; // idempotent
+    }
   }
 
   /* Moderator */
@@ -194,7 +200,7 @@ const API = (function() {
   function buildUrl(path, params) {
     params = params || {};
     const qs = new URLSearchParams();
-    Object.keys(params).forEach(function(k) {
+    Object.keys(params).forEach(function (k) {
       const v = params[k];
       if (v !== undefined && v !== null && v !== "") qs.append(k, v);
     });

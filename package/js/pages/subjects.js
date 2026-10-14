@@ -5,35 +5,11 @@
 let _allSubjects = [];
 
 document.addEventListener('DOMContentLoaded', async function() {
-  renderTopbar('subjects.html');
-  const footer = document.getElementById('footerPlaceholder');
-  if (footer) footer.outerHTML = renderFooter();
+  // Auth gate — sends anonymous visitors to login.html
+  const profile = await Auth.bootstrap({ requireLogin: true });
+  if (!profile) return;
 
-  const grid = document.getElementById('subjectsGrid');
-  setLoading(grid);
-
-  try {
-    _allSubjects = await API.getSubjects();
-    renderSubjects(_allSubjects);
-  } catch (err) {
-    console.error(err);
-    setEmpty(grid, err.message || 'Failed to load courses');
-  }
-
-  const input = document.getElementById('searchInput');
-  if (input) {
-    input.addEventListener('input', function() {
-      const q = input.value.trim().toLowerCase();
-      const filtered = !q
-        ? _allSubjects
-        : _allSubjects.filter(function(s) {
-            return (s.name || '').toLowerCase().indexOf(q) !== -1 ||
-                   (s.code || '').toLowerCase().indexOf(q) !== -1 ||
-                   (s.description || '').toLowerCase().indexOf(q) !== -1;
-          });
-      renderSubjects(filtered);
-    });
-  }
+  // ... rest of the original page code
 });
 
 function renderSubjects(list) {

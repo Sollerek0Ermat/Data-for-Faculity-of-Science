@@ -1,62 +1,49 @@
 /**
- * 🔐 Login page — Microsoft OAuth
+ * Login page.
+ *
+ * - Anonymous visitor        → "Sign in with Microsoft" button only.
+ * - Session exists, non-staff → redirect to index.html (they're already in).
+ * - Session exists, staff     → redirect to admin.html (password gate is there).
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
-  if (document.getElementById('topbarPlaceholder')) renderTopbar();
   const footer = document.getElementById('footerPlaceholder');
   if (footer) footer.outerHTML = renderFooter();
 
-  // ⚡ معالجة الرجوع من Microsoft callback
-  const urlParams = new URLSearchParams(location.search);
-  const loginStatus = urlParams.get('login');
-  const loginError  = urlParams.get('error');
-
-  if (loginError) {
-    UI.error('Login failed: ' + decodeURIComponent(loginError));
-    history.replaceState({}, '', 'login.html');
-  }
-
-  // لو مسجل دخول بالفعل → وجّه
-  if (Auth.isLoggedIn()) {
-    redirectByRole();
+  // If the user has a session already, don't show login at all.
+  const existing = Auth.getSession();
+  if (existing) {
+    if (['owner', 'moderator', 'doctor'].indexOf(existing.role) !== -1) {
+      window.location.replace('admin.html');
+    } else {
+      window.location.replace('index.html');
+    }
     return;
   }
 
-  // جرب تجيب profile (لو الكوكي موجود)
-  try {
-    const profile = await API.getProfile();
-    if (profile && profile.role) {
-      Auth.setSession({
-        id:    profile.id,
-        name:  profile.name,
-        email: profile.email,
-        role:  profile.role,
-        photo: profile.photo
-      });
-      redirectByRole();
-      return;
+  // Try to validate the cookie before showing anything.
+  const profile = await Auth.syncSession();
+  if (profile) {
+    if (['owner', 'moderator', 'doctor'].indexOf(profile.role) !== -1) {
+      window.location.replace('admin.html');
+    } else {
+      window.location.replace('index.html');
     }
-  } catch (err) {
-    console.log('Not logged in:', err.message);
+    return;
   }
 
-  // زر Microsoft Login
+  // Not logged in → render the Microsoft button.
+  renderTopbar();
   const msBtn = document.getElementById('msLoginBtn');
   if (msBtn) {
-    msBtn.addEventListener('click', () => {
-      const base = CONFIG.API_URL || '';
-      window.location.href = base + '/' + CONFIG.ENDPOINTS.student.microsoftLogin;
-    });
+    // renderTopbar already binds loginWithMicrosoft, no-op here.
+  }
+
+  // Show a friendly error if we were redirected back with one.
+  const params = new URLSearchParams(location.search);
+  const err = params.get('error');
+  if (err) {
+    UI.error('Login failed: ' + decodeURIComponent(err));
+    history.replaceState({}, '', 'login.html');
   }
 });
-
-function redirectByRole() {
-  const role = Auth.getRole();
-
-  if (role === CONFIG.ROLES.OWNER || role === CONFIG.ROLES.MODERATOR || role === CONFIG.ROLES.DOCTOR) {
-    window.location.href = 'admin.html';
-  } else {
-    window.location.href = 'index.html';
-  }
-}

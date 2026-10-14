@@ -51,7 +51,7 @@ const create_send_responce = async (user, status_code, response, next, save_jwt,
         if (save_jwt) {
             const options = {
                 maxAge: userControllerMethods.parseExpirationToMs(process.env.login_expires),
-                secure: false, //only put on secure connection https
+                secure: true, //only put on secure connection https
                 httpOnly: true //not accessible by js only by https
             }
             if (process.env.NODE_ENV === 'production') {
@@ -103,7 +103,7 @@ exports.microsoftLoginCallback = (req, res, next) => {
             // await userControllerMethods.sendEmail(req, user, 'Microsoft Login Successful', message)
 
             create_send_responce(user, 200, res, next, true, message)
-            res.redirect(`${process.env.USER_URL}/intro.html`);
+            // res.redirect(`${process.env.USER_URL}/intro.html`);
 
 
         } catch (error) {
@@ -132,7 +132,7 @@ exports.is_user = async (request, responce, next) => {
 
         if (decoded_token.exp && decoded_token.exp * 1000 < new Date(Date.now())) {
             await prisma.user.update({
-                where: { userid: user.userId },
+                where: { userId: user.userId },
                 data: {
                     logged_in: false,
                     adminLogged_in: false

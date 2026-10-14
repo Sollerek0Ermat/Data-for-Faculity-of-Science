@@ -4,7 +4,7 @@ const send_email = async (options) => { //more methods to use email https://chat
     const transporter = nodemailer.createTransport({
         host: process.env.email_host,
         port: Number(process.env.email_port),
-        secure: false, // true for 465, false for 587
+        secure: true, // true for 465, false for 587
         auth: {
             user: process.env.email_user,
             pass: process.env.email_password
