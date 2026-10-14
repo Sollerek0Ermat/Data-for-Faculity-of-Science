@@ -1,9 +1,24 @@
-﻿/**
+/**
  * Home page
  */
 
 document.addEventListener('DOMContentLoaded', async function() {
-  // Intro â€” Ù…Ø±Ø© ÙˆØ§Ø­Ø¯Ø©
+  // فحص login — بدون تحويل
+  try {
+    const profile = await API.getProfile();
+    if (profile && profile.role) {
+      Auth.setSession({
+        id:    profile.id,
+        name:  profile.name,
+        email: profile.email,
+        role:  profile.role,
+        photo: profile.photo
+      });
+    }
+  } catch (err) {
+    console.log('Profile fetch failed:', err.message);
+  }
+
   const introSeen = localStorage.getItem('intro_seen_v3');
   const skipIntro = new URLSearchParams(location.search).get('skip_intro');
 
@@ -13,7 +28,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     return;
   }
 
-  // Session â€” Ø¨Ø¯ÙˆÙ† ØªØ­ÙˆÙŠÙ„
   try {
     const profile = await API.getProfile();
     if (profile && profile.role) {
@@ -21,11 +35,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         id:    profile.id,
         name:  profile.name,
         email: profile.email,
-        role:  profile.role
+        role:  profile.role,
+        photo: profile.photo
       });
     }
   } catch (err) {
     console.log('Not logged in:', err.message);
+    if (err.message === 'Unauthorized') Auth.clearSession();
   }
 
   renderTopbar('index.html');
@@ -52,7 +68,7 @@ async function loadHome() {
     renderSubjects(subjects);
   } catch (err) {
     console.error(err);
-    UI.error(err.message || I18N.t('msg_error'));
+    UI.error(err.message || 'Failed to load');
     setEmpty(subjectsGrid, err.message || 'Failed to load');
   }
 }
@@ -67,17 +83,24 @@ function renderSubjects(list) {
   }
 
   const html = list.map(function(s) {
-    const name = escapeHtml(s.name);
+    const name = escapeHtml(s.name || '');
     const code = escapeHtml(s.code || '');
     const desc = escapeHtml(s.description || '');
-    const link = 'subject.html?id=' + encodeURIComponent(s.name);
+    const icon = s.icon || '📚';
+    const link = 'subject.html?id=' + encodeURIComponent(s.name || '');
+    const metaParts = [];
+    if (s.department)     metaParts.push(escapeHtml(s.department));
+    if (s.levelNumber)    metaParts.push('Level ' + escapeHtml(String(s.levelNumber)));
+    if (s.semesterNumber) metaParts.push('Sem ' + escapeHtml(String(s.semesterNumber)));
+    const meta = metaParts.join(' • ');
 
     return [
       '<a href="' + link + '" class="subject-card">',
       code ? '  <span class="subject-code">' + code + '</span>' : '',
-      '  <span class="subject-icon">' + (s.icon || 'ðŸ“š') + '</span>',
+      '  <span class="subject-icon">' + icon + '</span>',
       '  <h3>' + name + '</h3>',
-      '  <p>' + desc + '</p>',
+      meta ? '  <p style="font-size:11px;opacity:.7">' + meta + '</p>' : '',
+      desc ? '  <p>' + desc + '</p>' : '',
       '</a>'
     ].join('');
   }).join('');

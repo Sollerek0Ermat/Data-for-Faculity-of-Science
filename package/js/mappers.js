@@ -1,10 +1,9 @@
 /**
- * Mappers — تحويل ردود الباك للفرونت
+ * Mappers - Convert backend responses for frontend
  */
 
 const Mappers = {
 
-  /* استخراج params من الرابط */
   _extractFromLink: function (link) {
     var r = { department: null, levelNumber: null, semesterNumber: null, subject: null, doctor: null, dataType: null };
     if (!link) return r;
@@ -17,47 +16,45 @@ const Mappers = {
       r.subject        = p.get('subject');
       r.doctor         = p.get('doctor');
       r.dataType       = p.get('dataType');
-    } catch (e) { /* ignore */ }
+    } catch (e) { }
     return r;
   },
 
-  /* أيقونة المادة */
   _getIcon: function (name) {
-    if (!name) return '📚';
+    if (!name) return '\uD83D\uDCDA';
     var n = name.toLowerCase();
-    if (n.indexOf('algorithm') !== -1) return '🧮';
-    if (n.indexOf('programming') !== -1) return '💻';
-    if (n.indexOf('computer') !== -1) return '💻';
-    if (n.indexOf('linear') !== -1) return '📐';
-    if (n.indexOf('algebra') !== -1) return '📐';
-    if (n.indexOf('discrete') !== -1) return '🔢';
-    if (n.indexOf('math') !== -1) return '➗';
-    if (n.indexOf('statistic') !== -1) return '📊';
-    if (n.indexOf('probabilit') !== -1) return '🎲';
-    if (n.indexOf('physic') !== -1) return '⚛️';
-    if (n.indexOf('vibration') !== -1) return '🌊';
-    if (n.indexOf('wave') !== -1) return '🌊';
-    if (n.indexOf('chemistr') !== -1) return '🧪';
-    if (n.indexOf('geograph') !== -1) return '🗺️';
-    if (n.indexOf('network') !== -1) return '🌐';
-    if (n.indexOf('database') !== -1) return '🗄️';
-    if (n.indexOf('system') !== -1) return '⚙️';
-    if (n.indexOf('software') !== -1) return '📱';
-    if (n.indexOf('web') !== -1) return '🌐';
-    if (n.indexOf('security') !== -1) return '🔒';
-    if (n.indexOf('intelligence') !== -1) return '🤖';
-    if (n.indexOf('machine') !== -1) return '🤖';
-    if (n.indexOf('data') !== -1) return '📊';
-    if (n.indexOf('structure') !== -1) return '🏗️';
-    if (n.indexOf('logic') !== -1) return '🧠';
-    if (n.indexOf('file') !== -1) return '🗂️';
-    if (n.indexOf('analysis') !== -1) return '📈';
-    if (n.indexOf('design') !== -1) return '🎨';
-    if (n.indexOf('introduction') !== -1) return '📖';
-    return '📚';
+    if (n.indexOf('algorithm') !== -1) return '\uD83E\uDDEE';
+    if (n.indexOf('programming') !== -1) return '\uD83D\uDCBB';
+    if (n.indexOf('computer') !== -1) return '\uD83D\uDCBB';
+    if (n.indexOf('linear') !== -1) return '\uD83D\uDCD0';
+    if (n.indexOf('algebra') !== -1) return '\uD83D\uDCD0';
+    if (n.indexOf('discrete') !== -1) return '\uD83D\uDD22';
+    if (n.indexOf('math') !== -1) return '\u2797';
+    if (n.indexOf('statistic') !== -1) return '\uD83D\uDCCA';
+    if (n.indexOf('probabilit') !== -1) return '\uD83C\uDFB2';
+    if (n.indexOf('physic') !== -1) return '\u269B\uFE0F';
+    if (n.indexOf('vibration') !== -1) return '\uD83C\uDF0A';
+    if (n.indexOf('wave') !== -1) return '\uD83C\uDF0A';
+    if (n.indexOf('chemistr') !== -1) return '\uD83E\uDDEA';
+    if (n.indexOf('geograph') !== -1) return '\uD83D\uDDFA\uFE0F';
+    if (n.indexOf('network') !== -1) return '\uD83C\uDF10';
+    if (n.indexOf('database') !== -1) return '\uD83D\uDDC4\uFE0F';
+    if (n.indexOf('system') !== -1) return '\u2699\uFE0F';
+    if (n.indexOf('software') !== -1) return '\uD83D\uDCF1';
+    if (n.indexOf('web') !== -1) return '\uD83C\uDF10';
+    if (n.indexOf('security') !== -1) return '\uD83D\uDD12';
+    if (n.indexOf('intelligence') !== -1) return '\uD83E\uDD16';
+    if (n.indexOf('machine') !== -1) return '\uD83E\uDD16';
+    if (n.indexOf('data') !== -1) return '\uD83D\uDCCA';
+    if (n.indexOf('structure') !== -1) return '\uD83C\uDFD7\uFE0F';
+    if (n.indexOf('logic') !== -1) return '\uD83E\uDDE0';
+    if (n.indexOf('file') !== -1) return '\uD83D\uDDC2\uFE0F';
+    if (n.indexOf('analysis') !== -1) return '\uD83D\uDCC8';
+    if (n.indexOf('design') !== -1) return '\uD83C\uDFA8';
+    if (n.indexOf('introduction') !== -1) return '\uD83D\uDCD6';
+    return '\uD83D\uDCDA';
   },
 
-  /* كود المادة الشكلي */
   _getCode: function (name) {
     if (!name) return '';
     var parts = name.trim().split(/\s+/);
@@ -67,7 +64,6 @@ const Mappers = {
     return code + num;
   },
 
-  /* Profile */
   profile: function (raw) {
     if (!raw) return null;
     return {
@@ -78,11 +74,12 @@ const Mappers = {
       photo:         raw.photo || null,
       department:    raw.department || null,
       level:         raw.level ? raw.level.toString() : null,
-      adminLoggedIn: raw.admin_logged_in || raw.adminLogged_in || false
+      adminLoggedIn: raw.admin_logged_in || raw.adminLogged_in || false,
+      hasPassword:   raw.password !== undefined ? !!raw.password
+                    : (raw.hasPassword !== undefined ? !!raw.hasPassword : null)
     };
   },
 
-  /* Subject */
   subject: function (raw) {
     if (!raw) return null;
     var name = raw.subjectName || raw.name || '';
@@ -101,7 +98,6 @@ const Mappers = {
     };
   },
 
-  /* Doctor */
   doctor: function (raw) {
     if (!raw) return null;
     return {
@@ -114,7 +110,6 @@ const Mappers = {
     };
   },
 
-  /* File */
   file: function (raw, type) {
     if (!raw) return null;
     var t = (type === 'recourse') ? 'resource' : type;
@@ -147,7 +142,7 @@ const Mappers = {
       id:         titles[t] || (t + '_' + Date.now()),
       title:      titles[t] || '',
       type:       t,
-      publisher:  publishers[t] || '—',
+      publisher:  publishers[t] || '-',
       url:        url,
       fileType:   raw.fileType || null,
       created_at: dates[t] || null,
@@ -158,7 +153,6 @@ const Mappers = {
     };
   },
 
-  /* Folder */
   folder: function (raw) {
     if (!raw) return null;
 
@@ -188,7 +182,6 @@ const Mappers = {
     return raw.map(function (item) { return Mappers.folder(item); });
   },
 
-  /* DoctorWithSubjects */
   doctorWithSubjects: function (raw) {
     if (!raw) return [];
     var list = Array.isArray(raw) ? raw : (raw.data || []);
@@ -234,7 +227,6 @@ const Mappers = {
     return Array.from(docMap.values());
   },
 
-  /* Folder Info */
   folderInfo: function (raw, type) {
     if (!raw) return null;
     if (type === 'doctor') {

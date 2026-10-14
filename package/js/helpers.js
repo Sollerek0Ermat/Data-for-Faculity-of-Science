@@ -1,5 +1,5 @@
 /**
- * 🛠️ Helpers
+ *  Helpers
  */
 
 function escapeHtml(str = '') {
@@ -9,7 +9,7 @@ function escapeHtml(str = '') {
 }
 
 function formatBytes(bytes) {
-  if (!bytes && bytes !== 0) return '—';
+  if (!bytes && bytes !== 0) return '';
   if (bytes === 0) return '0 B';
   const k = 1024;
   const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -17,12 +17,19 @@ function formatBytes(bytes) {
 }
 
 function formatDate(iso) {
-  if (!iso) return '—';
+  if (!iso) return '';
   try {
-    return new Date(iso).toLocaleDateString('en-US', {
-      year: 'numeric', month: 'short', day: 'numeric'
-    });
-  } catch { return '—'; }
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return String(iso);
+    var y = d.getUTCFullYear();
+    var m = String(d.getUTCMonth() + 1).padStart(2, '0');
+    var day = String(d.getUTCDate()).padStart(2, '0');
+    var h = String(d.getUTCHours()).padStart(2, '0');
+    var min = String(d.getUTCMinutes()).padStart(2, '0');
+    return y + '-' + m + '-' + day + 'T' + h + ':' + min;
+  } catch (e) {
+    return String(iso);
+  }
 }
 
 function uid(prefix = 'id') {

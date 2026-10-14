@@ -1,10 +1,10 @@
 /**
- * âš™ï¸ Configuration
+ * Ã¢Å¡â„¢Ã¯Â¸Â Configuration
  */
 
 const CONFIG = {
   USE_MOCK: false,
-  API_URL: 'http://localhost:3000',
+  API_URL: '',
 
   DEFAULTS: {
     department: 'computer science',
@@ -26,21 +26,21 @@ const CONFIG = {
   },
 
   ENDPOINTS: {
-    /* â•â•â• ðŸŽ“ Student â•â•â• */
+    /* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â Ã°Å¸Å½â€œ Student Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */
     student: {
       microsoftLogin:        'v1/student/auth/microsoft/login',
       microsoftCallback:     'v1/student/auth/microsoft/login/callback',
       profile:               'v1/student/profile',
       profilePhoto:          'v1/student/profile/photo',
       folders:               'v1/student/folder',
-      folderInfo:            'v1/student/folderInfo',          // âš ï¸ Ø­Ø±Ù I ÙƒØ¨ÙŠØ±
+      folderInfo:            'v1/student/folderInfo',          // Ã¢Å¡Â Ã¯Â¸Â Ã˜Â­Ã˜Â±Ã™Â I Ã™Æ’Ã˜Â¨Ã™Å Ã˜Â±
       doctorPhoto:           'v1/student/profile/photo/doctor',
       doctorCertifications:  'v1/student/doctor/certifications',
       doctorWithSubjects:    'v1/student/doctorWithSubjects',
-      download:              'v1/student/file',                 // Ø¨Ø¯ÙˆÙ† auth
+      download:              'v1/student/file',                 // Ã˜Â¨Ã˜Â¯Ã™Ë†Ã™â€  auth
     },
 
-    /* â•â•â• ðŸ›¡ï¸ Admin â•â•â• */
+    /* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â Ã°Å¸â€ºÂ¡Ã¯Â¸Â Admin Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */
     admin: {
       login:                 'v1/admin/login',
       logout:                'v1/admin/logout',
@@ -50,7 +50,7 @@ const CONFIG = {
       resetPassword:         'v1/admin/resetPassword',
     },
 
-    /* â•â•â• ðŸ§‘â€ðŸ« Moderator â•â•â• */
+    /* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â Ã°Å¸Â§â€˜Ã¢â‚¬ÂÃ°Å¸ÂÂ« Moderator Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */
     moderator: {
       addSections:    'v1/moderator/sections/AddNewSections',
       deleteSections: 'v1/moderator/sections/deleteSections',
@@ -66,7 +66,7 @@ const CONFIG = {
       editSummary:     'v1/moderator/summaries/EditSummary',
     },
 
-    /* â•â•â• ðŸ‘‘ Owner â•â•â• */
+    /* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â Ã°Å¸â€˜â€˜ Owner Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */
     owner: {
       garanteeRoles: 'v1/owner/admins/garanteeRoles',
       changeLock:    'v1/owner/admins/changeLock',
@@ -88,10 +88,10 @@ const CONFIG = {
     },
   },
 
-  DEFAULT_SUBJECT_ICON: 'ðŸ“š',
+  DEFAULT_SUBJECT_ICON: 'Ã°Å¸â€œÅ¡',
   TOAST_DURATION: 3000,
 
-  // 🔥 جديد: خريطة للتعامل مع recourse/resource
+  // ðŸ”¥ Ø¬Ø¯ÙŠØ¯: Ø®Ø±ÙŠØ·Ø© Ù„Ù„ØªØ¹Ø§Ù…Ù„ Ù…Ø¹ recourse/resource
   DATA_TYPE_MAP: {
     'section':  { prismaKey: 'section',  titleKey: 'sectionTitle'  },
     'video':    { prismaKey: 'video',    titleKey: 'videoTitle'    },

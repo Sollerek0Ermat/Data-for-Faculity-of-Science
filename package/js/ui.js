@@ -1,5 +1,5 @@
 /**
- * 🎛️ UI Components — Toast + Confirm
+ *  UI Components  Toast + Confirm
  */
 
 const UI = {

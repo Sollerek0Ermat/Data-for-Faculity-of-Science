@@ -4,14 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Dashboard — CS Data</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;700&family=Karla:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <link rel="preload" href="style.css" as="style">
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎓%3C/text%3E%3C/svg%3E">
 </head>
 <body class="dark">
 
@@ -19,220 +15,148 @@
     <div id="topbarPlaceholder"></div>
 
     <section class="container">
-      <div class="hero hero-home">
-        <div class="hero-content">
-          <h1 id="welcomeTitle">👋 Welcome</h1>
+      <div class="hero hero-home" style="min-height:180px;padding:24px 4%">
+        <div class="hero-content" style="width:100%;text-align:left">
+          <h1 id="welcomeTitle" style="font-size:clamp(24px,3vw,36px)">👋 Welcome</h1>
           <p id="userRole">Loading...</p>
         </div>
       </div>
     </section>
 
     <div class="container">
-      <div class="tabs" id="adminTabs" style="flex-wrap:wrap;gap:6px">
+      <!-- Tabs -->
+      <div class="tabs" id="adminTabs" style="flex-wrap:wrap;gap:6px;margin-bottom:20px">
         <button class="tab active" data-tab="overview">📊 Overview</button>
-        <button class="tab" data-tab="upload">📤 Upload</button>
-        <button class="tab" data-tab="published">📚 Published</button>
+        <button class="tab" data-tab="content">📚 Content</button>
+        <button class="tab" data-tab="structure">🏛️ Structure</button>
         <button class="tab" data-tab="doctors">👨‍🏫 Doctors</button>
-        <button class="tab" data-tab="subjects">📖 Subjects</button>
-        <button class="tab" data-tab="departments">🏛️ Departments</button>
-        <button class="tab" data-tab="levels">📊 Levels</button>
-        <button class="tab" data-tab="semesters">📅 Semesters</button>
-        <button class="tab" data-tab="link">🔗 Link Doctors</button>
         <button class="tab" data-tab="users">👥 Users</button>
       </div>
 
-      <!-- ═══ Overview ═══ -->
+      <!-- ═══════════════════════════════════════════ -->
+      <!-- TAB: Overview                                -->
+      <!-- ═══════════════════════════════════════════ -->
       <div class="tab-content" id="tab-overview">
         <div class="stats-grid" id="statsGrid"></div>
-      </div>
 
-      <!-- ═══ Upload ═══ -->
-      <div class="tab-content hidden" id="tab-upload">
-        <div class="table-wrap" style="padding:24px">
-          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">📤 Upload New File</h2>
-
-          <div class="field">
-            <label>File Title</label>
-            <input type="text" id="fileTitle" placeholder="e.g., Chapter 1 Summary">
-          </div>
-
-          <div class="field">
-            <label>File Type</label>
-            <select id="fileType">
-              <option value="section">📄 Section</option>
-              <option value="summary">📝 Summary</option>
-              <option value="resource">📦 Resource</option>
-              <option value="video">🎬 Video</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label>Department</label>
-            <select id="fileDepartment"></select>
-          </div>
-
-          <div class="field">
-            <label>Level</label>
-            <select id="fileLevel"></select>
-          </div>
-
-          <div class="field">
-            <label>Semester</label>
-            <select id="fileSemester"></select>
-          </div>
-
-          <div class="field">
-            <label>Subject</label>
-            <select id="fileSubject"></select>
-          </div>
-
-          <div class="field">
-            <label>Doctor</label>
-            <select id="fileDoctor"></select>
-          </div>
-
-          <div class="field" id="videoUrlField" style="display:none">
-            <label>Video URL</label>
-            <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=...">
-          </div>
-
-          <div class="field" id="fileInputField">
-            <label>File</label>
-            <input type="file" id="fileInput">
-          </div>
-
-          <button class="btn btn-primary" id="uploadBtn">🚀 Upload & Save</button>
+        <div class="table-wrap" style="padding:20px;margin-top:20px">
+          <h2 style="font-size:16px;font-weight:800;margin-bottom:14px;color:var(--cyan)">📋 Quick Stats</h2>
+          <div id="quickStats"></div>
         </div>
       </div>
 
-      <!-- ═══ Published ═══ -->
-      <div class="tab-content hidden" id="tab-published">
-        <div class="table-wrap">
-          <div style="padding:18px 24px;border-bottom:1px solid var(--line)">
-            <h2 style="font-size:18px;font-weight:800;color:var(--cyan)">📚 Published Files</h2>
+      <!-- ═══════════════════════════════════════════ -->
+      <!-- TAB: Content — الشجرة الهرمية               -->
+      <!-- ═══════════════════════════════════════════ -->
+      <div class="tab-content hidden" id="tab-content">
+        <div class="table-wrap" style="padding:20px;margin-bottom:16px">
+          <nav class="breadcrumbs" id="contentBreadcrumbs" style="margin:0"></nav>
+        </div>
+
+        <div class="table-wrap" style="padding:20px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+            <h2 id="contentTitle" style="font-size:18px;font-weight:800;color:var(--cyan)">🏛️ Departments</h2>
+            <div id="contentActions"></div>
           </div>
-          <table>
-            <thead>
-              <tr><th>Title</th><th>Type</th><th>Published By</th><th>Actions</th></tr>
-            </thead>
-            <tbody id="filesBody"></tbody>
-          </table>
+          <div id="contentGrid"></div>
         </div>
       </div>
 
-      <!-- ═══ Doctors ═══ -->
+      <!-- ═══════════════════════════════════════════ -->
+      <!-- TAB: Structure                              -->
+      <!-- ═══════════════════════════════════════════ -->
+      <div class="tab-content hidden" id="tab-structure">
+        <div class="table-wrap" style="padding:20px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <h2 style="font-size:16px;font-weight:800;color:var(--cyan)">🏛️ Departments</h2>
+            <button class="btn btn-primary btn-sm" data-action="openAddDepartment">➕ Add Department</button>
+          </div>
+          <div id="deptsList"></div>
+        </div>
+
+        <div class="table-wrap" style="padding:20px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <h2 style="font-size:16px;font-weight:800;color:var(--cyan)">📊 Levels</h2>
+            <button class="btn btn-primary btn-sm" data-action="openAddLevel">➕ Add Level</button>
+          </div>
+          <div id="levelsList"></div>
+        </div>
+
+        <div class="table-wrap" style="padding:20px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <h2 style="font-size:16px;font-weight:800;color:var(--cyan)">📅 Semesters</h2>
+            <button class="btn btn-primary btn-sm" data-action="openAddSemester">➕ Add Semester</button>
+          </div>
+          <div id="semestersList"></div>
+        </div>
+
+        <div class="table-wrap" style="padding:20px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <h2 style="font-size:16px;font-weight:800;color:var(--cyan)">📖 Subjects</h2>
+            <button class="btn btn-primary btn-sm" data-action="openAddSubject">➕ Add Subject</button>
+          </div>
+          <div id="subjectsList"></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════ -->
+      <!-- TAB: Doctors                                -->
+      <!-- ═══════════════════════════════════════════ -->
       <div class="tab-content hidden" id="tab-doctors">
-        <div class="table-wrap" style="padding:24px">
-          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">👨‍🏫 Manage Doctors</h2>
+        <div class="table-wrap" style="padding:20px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <h2 style="font-size:16px;font-weight:800;color:var(--cyan)">👨‍🏫 All Doctors</h2>
+            <button class="btn btn-primary btn-sm" data-action="openAddDoctor">➕ Add Doctor</button>
+          </div>
+          <div id="doctorsList2"></div>
+        </div>
 
-          <div class="field"><label>Doctor Name</label><input type="text" id="doctorName" placeholder="Amgad Salama"></div>
-          <div class="field"><label>Academic Degree</label><input type="text" id="doctorDegree" placeholder="PhD / MSc"></div>
-          <div class="field"><label>Description</label><input type="text" id="doctorDesc" placeholder="Professor of Algorithms"></div>
-          <div class="field"><label>Photo (optional)</label><input type="file" id="doctorPhoto" accept="image/*"></div>
-          <button class="btn btn-primary" id="addDoctorBtn">➕ Add Doctor</button>
-
-          <div id="doctorsList" style="margin-top:24px"></div>
+        <div class="table-wrap" style="padding:20px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <h2 style="font-size:16px;font-weight:800;color:var(--cyan)">🔗 Doctor ↔ Subject Links</h2>
+            <button class="btn btn-primary btn-sm" data-action="openLinkDoctor">➕ Link Doctor</button>
+          </div>
+          <div id="linksList"></div>
         </div>
       </div>
 
-      <!-- ═══ Subjects ═══ -->
-      <div class="tab-content hidden" id="tab-subjects">
-        <div class="table-wrap" style="padding:24px">
-          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">📖 Manage Subjects</h2>
-
-          <div class="field"><label>Department Name</label><input type="text" id="subjDept" placeholder="computer science"></div>
-          <div class="field"><label>Level Number</label><input type="number" id="subjLevel" value="2"></div>
-          <div class="field"><label>Semester Number</label><input type="number" id="subjSem" value="1"></div>
-          <div class="field"><label>Subject Name</label><input type="text" id="subjectName" placeholder="algorithm"></div>
-          <div class="field"><label>Subject Description</label><input type="text" id="subjectDesc" placeholder="..."></div>
-          <div class="field"><label>Subject Code</label><input type="text" id="subjectCode" placeholder="ALG101"></div>
-          <button class="btn btn-primary" id="addSubjectBtn">➕ Add Subject</button>
-
-          <div id="subjectsList" style="margin-top:24px"></div>
-        </div>
-      </div>
-
-      <!-- ═══ Departments ═══ -->
-      <div class="tab-content hidden" id="tab-departments">
-        <div class="table-wrap" style="padding:24px">
-          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">🏛️ Manage Departments</h2>
-
-          <div class="field"><label>Department Name</label><input type="text" id="deptName" placeholder="computer science"></div>
-          <div class="field"><label>Description</label><input type="text" id="deptDesc" placeholder="..."></div>
-          <div class="field"><label>Expected Jobs</label><input type="text" id="deptJobs" placeholder="..."></div>
-          <div class="field"><label>Department Code</label><input type="text" id="deptCode" placeholder="CS"></div>
-          <button class="btn btn-primary" id="addDeptBtn">➕ Add Department</button>
-
-          <div id="deptsList" style="margin-top:24px"></div>
-        </div>
-      </div>
-
-      <!-- ═══ Levels ═══ -->
-      <div class="tab-content hidden" id="tab-levels">
-        <div class="table-wrap" style="padding:24px">
-          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">📊 Manage Levels</h2>
-
-          <div class="field"><label>Department Name</label><input type="text" id="lvlDept" placeholder="computer science"></div>
-          <div class="field"><label>Level Number</label><input type="number" id="lvlNum" value="1"></div>
-          <button class="btn btn-primary" id="addLevelBtn">➕ Add Level</button>
-
-          <div id="levelsList" style="margin-top:24px"></div>
-        </div>
-      </div>
-
-      <!-- ═══ Semesters ═══ -->
-      <div class="tab-content hidden" id="tab-semesters">
-        <div class="table-wrap" style="padding:24px">
-          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">📅 Manage Semesters</h2>
-
-          <div class="field"><label>Department Name</label><input type="text" id="semDept" placeholder="computer science"></div>
-          <div class="field"><label>Level Number</label><input type="number" id="semLvl" value="1"></div>
-          <div class="field"><label>Semester Number</label><input type="number" id="semNum" value="1"></div>
-          <button class="btn btn-primary" id="addSemBtn">➕ Add Semester</button>
-
-          <div id="semestersList" style="margin-top:24px"></div>
-        </div>
-      </div>
-
-      <!-- ═══ Link Doctors ═══ -->
-      <div class="tab-content hidden" id="tab-link">
-        <div class="table-wrap" style="padding:24px">
-          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">🔗 Link Doctors to Subjects</h2>
-
-          <div class="field"><label>Department Name</label><input type="text" id="lnkDept" placeholder="computer science"></div>
-          <div class="field"><label>Level Number</label><input type="number" id="lnkLvl" value="2"></div>
-          <div class="field"><label>Semester Number</label><input type="number" id="lnkSem" value="1"></div>
-          <div class="field"><label>Subject Name</label><input type="text" id="lnkSubject" placeholder="algorithm"></div>
-          <div class="field"><label>Doctor Name</label><input type="text" id="lnkDoctor" placeholder="Amgad Salama"></div>
-          <button class="btn btn-primary" id="linkBtn">🔗 Link Doctor</button>
-          <button class="btn btn-danger" id="unlinkBtn" style="margin-left:8px">🔓 Unlink</button>
-
-          <div id="linksList" style="margin-top:24px"></div>
-        </div>
-      </div>
-
-      <!-- ═══ Users ═══ -->
+      <!-- ═══════════════════════════════════════════ -->
+      <!-- TAB: Users                                  -->
+      <!-- ═══════════════════════════════════════════ -->
       <div class="tab-content hidden" id="tab-users">
-        <div class="table-wrap" style="padding:24px">
-          <h2 style="font-size:18px;font-weight:800;margin-bottom:18px;color:var(--cyan)">👥 Manage Users (Role + Lock)</h2>
+        <div class="table-wrap" style="padding:20px">
+          <h2 style="font-size:16px;font-weight:800;color:var(--cyan);margin-bottom:14px">👥 Manage Users</h2>
 
-          <div class="field"><label>Student Emails (one per line)</label>
-            <textarea id="userEmails" rows="4" placeholder="user1@science.tanta.edu.eg&#10;user2@science.tanta.edu.eg"></textarea>
-          </div>
           <div class="field">
-            <label>New Role</label>
-            <select id="userRole">
-              <option value="user">User (Student)</option>
-              <option value="doctor">Doctor</option>
-              <option value="moderator">Moderator</option>
-              <option value="owner">Owner</option>
-            </select>
+            <label>Emails (one per line)</label>
+            <textarea id="userEmails" rows="4" placeholder="student@science.tanta.edu.eg"></textarea>
           </div>
-          <div class="field"><label>Department</label><input type="text" id="userDept" placeholder="computer science"></div>
-          <div class="field"><label>Level</label><input type="number" id="userLevel" value="1"></div>
-          <button class="btn btn-primary" id="changeRoleBtn">🔄 Change Role</button>
-          <button class="btn btn-success" id="unlockBtn" style="margin-left:8px">🔓 Unlock</button>
-          <button class="btn btn-danger" id="lockBtn" style="margin-left:8px">🔒 Lock</button>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+            <div class="field">
+              <label>Role</label>
+              <select id="userRole">
+                <option value="user">User</option>
+                <option value="doctor">Doctor</option>
+                <option value="moderator">Moderator</option>
+                <option value="owner">Owner</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Department</label>
+              <input type="text" id="userDept" placeholder="computer science">
+            </div>
+            <div class="field">
+              <label>Level</label>
+              <input type="number" id="userLevel" value="1">
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <button class="btn btn-primary btn-sm" data-action="changeRole">🔄 Change Role</button>
+            <button class="btn btn-success btn-sm" data-action="changeLockTrue">🔒 Lock</button>
+            <button class="btn btn-ghost btn-sm" data-action="changeLockFalse">🔓 Unlock</button>
+          </div>
         </div>
       </div>
 
@@ -240,6 +164,9 @@
 
     <div id="footerPlaceholder"></div>
   </div>
+
+  <!-- Modal Placeholder -->
+  <div id="modalRoot"></div>
 
   <script src="js/config.js"          defer></script>
   <script src="js/i18n.js"            defer></script>

@@ -1,8 +1,10 @@
 /**
- * API — متوافق مع الباك
+ * API - Cookie-Only Authentication
+ * JWT is stored ONLY in HttpOnly cookies (backend manages it).
+ * Frontend NEVER reads/stores/sends the token.
  */
 
-const API = (function () {
+const API = (function() {
 
   async function request(path, options) {
     options = options || {};
@@ -17,7 +19,12 @@ const API = (function () {
     const headers = {};
     if (!isFormData && body) headers["Content-Type"] = "application/json";
 
-    const fetchOptions = { method: method, headers: headers, credentials: "include" };
+    // Cookie-only: never send Authorization header
+    const fetchOptions = {
+      method: method,
+      headers: headers,
+      credentials: "include"
+    };
     if (body) fetchOptions.body = isFormData ? body : JSON.stringify(body);
 
     let res;
@@ -28,9 +35,12 @@ const API = (function () {
       throw new Error("Cannot reach server");
     }
 
+    // On 401 → clear session + redirect (avoid loop)
     if (res.status === 401) {
-      Auth.clearSession();
-      if (location.pathname.indexOf("login.html") === -1) {
+      if (typeof Auth !== 'undefined') Auth.clearSession();
+      const onLogin = location.pathname.indexOf("login.html") !== -1;
+      const onAdminLogin = location.pathname.indexOf("admin-login.html") !== -1;
+      if (!onLogin && !onAdminLogin) {
         window.location.href = "login.html";
       }
       throw new Error("Unauthorized");
@@ -42,7 +52,7 @@ const API = (function () {
       return await res.blob();
     }
 
-    const data = await res.json().catch(function () { return null; });
+    const data = await res.json().catch(function() { return null; });
 
     if (!res.ok) {
       const msg = (data && (data.message || data.error)) || ("HTTP " + res.status);
@@ -89,17 +99,16 @@ const API = (function () {
   async function getSubjects() {
     const dws = await getDoctorWithSubjects();
     const map = new Map();
-    dws.forEach(function (item) {
-      (item.subjects || []).forEach(function (s) {
+    dws.forEach(function(item) {
+      (item.subjects || []).forEach(function(s) {
         var name = s.name || s.id;
         if (!name) return;
         if (!map.has(name)) {
           map.set(name, {
-            id: name,
-            name: name,
+            id: name, name: name,
             code: s.code || '',
             description: s.description || '',
-            icon: s.icon || '📚',
+            icon: s.icon || CONFIG.DEFAULT_SUBJECT_ICON,
             department: s.department || null,
             levelNumber: s.levelNumber || null,
             semesterNumber: s.semesterNumber || null,
@@ -108,24 +117,24 @@ const API = (function () {
         }
       });
     });
-    return Array.from(map.values()).sort(function (a, b) { return a.name.localeCompare(b.name); });
+    return Array.from(map.values()).sort(function(a, b) { return a.name.localeCompare(b.name); });
   }
 
   async function getDoctors() {
     const dws = await getDoctorWithSubjects();
-    return dws.map(function (d) { return d.doctor; });
+    return dws.map(function(d) { return d.doctor; });
   }
 
   async function getFolderContent(opts) {
     let dt = opts.dataType;
     if (dt === 'recourse') dt = 'resource';
     const query = {
-      department: opts.department || CONFIG.DEFAULTS.department,
-      levelNumber: opts.levelNumber || CONFIG.DEFAULTS.levelNumber,
+      department:     opts.department     || CONFIG.DEFAULTS.department,
+      levelNumber:    opts.levelNumber    || CONFIG.DEFAULTS.levelNumber,
       semesterNumber: opts.semesterNumber || CONFIG.DEFAULTS.semesterNumber,
-      subject: opts.subjectName,
-      doctor: opts.doctorName,
-      dataType: dt
+      subject:        opts.subjectName,
+      doctor:         opts.doctorName,
+      dataType:       dt
     };
     const res = await request(buildUrl(ep.student.folders, query));
     return res.data || [];
@@ -136,7 +145,6 @@ const API = (function () {
     let dt = dataType === 'recourse' ? 'resource' : dataType;
     const base = CONFIG.API_URL || "";
     const url = base + "/" + ep.student.download + "/" + dt + "/" + encodeURIComponent(dataName) + "/download?mode=" + mode;
-
     if (mode === "view") window.open(url, "_blank");
     else {
       const a = document.createElement("a");
@@ -148,20 +156,36 @@ const API = (function () {
     }
   }
 
+  /* Admin */
   async function adminLogin(opts) {
-    // Requires an existing Microsoft JWT cookie (see backend is_user middleware)
-    return await request(ep.admin.login, {
+    // opts: { password, confirm_password? }
+    const body = { password: opts.password };
+    if (opts.confirm_password !== undefined) {
+      body.confirm_password = opts.confirm_password;
+    }
+    return await request(ep.admin.login, { method: "POST", body: body });
+  }
+
+  async function adminLoginDirect(opts) {
+    return await request(ep.admin.loginDirect, {
       method: "POST",
-      body: { password: opts.password }
+      body: { email: opts.email, password: opts.password }
     });
   }
 
   async function adminLogout() {
-    try {
-      return await request(ep.admin.logout, { method: "POST" });
-    } catch (e) {
-      return { status: 'success' }; // idempotent
-    }
+    return await request(ep.admin.logout, { method: "POST" });
+  }
+
+  async function changePassword(opts) {
+    return await request(ep.admin.changePassword, {
+      method: "PATCH",
+      body: {
+        old_password: opts.oldPassword,
+        password: opts.password,
+        confirm_password: opts.confirm_password
+      }
+    });
   }
 
   /* Moderator */
@@ -200,7 +224,7 @@ const API = (function () {
   function buildUrl(path, params) {
     params = params || {};
     const qs = new URLSearchParams();
-    Object.keys(params).forEach(function (k) {
+    Object.keys(params).forEach(function(k) {
       const v = params[k];
       if (v !== undefined && v !== null && v !== "") qs.append(k, v);
     });
@@ -222,6 +246,7 @@ const API = (function () {
     getFolderContent: getFolderContent,
     downloadFile: downloadFile,
     adminLogin: adminLogin,
+    adminLoginDirect: adminLoginDirect,
     adminLogout: adminLogout,
     changePassword: changePassword,
     addSections: addSections, deleteSections: deleteSections, editSection: editSection,

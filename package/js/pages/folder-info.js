@@ -3,11 +3,35 @@
  */
 
 document.addEventListener('DOMContentLoaded', async function() {
-  // Auth gate — sends anonymous visitors to login.html
-  const profile = await Auth.bootstrap({ requireLogin: true });
-  if (!profile) return;
+  renderTopbar();
+  var footer = document.getElementById('footerPlaceholder');
+  if (footer) footer.outerHTML = renderFooter();
 
-  // ... rest of the original page code
+  var params = new URLSearchParams(location.search);
+  var folder = params.get('folder');
+  var name = params.get('name');
+  var wrap = document.getElementById('folderInfoWrap');
+
+  if (!folder || !name) {
+    wrap.innerHTML = '<p class="text-center text-muted" style="padding:60px">Missing parameters</p>';
+    return;
+  }
+
+  try {
+    var info = await API.getFolderInfo(folder, name);
+
+    if (!info) {
+      wrap.innerHTML = '<p class="text-center text-muted" style="padding:60px">Not found</p>';
+      return;
+    }
+
+    if (folder === 'doctor')      renderDoctor(wrap, info);
+    else if (folder === 'subject') renderSubject(wrap, info);
+    else                           renderDepartment(wrap, info);
+  } catch (err) {
+    console.error(err);
+    wrap.innerHTML = '<p class="text-center text-muted" style="padding:60px">' + err.message + '</p>';
+  }
 });
 
 function renderDoctor(wrap, info) {

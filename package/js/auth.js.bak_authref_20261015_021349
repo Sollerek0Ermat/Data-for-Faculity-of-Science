@@ -1,5 +1,5 @@
 /**
- * 🔐 Authentication
+ * Authentication
  */
 
 const Auth = {
@@ -9,12 +9,26 @@ const Auth = {
     } catch { return null; }
   },
 
+  getToken() {
+    return localStorage.getItem('cs_jwt_token') || null;
+  },
+
+  setToken(token) {
+    if (token) localStorage.setItem('cs_jwt_token', token);
+  },
+
+  clearToken() {
+    localStorage.removeItem('cs_jwt_token');
+  },
+
   setSession(session) {
     localStorage.setItem(CONFIG.STORAGE.SESSION, JSON.stringify(session));
+    if (session && session.token) this.setToken(session.token);
   },
 
   clearSession() {
     localStorage.removeItem(CONFIG.STORAGE.SESSION);
+    localStorage.removeItem('cs_jwt_token');
   },
 
   isLoggedIn() {
@@ -26,7 +40,8 @@ const Auth = {
   },
 
   getRole() {
-    return this.getSession()?.role || null;
+    const s = this.getSession();
+    return s && s.role ? s.role : null;
   },
 
   isOwner()     { return this.getRole() === CONFIG.ROLES.OWNER; },
@@ -36,53 +51,40 @@ const Auth = {
 
   isStaff() {
     const r = this.getRole();
-    return r === CONFIG.ROLES.OWNER
-        || r === CONFIG.ROLES.MODERATOR
-        || r === CONFIG.ROLES.DOCTOR;
+    return r === CONFIG.ROLES.OWNER || r === CONFIG.ROLES.MODERATOR || r === CONFIG.ROLES.DOCTOR;
   },
 
-  /* ═══════════════════════════════════════════
-     🔑 Login (Microsoft OAuth)
-     ═══════════════════════════════════════════ */
   loginWithMicrosoft() {
-    window.location.href = CONFIG.API_URL + '/' + CONFIG.ENDPOINTS.student.microsoftLogin;
+    const base = CONFIG.API_URL || '';
+    window.location.href = base + '/' + CONFIG.ENDPOINTS.student.microsoftLogin;
   },
 
-  /* ═══════════════════════════════════════════
-     🎓 Login (Admin - password only)
-     ═══════════════════════════════════════════ */
   async login(email, password) {
     const res = await API.adminLogin({ email, password });
-    if (res?.success) {
-      this.setSession(res.session);
-    }
+    if (res && res.success) this.setSession(res.session);
     return res;
   },
 
   async logout() {
-    try { await API.adminLogout(); } catch {}
+    try { await API.adminLogout(); } catch (err) {}
     this.clearSession();
     window.location.href = 'login.html';
   },
 
-  /* ═══════════════════════════════════════════
-     🛡️ Role Check
-     ═══════════════════════════════════════════ */
-  requireAuth(allowedRoles = []) {
+  requireAuth(allowedRoles) {
+    allowedRoles = allowedRoles || [];
     if (!this.isLoggedIn()) {
       window.location.href = 'login.html';
       return false;
     }
-
     if (allowedRoles.length) {
       const role = this.getRole();
-      if (!allowedRoles.includes(role)) {
-        UI.error('Access denied');
-        setTimeout(() => window.location.href = 'index.html', 1200);
+      if (allowedRoles.indexOf(role) === -1) {
+        UI.error('Access denied. Only admins can access this page.');
+        setTimeout(() => { window.location.href = 'index.html'; }, 2000);
         return false;
       }
     }
-
     return true;
   },
 
@@ -90,23 +92,22 @@ const Auth = {
     return await API.changePassword({
       oldPassword:      oldPassword,
       password:         newPassword,
-      confirm_password: newPassword,
+      confirm_password: newPassword
     });
   },
 
-  /* ═══════════════════════════════════════════
-     📥 Sync Session from Server
-     ═══════════════════════════════════════════ */
   async syncSession() {
     try {
       const profile = await API.getProfile();
       if (profile) {
+        const existing = this.getSession() || {};
         this.setSession({
           id:    profile.id,
           name:  profile.name,
           email: profile.email,
           role:  profile.role,
           photo: profile.photo,
+          token: existing.token || this.getToken()
         });
       }
       return profile;
@@ -114,5 +115,5 @@ const Auth = {
       console.warn('Session sync failed:', err.message);
       return null;
     }
-  },
+  }
 };
