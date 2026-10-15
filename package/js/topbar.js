@@ -93,7 +93,7 @@ function renderFooter() {
     '<footer class="footer">',
     '<div class="footer-content">',
     '<p>© ' + year + ' — All Rights Reserved</p>',
-    '<p class="footer-dev">Developed by <a href="https://wa.me/201289910513" target="_blank" style="color:var(--cyan);text-decoration:none;font-weight:700;">Abdellatif</a> &amp; Kerollos Tamer</p>',
+    '<p class="footer-dev">Developed by <a href="https://wa.me/201289910513" target="_blank" style="color:var(--cyan);text-decoration:none;font-weight:700;">Abdellatif</a> &amp; <a href="https://wa.me/201206840247" target="_blank" style="color:var(--cyan);text-decoration:none;font-weight:700;">Kero Zaki</a></p>',
     '<a href="admin-login.html" class="footer-hidden-admin" title="Admin">&#x2699;&#xFE0F;</a>',
     '</div>',
     '</footer>'
