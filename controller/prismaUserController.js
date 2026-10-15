@@ -89,11 +89,13 @@ exports.microsoftLogin = passport.authenticate('microsoft_login')
 exports.microsoftLoginCallback = (req, res, next) => {
     passport.authenticate('microsoft_login', { session: false, failureRedirect: '/login-failed' }, async (err, user, message) => {
         if (err || !user) {
-            return res.status(401).json({
-                status: 'fail',
-                message: 'Microsoft authentication failed',
-                error: message
-            });
+            // return res.status(401).json({
+            //     status: 'fail',
+            //     message: 'Microsoft authentication failed',
+            //     error: message
+            // });
+            const redMessage = encodeURIComponent(`Microsoft authentication failed, ${message}`);
+            res.redirect(401, `/https://data-for-faculity-of-science.onrender.com/login.html?message=${redMessage}`);
         }
 
         try {
@@ -205,14 +207,14 @@ exports.getUserInfo = async (request, response, next) => {
             }
         });
 
-        const { password, ...userToAdd } = user 
+        const { password, ...userToAdd } = user
 
         response.status(200).json({
             status: 'success',
             message: 'user info retrieved successfully',
             data: {
                 ...userToAdd,
-                password: user.password? true : false,
+                password: user.password ? true : false,
                 photo: user.photo ? `/v1/student/profile/photo/${decoded_token.id.toString()}` : null
             }
         });

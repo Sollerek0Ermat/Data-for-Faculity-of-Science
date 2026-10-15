@@ -503,7 +503,7 @@ exports.bulkDeleteDepartments = async (request, response, next) => {
 exports.EditADepartment = async (request, response, next) => {
     try {
         const result = await prisma.$transaction(async (tx) => {
-            const { departmentName, newDepartmentDescription, newDepartmentExpectedJobs, newDepartmentName, newDepartmentCode } = request.body;
+            const { departmentName, departmentDescription, departmentExpectedJobs, newDepartmentName, newDepartmentCode } = request.body;
 
             // makes sure that the admin entered the department name
             // if (!departmentName) {
@@ -526,14 +526,14 @@ exports.EditADepartment = async (request, response, next) => {
             // checks if the admin entered the department description so it wraps it in
             // dataToUpdate json to use it in the update method later
             // orConditions array to use it in the checks later
-            if (newDepartmentDescription !== undefined) {
-                orConditions.push({ departmentDescription: newDepartmentDescription });
-                dataToUpdate.departmentDescription = newDepartmentDescription;
+            if (departmentDescription !== undefined) {
+                orConditions.push({ departmentDescription: departmentDescription });
+                dataToUpdate.departmentDescription = departmentDescription;
 
             }
-            if (newDepartmentExpectedJobs !== undefined) {
-                orConditions.push({ departmentExpectedJobs: newDepartmentExpectedJobs });
-                dataToUpdate.departmentExpectedJobs = newDepartmentExpectedJobs
+            if (departmentExpectedJobs !== undefined) {
+                orConditions.push({ departmentExpectedJobs: departmentExpectedJobs });
+                dataToUpdate.departmentExpectedJobs = departmentExpectedJobs
             }
             if (newDepartmentName !== undefined) {
                 orConditions.push({ departmentName: newDepartmentName });
@@ -1872,7 +1872,7 @@ exports.bulkDeleteSubjects = async (request, response, next) => {
 exports.EditASubject = async (request, response, next) => {
     try {
         const result = await prisma.$transaction(async (tx) => {
-            const { departmentName, levelNumber, semesterNumber, subjectName, newSubjectDescription, newSubjectName, newSubjectCode } = request.body;
+            const { departmentName, levelNumber, semesterNumber, subjectName, subjectDescription, newSubjectName, newSubjectCode } = request.body;
 
             // makes sure that the admin entered the department name and level Number and semester Number and subject Name
             // if (!levelNumber || !departmentName || !semesterNumber || !subjectName || !subjectDescription) {
@@ -1951,9 +1951,9 @@ exports.EditASubject = async (request, response, next) => {
 
             const dataToUpdate = {};
             const orConditions = [];
-            if (newSubjectDescription !== undefined) {
-                orConditions.push({ subjectDescription: newSubjectDescription });
-                dataToUpdate.subjectDescription = newSubjectDescription;
+            if (subjectDescription !== undefined) {
+                orConditions.push({ subjectDescription: subjectDescription });
+                dataToUpdate.subjectDescription = subjectDescription;
 
             }
             if (newSubjectName !== undefined) {
@@ -2399,7 +2399,7 @@ exports.EditADoctor = [
 
     async (request, response, next) => {
         try {
-            const { doctorName, newDoctorAcademicDegree, newDoctorDescription, newDoctorPhotoFile, newDoctorCertificationFiles } = request.body;
+            const { doctorName, doctorAcademicDegree, doctorDescription, doctorPhotoFile, doctorCertificationFiles } = request.body;
 
             const existingDoctor = await prisma.doctor.findUnique({
                 where: { doctorName: doctorName },
@@ -2413,15 +2413,15 @@ exports.EditADoctor = [
                 filesByFieldName[file.fieldname] = file;
             }
 
-            const newPhotoFile = newDoctorPhotoFile ? filesByFieldName[newDoctorPhotoFile] : null;
+            const newPhotoFile = doctorPhotoFile ? filesByFieldName[doctorPhotoFile] : null;
 
             let certFieldNames = [];
-            if (newDoctorCertificationFiles) {
+            if (doctorCertificationFiles) {
                 try {
-                    certFieldNames = JSON.parse(newDoctorCertificationFiles);
+                    certFieldNames = JSON.parse(doctorCertificationFiles);
                 }
                 catch {
-                    certFieldNames = [newDoctorCertificationFiles]; // fallback: treat as a single field name
+                    certFieldNames = [doctorCertificationFiles]; // fallback: treat as a single field name
                 }
             }
 
@@ -2430,13 +2430,13 @@ exports.EditADoctor = [
             const dataToUpdate = {};
             const orConditions = [];
 
-            if (newDoctorAcademicDegree !== undefined) {
-                orConditions.push({ doctorAcademicDegree: newDoctorAcademicDegree });
-                dataToUpdate.doctorAcademicDegree = newDoctorAcademicDegree;
+            if (doctorAcademicDegree !== undefined) {
+                orConditions.push({ doctorAcademicDegree: doctorAcademicDegree });
+                dataToUpdate.doctorAcademicDegree = doctorAcademicDegree;
             }
-            if (newDoctorDescription !== undefined) {
-                orConditions.push({ doctorDescription: newDoctorDescription });
-                dataToUpdate.doctorDescription = newDoctorDescription;
+            if (doctorDescription !== undefined) {
+                orConditions.push({ doctorDescription: doctorDescription });
+                dataToUpdate.doctorDescription = doctorDescription;
             }
 
             // precompute the keys/URLs now, but don't touch Wasabi until the DB update succeeds
