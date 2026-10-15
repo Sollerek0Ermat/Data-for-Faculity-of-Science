@@ -1,11 +1,12 @@
-/**
- * 🔑 Set Password page (first time)
+﻿/**
+ * 🔑 Set / Reset Password page
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   renderTopbar();
 
-  if (!Auth.isLoggedIn()) {
+  const profile = await Auth.syncSession();
+  if (!profile && !Auth.isLoggedIn()) {
     window.location.href = 'login.html';
     return;
   }
@@ -13,6 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('setPwdForm');
   const btn  = document.getElementById('submitBtn');
   const msg  = document.getElementById('msg');
+
+  const urlParams = new URLSearchParams(location.search);
+  const isReset = urlParams.get('reset') === '1'
+               || urlParams.get('mode') === 'reset'
+               || location.pathname.toLowerCase().indexOf('reset') !== -1
+               || sessionStorage.getItem('pending_pwd_reset') === '1'
+               || (profile && profile.hasPassword);
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -39,13 +47,22 @@ document.addEventListener('DOMContentLoaded', () => {
     msg.style.color = 'var(--muted)';
 
     try {
-      // adminLogin يقبل password جديد لو user.password === null
-      await API.adminLogin({
-        email: Auth.getUser()?.email || '',
-        password: newPwd,
-      });
+      if (isReset) {
+        await API.resetPassword({
+          password: newPwd,
+          confirm_password: confirmPwd
+        });
+        sessionStorage.removeItem('pending_pwd_reset');
+      } else {
+        await API.adminLogin({
+          password: newPwd,
+          confirm_password: confirmPwd
+        });
+      }
 
-      msg.textContent = '✅ Password saved';
+      await Auth.syncSession();
+
+      msg.textContent = '✅ Password updated successfully';
       msg.style.color = 'var(--success)';
       UI.success('Password saved');
 

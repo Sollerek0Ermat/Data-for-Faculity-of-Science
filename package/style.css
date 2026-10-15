@@ -1703,7 +1703,7 @@ tbody tr:last-child td { border-bottom: none; }
 }
 
 .file-card-meta span::before {
-  content: "â€¢ ";
+  content: "• ";
   color: var(--cyan);
   opacity: 0.5;
   margin-right: 4px;
