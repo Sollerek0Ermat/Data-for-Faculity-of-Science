@@ -714,24 +714,24 @@ const AdminUI = {
     if (root) root.innerHTML = '';
   },
 
-  /* ═══ DROPDOWN HELPERS ═══ */
+  /* ═══ DATALIST OPTIONS HELPERS ═══ */
   deptOptions() {
     return (_state.departments || []).map(d => {
       const name = d.depName || d.name;
-      return `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`;
+      return `<option value="${escapeHtml(name)}"></option>`;
     }).join('');
   },
 
   subjectsOptions() {
     return (_state.subjects || []).map(s =>
-      `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)}</option>`
+      `<option value="${escapeHtml(s.name)}"></option>`
     ).join('');
   },
 
   doctorsOptions() {
     return (_state.doctors || []).map(item => {
       const n = item.doctor ? item.doctor.name : item.name;
-      return `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`;
+      return `<option value="${escapeHtml(n)}"></option>`;
     }).join('');
   },
 
@@ -803,12 +803,12 @@ const AdminUI = {
   /* ═══ LEVEL ═══ */
   openAddLevel() {
     const deptOpts = AdminUI.deptOptions();
+    const defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
     this.modal('➕ Add Level', `
       <div class="field">
         <label>Department</label>
-        <select id="mLvlDept">
-          ${deptOpts || '<option value="">No departments — add one first</option>'}
-        </select>
+        <input type="text" id="mLvlDept" list="mLvlDeptList" value="${escapeHtml(defaultDept)}" placeholder="Select or type department...">
+        <datalist id="mLvlDeptList">${deptOpts}</datalist>
       </div>
       <div class="field"><label>Level Number</label><input type="number" id="mLvlNum" value="1" min="1" max="6"></div>
     `, async (keepOpen) => {
@@ -845,12 +845,12 @@ const AdminUI = {
   /* ═══ SEMESTER ═══ */
   openAddSemester() {
     const deptOpts = AdminUI.deptOptions();
+    const defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
     this.modal('➕ Add Semester', `
       <div class="field">
         <label>Department</label>
-        <select id="mSemDept">
-          ${deptOpts || '<option value="">No departments</option>'}
-        </select>
+        <input type="text" id="mSemDept" list="mSemDeptList" value="${escapeHtml(defaultDept)}" placeholder="Select or type department...">
+        <datalist id="mSemDeptList">${deptOpts}</datalist>
       </div>
       <div class="field"><label>Level Number</label><input type="number" id="mSemLvl" value="1"></div>
       <div class="field"><label>Semester Number</label><input type="number" id="mSemNum" value="1"></div>
@@ -886,15 +886,17 @@ const AdminUI = {
   /* ═══ SUBJECT ═══ */
   openAddSubject() {
     const deptOpts = AdminUI.deptOptions();
+    const defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
+    const defaultLvl = _state.path.levelNumber || 1;
+    const defaultSem = _state.path.semesterNumber || 1;
     this.modal('➕ Add Subject', `
       <div class="field">
         <label>Department</label>
-        <select id="mSubDept">
-          ${deptOpts || '<option value="">No departments</option>'}
-        </select>
+        <input type="text" id="mSubDept" list="mSubDeptList" value="${escapeHtml(defaultDept)}" placeholder="Select or type department...">
+        <datalist id="mSubDeptList">${deptOpts}</datalist>
       </div>
-      <div class="field"><label>Level</label><input type="number" id="mSubLvl" value="1"></div>
-      <div class="field"><label>Semester</label><input type="number" id="mSubSem" value="1"></div>
+      <div class="field"><label>Level</label><input type="number" id="mSubLvl" value="${defaultLvl}"></div>
+      <div class="field"><label>Semester</label><input type="number" id="mSubSem" value="${defaultSem}"></div>
       <div class="field"><label>Subject Name</label><input type="text" id="mSubName" placeholder="algorithm"></div>
       <div class="field"><label>Description</label><input type="text" id="mSubDesc"></div>
       <div class="field"><label>Code</label><input type="text" id="mSubCode"></div>
@@ -1049,27 +1051,25 @@ const AdminUI = {
     const deptOpts = AdminUI.deptOptions();
     const subjOpts = AdminUI.subjectsOptions();
     const docOpts = AdminUI.doctorsOptions();
+    const defaultDept = p.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
 
     this.modal('🔗 Link Doctor to Subject', `
       <div class="field">
         <label>Department</label>
-        <select id="mLnkDept">${deptOpts}</select>
+        <input type="text" id="mLnkDept" list="mLnkDeptList" value="${escapeHtml(defaultDept)}" placeholder="Select or type department...">
+        <datalist id="mLnkDeptList">${deptOpts}</datalist>
       </div>
       <div class="field"><label>Level</label><input type="number" id="mLnkLvl" value="${p.levelNumber || 1}"></div>
       <div class="field"><label>Semester</label><input type="number" id="mLnkSem" value="${p.semesterNumber || 1}"></div>
       <div class="field">
         <label>Subject</label>
-        <select id="mLnkSub">
-          <option value="">Select subject...</option>
-          ${subjOpts}
-        </select>
+        <input type="text" id="mLnkSub" list="mLnkSubList" value="${escapeHtml(p.subject || '')}" placeholder="Select or type subject...">
+        <datalist id="mLnkSubList">${subjOpts}</datalist>
       </div>
       <div class="field">
         <label>Doctor</label>
-        <select id="mLnkDoc">
-          <option value="">Select doctor...</option>
-          ${docOpts}
-        </select>
+        <input type="text" id="mLnkDoc" list="mLnkDocList" placeholder="Select or type doctor...">
+        <datalist id="mLnkDocList">${docOpts}</datalist>
       </div>
     `, async (keepOpen) => {
       const payload = [{
@@ -1117,24 +1117,28 @@ const AdminUI = {
     this.modal('➕ Upload Content', `
       <div class="field">
         <label>Content Type</label>
-        <select id="mChoiceType">
-          <option value="section">📄 Section</option>
-          <option value="video">🎬 Video</option>
-          <option value="summary">📝 Summary</option>
-          <option value="resource">📦 Resource</option>
-        </select>
+        <input type="text" id="mChoiceType" list="mChoiceTypeList" value="section" placeholder="Type content type...">
+        <datalist id="mChoiceTypeList">
+          <option value="section"></option>
+          <option value="video"></option>
+          <option value="summary"></option>
+          <option value="resource"></option>
+        </datalist>
       </div>
       <div class="field"><label>Title</label><input type="text" id="mFileTitle" placeholder="Lecture 1 / Section 1"></div>
       <div class="field" id="mFileWrap"><label>File</label><input type="file" id="mFileInput"></div>
       <div class="field" id="mVideoWrap" style="display:none"><label>Video URL</label><input type="text" id="mFileVideo" placeholder="https://youtube.com/..."></div>
     `, async (keepOpen) => {
-      const dataType = document.getElementById('mChoiceType').value;
+      const dataType = document.getElementById('mChoiceType').value.trim();
+      if (!['section', 'video', 'summary', 'resource'].includes(dataType)) {
+        return UI.error('Type must be: section, video, summary, or resource');
+      }
       await this._submitFileUpload(dataType, keepOpen);
     }, true);
 
     const selectEl = document.getElementById('mChoiceType');
     if (selectEl) {
-      selectEl.addEventListener('change', () => {
+      selectEl.addEventListener('input', () => {
         const isVid = selectEl.value === 'video';
         document.getElementById('mFileWrap').style.display = isVid ? 'none' : 'block';
         document.getElementById('mVideoWrap').style.display = isVid ? 'block' : 'none';

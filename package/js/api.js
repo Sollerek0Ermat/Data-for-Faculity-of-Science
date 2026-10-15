@@ -1,4 +1,4 @@
-/**
+﻿/**
  * API - Cookie-Only Authentication
  * JWT is stored ONLY in HttpOnly cookies (backend manages it).
  * Frontend NEVER reads/stores/sends the token.
@@ -154,9 +154,9 @@ const API = (function() {
     }
   }
 
-  /* ═══════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      ADMIN
-     ═══════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   async function adminLogin(opts) {
     const body = { password: opts.password };
     if (opts.confirm_password !== undefined) {
@@ -186,11 +186,66 @@ const API = (function() {
       }
     });
   }
-
+  /**
+   * Forgot Password → Microsoft OAuth
+   * الباك ممكن:
+   *   1) يعمل redirect مباشر
+   *   2) يرجع JSON فيه token
+   *   3) يرجع JSON فيه error
+   * الكود ده بيتعامل مع التلاتة
+   */
   async function forgotPassword() {
     const base = CONFIG.API_URL || '';
-    window.location.href = base + '/' + ep.admin.forgotPassword;
+    const url = base + '/' + ep.admin.forgotPassword;
+
+    try {
+      const res = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        redirect: 'follow'
+      });
+
+      const ctype = res.headers.get('content-type') || '';
+
+      // لو رجع JSON
+      if (ctype.indexOf('application/json') !== -1) {
+        const data = await res.json().catch(() => null);
+
+        // ✅ الباك رجع token → نروح لصفحة setPassword
+        if (data && data.token) {
+          location.href = 'setPassword.html?token=' + encodeURIComponent(data.token);
+          return;
+        }
+
+        // ⚠️ الباك رجع error
+        if (data && data.error && data.error.message) {
+          location.href = 'admin-login.html?error=' + encodeURIComponent(data.error.message);
+          return;
+        }
+
+        // ⚠️ الباك رجع message (rate limit مثلاً)
+        if (data && data.message) {
+          location.href = 'admin-login.html?error=' + encodeURIComponent(data.message);
+          return;
+        }
+      }
+
+      // لو الـ response عمل redirect لصفحة تانية
+      if (res.url && res.url !== url && res.url.indexOf('setPassword') === -1) {
+        window.location.href = res.url;
+        return;
+      }
+
+      // fallback
+      location.href = 'admin-login.html?error=' + encodeURIComponent('Unexpected response from server');
+
+    } catch (err) {
+      console.error('[forgotPassword] error:', err);
+      // fallback: redirect عادي
+      window.location.href = url;
+    }
   }
+
 
   async function resetPassword(opts) {
     return await request(ep.admin.resetPassword, {
@@ -203,9 +258,9 @@ const API = (function() {
     });
   }
 
-  /* ═══════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      MODERATOR
-     ═══════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   async function addSections(fd) { return await request(ep.moderator.addSections, { method: "POST", body: fd, isFormData: true }); }
   async function deleteSections(t) { return await request(ep.moderator.deleteSections, { method: "DELETE", body: { sectionTitle: t } }); }
   async function editSection(fd) { return await request(ep.moderator.editSection, { method: "PATCH", body: fd, isFormData: true }); }
@@ -219,9 +274,9 @@ const API = (function() {
   async function deleteSummaries(t) { return await request(ep.moderator.deleteSummaries, { method: "DELETE", body: { summaryTitle: t } }); }
   async function editSummary(fd) { return await request(ep.moderator.editSummary, { method: "PATCH", body: fd, isFormData: true }); }
 
-  /* ═══════════════════════════════════════════
+  /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
      OWNER
-     ═══════════════════════════════════════════ */
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
   async function addDoctors(fd) { return await request(ep.owner.addDoctors, { method: "POST", body: fd, isFormData: true }); }
   async function deleteDoctors(n) { return await request(ep.owner.deleteDoctors, { method: "DELETE", body: { doctorName: Array.isArray(n) ? n : [n] } }); }
   async function editDoctor(fd) { return await request(ep.owner.editDoctor, { method: "PATCH", body: fd, isFormData: true }); }
