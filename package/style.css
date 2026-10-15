@@ -2398,3 +2398,49 @@ tbody tr:last-child td { border-bottom: none; }
   font-weight: 700;
   box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
 }
+
+/* --- Cascade Cards & Structure Styles --- */
+#structureCardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+#structureCardsGrid > div {
+  background: rgba(8, 20, 38, 0.75);
+  border: 1px solid rgba(0, 210, 255, 0.25);
+  border-radius: 16px;
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+}
+
+#structureCardsGrid > div:hover {
+  border-color: var(--cyan);
+  transform: translateY(-6px);
+  box-shadow: 0 8px 30px rgba(0, 210, 255, 0.15);
+}
+
+#homeBreadcrumbs {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--cyan);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+#homeBreadcrumbs span {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+#homeBreadcrumbs span:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}

@@ -1,66 +1,102 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>CS Data - Tanta University</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;700&family=Karla:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <link rel="preload" href="style.css"   as="style">
-  <link rel="preload" href="js/globe.js" as="script">
+  <title>CS Data — Tanta University</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎓%3C/text%3E%3C/svg%3E">
 </head>
 <body class="dark">
-
-  <canvas id="matrixCanvas"></canvas>
-
   <div class="page">
     <div id="topbarPlaceholder"></div>
-
-    <!-- ═══ Hero Home ═══ -->
-    <section class="container">
-      <div class="hero hero-home">
-        <div class="hero-content">
-          <h1>CS Data - Tanta University</h1>
-          <p>Everything you need in one place</p>
-
-          <div class="top-banner">
-            <div class="banner-track">
-              <div class="banner-content">
-                <span class="banner-phrase">★ Designed for Computer Science students ★</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ Courses ═══ -->
-    <section class="container">
-      <div class="section-title">
-        <h2>📚 Courses</h2>
-        <a href="subjects.html">View All →</a>
-      </div>
-      <div class="grid" id="subjectsGrid"></div>
-    </section>
-
+    <div class="container" style="margin: 40px auto;">
+      <h2 style="color: var(--cyan); text-align: center; margin-bottom: 24px;">🏛️ Faculty Departments & Academic Structure</h2>
+      <div id="homeBreadcrumbs" style="margin-bottom: 16px; color: var(--cyan); font-weight: 600;"></div>
+      <div id="structureCardsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;"></div>
+    </div>
     <div id="footerPlaceholder"></div>
   </div>
+  <script src="js/api.js" defer></script>
+  <script src="js/topbar.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (typeof renderTopbar === 'function') renderTopbar();
+      let currentPath = { department: null, levelNumber: null, semesterNumber: null, subject: null };
+      const grid = document.getElementById('structureCardsGrid');
+      const breadcrumbsEl = document.getElementById('homeBreadcrumbs');
 
-  <script src="js/config.js"      defer></script>
-  <script src="js/i18n.js"        defer></script>
-  <script src="js/helpers.js"     defer></script>
-  <script src="js/ui.js"          defer></script>
-  <script src="js/auth.js"        defer></script>
-  <script src="js/mappers.js"     defer></script>
-  <script src="js/api.js"         defer></script>
-<script src="js/matrix.js"      defer></script>
-  <script src="js/globe.js"       defer></script>
-  <script src="js/topbar.js"      defer></script>
-  <script src="js/pages/index.js" defer></script>
+      async function renderStructure() {
+        if (!grid) return;
+        grid.innerHTML = '<div style="text-align:center;color:var(--cyan);grid-column:1/-1;padding:40px;">Loading structure...</div>';
+        updateBreadcrumbs();
+        try {
+          let items = [];
+          if (typeof API !== 'undefined' && API.getFolders) {
+            items = await API.getFolders({
+              department: currentPath.department || undefined,
+              levelNumber: currentPath.levelNumber || undefined,
+              semesterNumber: currentPath.semesterNumber || undefined,
+              subject: currentPath.subject || undefined
+            });
+          }
+          if (!items || !items.length) {
+            grid.innerHTML = '<p style="color:var(--muted); text-align:center; grid-column:1/-1; padding:40px;">No items available at this level.</p>';
+            return;
+          }
+          grid.innerHTML = items.map(item => {
+            if (item.depName || item.department) {
+              const name = item.depName || item.department;
+              return createCard('🏛️', name, 'Department / Branch', () => { currentPath.department = name; renderStructure(); });
+            }
+            if (item.levelNumber !== undefined) {
+              return createCard('📊', `Level ${item.levelNumber}`, `Academic Level ${item.levelNumber} - ${currentPath.department}`, () => { currentPath.levelNumber = item.levelNumber; renderStructure(); });
+            }
+            if (item.semesterNumber !== undefined) {
+              return createCard('📅', `Semester ${item.semesterNumber}`, `Term ${item.semesterNumber} of Level ${currentPath.levelNumber}`, () => { currentPath.semesterNumber = item.semesterNumber; renderStructure(); });
+            }
+            if (item.subjectName || item.name) {
+              const subName = item.subjectName || item.name;
+              return createCard('📖', subName, item.code ? `Course Code: ${item.code}` : 'Subject Course', () => { if (item.link) window.location.href = item.link; }, true);
+            }
+            return '';
+          }).join('');
+        } catch (e) {
+          console.error(e);
+          grid.innerHTML = '<p style="color:#ff3366; text-align:center; grid-column:1/-1;">Error loading data from server.</p>';
+        }
+      }
+
+      function createCard(icon, title, subtitle, onClick, isSub = false) {
+        const id = 'c_' + Math.random().toString(36).substring(2, 7);
+        setTimeout(() => { const el = document.getElementById(id); if (el) el.addEventListener('click', onClick); }, 0);
+        return `<div id="${id}" style="background:rgba(8,20,38,0.75);border:1px solid rgba(0,210,255,0.25);border-radius:16px;padding:28px 20px;text-align:center;cursor:pointer;transition:0.3s;"
+                     onmouseover="this.style.borderColor='var(--cyan)';this.style.transform='translateY(-4px)';"
+                     onmouseout="this.style.borderColor='rgba(0,210,255,0.25)';this.style.transform='translateY(0)';">
+                  ${isSub ? '<div style="display:inline-block;padding:3px 12px;background:rgba(0,229,255,0.12);border:1px solid var(--cyan);border-radius:999px;color:var(--cyan);font-size:11px;font-weight:700;margin-bottom:10px;">Course</div>' : ''}
+                  <div style="font-size:38px;margin-bottom:12px;">${icon}</div>
+                  <h3 style="color:#fff;font-size:18px;margin-bottom:6px;">${title}</h3>
+                  <p style="color:var(--muted);font-size:13px;margin:0;">${subtitle}</p>
+                </div>`;
+      }
+
+      function updateBreadcrumbs() {
+        if (!breadcrumbsEl) return;
+        let html = '<span style="cursor:pointer;color:var(--cyan);" id="bc_home">🏠 Home</span>';
+        if (currentPath.department) html += ` / <span style="cursor:pointer;color:var(--cyan);" id="bc_dept">${currentPath.department}</span>`;
+        if (currentPath.levelNumber) html += ` / <span style="cursor:pointer;color:var(--cyan);" id="bc_lvl">Level ${currentPath.levelNumber}</span>`;
+        if (currentPath.semesterNumber) html += ` / <span style="color:#fff;">Sem ${currentPath.semesterNumber}</span>`;
+        breadcrumbsEl.innerHTML = html;
+
+        const bcHome = document.getElementById('bc_home');
+        if (bcHome) bcHome.addEventListener('click', () => { currentPath = { department: null, levelNumber: null, semesterNumber: null, subject: null }; renderStructure(); });
+        const bcDept = document.getElementById('bc_dept');
+        if (bcDept) bcDept.addEventListener('click', () => { currentPath.levelNumber = null; currentPath.semesterNumber = null; currentPath.subject = null; renderStructure(); });
+        const bcLvl = document.getElementById('bc_lvl');
+        if (bcLvl) bcLvl.addEventListener('click', () => { currentPath.semesterNumber = null; currentPath.subject = null; renderStructure(); });
+      }
+
+      renderStructure();
+    });
+  </script>
 </body>
 </html>
