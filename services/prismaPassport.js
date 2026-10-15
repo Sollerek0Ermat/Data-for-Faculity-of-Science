@@ -90,7 +90,7 @@ passport.use('microsoft_passwordReset', new MicrosoftStrategy({
             }
             const user = await prisma.user.findUnique({ where: { colleageEmail: email } })
             if (user.adminLogged_in) {
-                return done(null, false, { message: 'you are already loggedin as an admin you can change your password instead of forgetting it' });
+                return done(null, false, 'you are already loggedin as an admin you can change your password instead of forgetting it' );
             }
             const photoURL = await passportMethods.getStudentPhoto(accessToken, profile.id)
             const updatedUser = await prisma.user.update({
