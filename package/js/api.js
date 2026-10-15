@@ -19,7 +19,6 @@ const API = (function() {
     const headers = {};
     if (!isFormData && body) headers["Content-Type"] = "application/json";
 
-    // Cookie-only: never send Authorization header
     const fetchOptions = {
       method: method,
       headers: headers,
@@ -35,7 +34,6 @@ const API = (function() {
       throw new Error("Cannot reach server");
     }
 
-    // On 401 → clear session + redirect (avoid loop)
     if (res.status === 401) {
       if (typeof Auth !== 'undefined') Auth.clearSession();
       const onLogin = location.pathname.indexOf("login.html") !== -1;
@@ -156,9 +154,10 @@ const API = (function() {
     }
   }
 
-  /* Admin */
+  /* ═══════════════════════════════════════════
+     ADMIN
+     ═══════════════════════════════════════════ */
   async function adminLogin(opts) {
-    // opts: { password, confirm_password? }
     const body = { password: opts.password };
     if (opts.confirm_password !== undefined) {
       body.confirm_password = opts.confirm_password;
@@ -177,6 +176,17 @@ const API = (function() {
     return await request(ep.admin.logout, { method: "POST" });
   }
 
+  async function changePassword(opts) {
+    return await request(ep.admin.changePassword, {
+      method: "PATCH",
+      body: {
+        old_password: opts.oldPassword,
+        password: opts.password,
+        confirm_password: opts.confirm_password
+      }
+    });
+  }
+
   async function forgotPassword() {
     const base = CONFIG.API_URL || '';
     window.location.href = base + '/' + ep.admin.forgotPassword;
@@ -193,7 +203,9 @@ const API = (function() {
     });
   }
 
-  /* Moderator */
+  /* ═══════════════════════════════════════════
+     MODERATOR
+     ═══════════════════════════════════════════ */
   async function addSections(fd) { return await request(ep.moderator.addSections, { method: "POST", body: fd, isFormData: true }); }
   async function deleteSections(t) { return await request(ep.moderator.deleteSections, { method: "DELETE", body: { sectionTitle: t } }); }
   async function editSection(fd) { return await request(ep.moderator.editSection, { method: "PATCH", body: fd, isFormData: true }); }
@@ -207,7 +219,9 @@ const API = (function() {
   async function deleteSummaries(t) { return await request(ep.moderator.deleteSummaries, { method: "DELETE", body: { summaryTitle: t } }); }
   async function editSummary(fd) { return await request(ep.moderator.editSummary, { method: "PATCH", body: fd, isFormData: true }); }
 
-  /* Owner */
+  /* ═══════════════════════════════════════════
+     OWNER
+     ═══════════════════════════════════════════ */
   async function addDoctors(fd) { return await request(ep.owner.addDoctors, { method: "POST", body: fd, isFormData: true }); }
   async function deleteDoctors(n) { return await request(ep.owner.deleteDoctors, { method: "DELETE", body: { doctorName: Array.isArray(n) ? n : [n] } }); }
   async function editDoctor(fd) { return await request(ep.owner.editDoctor, { method: "PATCH", body: fd, isFormData: true }); }
@@ -250,14 +264,22 @@ const API = (function() {
     getDoctors: getDoctors,
     getFolderContent: getFolderContent,
     downloadFile: downloadFile,
+
+    // Admin
     adminLogin: adminLogin,
     adminLoginDirect: adminLoginDirect,
     adminLogout: adminLogout,
     changePassword: changePassword,
+    forgotPassword: forgotPassword,
+    resetPassword: resetPassword,
+
+    // Moderator
     addSections: addSections, deleteSections: deleteSections, editSection: editSection,
     addVideos: addVideos, deleteVideos: deleteVideos, editVideo: editVideo,
     addResources: addResources, deleteResources: deleteResources, editResource: editResource,
     addSummaries: addSummaries, deleteSummaries: deleteSummaries, editSummary: editSummary,
+
+    // Owner
     addDoctors: addDoctors, deleteDoctors: deleteDoctors, editDoctor: editDoctor,
     addSubjects: addSubjects, deleteSubjects: deleteSubjects, editSubject: editSubject,
     addDepartments: addDepartments, deleteDepartments: deleteDepartments, editDepartment: editDepartment,
