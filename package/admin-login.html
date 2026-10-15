@@ -3,51 +3,260 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Admin Login - CS Data</title>
+  <title>Admin Access - CS Data</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;700&family=Karla:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="preload" href="style.css" as="style">
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    .admin-card {
+      width: 100%;
+      max-width: 420px;
+      margin: 40px auto;
+      padding: 36px 30px;
+      background: rgba(8, 20, 38, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 210, 255, 0.3);
+      border-radius: 16px;
+      box-shadow: 0 0 35px rgba(0, 210, 255, 0.08), inset 0 0 15px rgba(0, 210, 255, 0.05);
+      text-align: center;
+      color: #fff;
+      transition: all 0.35s ease;
+      position: relative;
+    }
+
+    .admin-card.error-state {
+      border-color: rgba(255, 51, 102, 0.6);
+      box-shadow: 0 0 40px rgba(255, 51, 102, 0.15), inset 0 0 20px rgba(255, 51, 102, 0.08);
+      animation: shake 0.45s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-2px, 0, 0); }
+      20%, 80% { transform: translate3d(4px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+      40%, 60% { transform: translate3d(6px, 0, 0); }
+    }
+
+    .icon-badge {
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      background: rgba(0, 210, 255, 0.08);
+      border: 1.5px solid var(--cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+      color: var(--cyan);
+      transition: 0.3s;
+    }
+
+    .admin-card.error-state .icon-badge {
+      background: rgba(255, 51, 102, 0.1);
+      border-color: #ff3366;
+      color: #ff3366;
+      box-shadow: 0 0 25px rgba(255, 51, 102, 0.4);
+    }
+
+    .admin-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 6px;
+      background: linear-gradient(90deg, var(--cyan), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .admin-card.error-state .admin-title {
+      background: linear-gradient(90deg, #ff3366, #ff758c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .admin-subtitle {
+      font-size: 13.5px;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .error-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 51, 102, 0.12);
+      border: 1px solid rgba(255, 51, 102, 0.4);
+      border-left: 4px solid #ff3366;
+      color: #ff85a2;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .error-banner svg {
+      flex-shrink: 0;
+      color: #ff3366;
+    }
+
+    .input-group {
+      text-align: left;
+      margin-bottom: 18px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #cbd5e1;
+      letter-spacing: 0.3px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper svg {
+      position: absolute;
+      left: 14px;
+      color: var(--muted);
+      pointer-events: none;
+      transition: 0.2s;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 12px 16px 12px 42px;
+      background: rgba(4, 11, 22, 0.6);
+      border: 1px solid rgba(126, 147, 176, 0.25);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.25s;
+      font-family: inherit;
+    }
+
+    .input-wrapper input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 210, 255, 0.2);
+    }
+
+    .hint-text {
+      font-size: 11.5px;
+      color: var(--muted);
+      text-align: left;
+      line-height: 1.5;
+      margin: -6px 0 20px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(90deg, var(--blue), var(--cyan));
+      border: none;
+      border-radius: 999px;
+      color: #030a14;
+      font-weight: 700;
+      font-size: 14.5px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0, 210, 255, 0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(0, 210, 255, 0.55);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 20px;
+      padding: 8px 18px;
+      color: var(--muted);
+      font-size: 13px;
+      text-decoration: none;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .btn-back:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .msg {
+      text-align: center;
+      margin-top: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      min-height: 20px;
+    }
+  </style>
 </head>
 <body class="dark">
 
   <div class="page">
     <div id="topbarPlaceholder"></div>
 
-    <div class="login-wrap" style="flex:1">
-      <div class="login-card">
-        <div class="login-icon">A</div>
-        <h1>Admin Access</h1>
-        <p id="subTitle">Enter your credentials</p>
-
-        <div id="step2">
-          <form id="pwdForm">
-            <div class="field">
-              <label for="adminEmail">Email</label>
-              <input type="email" id="adminEmail" placeholder="you@science.tanta.edu.eg" required>
-            </div>
-            <div class="field">
-              <label for="adminPwd">Admin Password</label>
-              <input type="password" id="adminPwd" placeholder="Enter password" required minlength="8">
-            </div>
-            <p style="font-size:12px;color:var(--muted);margin-bottom:12px" id="pwdHint">
-              First time? Enter a new password to set it. Otherwise, enter your existing password.
-            </p>
-            <button type="submit" class="btn btn-primary btn-block" id="submitBtn" style="height:52px">
-              Continue
-            </button>
-          </form>
-          <p id="msg" class="text-center" style="margin-top:12px;font-weight:700;font-size:14px;min-height:20px"></p>
+    <section class="container">
+      <div class="admin-card" id="adminCard">
+        <div class="icon-badge">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
         </div>
 
-        <div style="text-align:center;margin-top:20px">
-          <a href="index.html" style="color:var(--muted);font-size:13px;font-weight:600">Back to Home</a>
-        </div>
+        <h1 class="admin-title" id="adminTitle">Admin Access</h1>
+        <p class="admin-subtitle" id="adminSubtitle">Restricted portal - Authorized personnel only</p>
+
+        <div id="errorBanner" style="display:none"></div>
+
+        <form id="adminForm">
+          <div id="passwordFields"></div>
+
+          <p class="hint-text" id="hintText" style="display:none">
+            First time? Enter a new password to set it. Otherwise, enter your existing password.
+          </p>
+
+          <button type="submit" class="btn-submit" id="submitBtn">Verify & Continue</button>
+        </form>
+
+        <p class="msg" id="msg"></p>
+
+        <a href="index.html" class="btn-back">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+          Back to Home
+        </a>
       </div>
-    </div>
+    </section>
 
     <div id="footerPlaceholder"></div>
   </div>
