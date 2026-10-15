@@ -177,13 +177,18 @@ const API = (function() {
     return await request(ep.admin.logout, { method: "POST" });
   }
 
-  async function changePassword(opts) {
-    return await request(ep.admin.changePassword, {
-      method: "PATCH",
+  async function forgotPassword() {
+    const base = CONFIG.API_URL || '';
+    window.location.href = base + '/' + ep.admin.forgotPassword;
+  }
+
+  async function resetPassword(opts) {
+    return await request(ep.admin.resetPassword, {
+      method: 'POST',
       body: {
-        old_password: opts.oldPassword,
-        password: opts.password,
-        confirm_password: opts.confirm_password
+        token: opts.token,
+        new_password: opts.newPassword,
+        confirm_password: opts.newPassword
       }
     });
   }

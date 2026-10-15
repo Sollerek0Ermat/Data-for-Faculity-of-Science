@@ -14,14 +14,14 @@ const FolderBrowser = (function () {
     file:       'Files'
   };
 
-  const FOLDER_ICONS = { department: '🏛️', level: '📊', semester: '📅', subject: '📚', doctor: '👨‍🏫' };
+  const FOLDER_ICONS = { department: '\uD83C\uDFDB\uFE0F', level: '\uD83D\uDCCA', semester: '\uD83D\uDCC5', subject: '\uD83D\uDCDA', doctor: '\uD83D\uDC68\u200D\uD83C\uDFEB' };
 
   const DATA_TYPE_META = {
-    sections:  { icon: '📄', label: 'Sections',  desc: 'Chapters and topics' },
-    videos:    { icon: '🎬', label: 'Videos',    desc: 'Recorded lectures' },
-    summaries: { icon: '📝', label: 'Summaries', desc: 'Condensed overviews' },
-    recourses: { icon: '📦', label: 'Resources', desc: 'Reference sheets' },
-    resources: { icon: '📦', label: 'Resources', desc: 'Reference sheets' }
+    sections:  { icon: '\uD83D\uDCC4', label: 'Sections',  desc: 'Chapters and topics' },
+    videos:    { icon: '\uD83C\uDFAC', label: 'Videos',    desc: 'Recorded lectures' },
+    summaries: { icon: '\uD83D\uDCDD', label: 'Summaries', desc: 'Condensed overviews' },
+    recourses: { icon: '\uD83D\uDCE6', label: 'Resources', desc: 'Reference sheets' },
+    resources: { icon: '\uD83D\uDCE6', label: 'Resources', desc: 'Reference sheets' }
   };
 
   const FILE_ICONS = { section: 'S', summary: 'M', resource: 'R', video: 'V' };
@@ -63,7 +63,6 @@ const FolderBrowser = (function () {
     return qs.join('&');
   }
 
-  /* ✅ breadcrumbTrail — بيمنع أي قيمة undefined/null من الظهور */
   function breadcrumbTrail(params) {
     params = cleanParams(params || {});
     var parts = [];
@@ -90,7 +89,13 @@ const FolderBrowser = (function () {
   }
 
   function folderCardHTML(item, href, navKey) {
-    var icon = FOLDER_ICONS[item.level] || '📁';
+    var icon = FOLDER_ICONS[item.level] || '\uD83D\uDCC1';
+
+    // ✅ استخدام أيقونة مخصصة حسب القسم
+    if (item.level === 'department' && typeof Mappers !== 'undefined' && Mappers._getDepartmentIcon) {
+      icon = Mappers._getDepartmentIcon(item.name);
+    }
+
     var label =
       safeText(item.name) ||
       (item.levelNumber != null ? 'Level ' + safeText(item.levelNumber) : '') ||
@@ -106,7 +111,7 @@ const FolderBrowser = (function () {
   }
 
   function dataTypeCardHTML(item, href, navKey) {
-    var meta = DATA_TYPE_META[item.dataType] || { icon: '📁', label: item.dataType || 'Folder', desc: '' };
+    var meta = DATA_TYPE_META[item.dataType] || { icon: '\uD83D\uDCC1', label: item.dataType || 'Folder', desc: '' };
     return [
       '<a href="' + href + '" class="dataType-card"' + (navKey ? ' data-nav="' + navKey + '"' : '') + '>',
       '  <div class="dataType-icon">' + meta.icon + '</div>',

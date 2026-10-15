@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Admin Login
  *
  * Flow:
@@ -10,6 +10,7 @@
  *      - hasPassword = true  → show Password only
  *      - Submit → POST /v1/admin/login
  *      - Success → redirect admin.html
+ *  5) Forgot password → Microsoft OAuth → reset
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -38,7 +39,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const profile = await Auth.syncSession();
 
   if (!profile || !profile.role) {
-    // Not logged in with Microsoft → back to login
     window.location.href = 'login.html';
     return;
   }
@@ -67,7 +67,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     form.style.display = 'none';
     hint.style.display = 'none';
 
-    // Auto-redirect after 3 seconds
     setTimeout(() => { window.location.href = 'index.html'; }, 3000);
     return;
   }
@@ -106,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       '</div>'
     ].join('');
     hint.style.display = 'block';
-    hint.textContent = 'Enter a password (min 5 characters).';
+    hint.textContent = 'Enter a password (min 8 characters).';
   } else {
     fields.innerHTML = [
       '<div class="input-group">',
@@ -152,14 +151,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       const payload = { password: pwd1 };
       if (firstTime) payload.confirm_password = pwd2;
 
-      await API.adminLogin(payload);
+      try {
+        await API.adminLogin(payload);
+      } catch (err) {
+        // ✅ لو الباك رجّع "already logged in"، نروح للـ dashboard مباشرة
+        const m = (err.message || '').toLowerCase();
+        if (m.indexOf('already logged in') !== -1) {
+          console.warn('[admin-login] Already logged in — redirecting');
+          await Auth.syncSession();
+          window.location.href = 'admin.html';
+          return;
+        }
+        throw err;
+      }
 
-      // Sync session again to update adminLoggedIn + hasPassword
       await Auth.syncSession();
-
-      // Mark password set (client-side hint)
       localStorage.setItem('admin_password_set', '1');
-
       setMsg('Welcome!', 'var(--success)');
 
       setTimeout(() => { window.location.href = 'admin.html'; }, 600);
@@ -167,7 +174,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (err) {
       console.error('adminLogin error:', err);
 
-      card.classList.add('error-state');
       card.classList.remove('error-state');
       void card.offsetWidth;
       card.classList.add('error-state');
@@ -184,4 +190,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       submitBtn.disabled = false;
     }
   });
+
+  /* ═══════════════════════════════════════════
+     5) Forgot Password → Microsoft OAuth
+     ═══════════════════════════════════════════ */
+  const forgotBtn = document.getElementById('forgotBtn');
+  if (forgotBtn) {
+    forgotBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!confirm('You will be redirected to Microsoft to verify your identity, then you can set a new password.\n\nContinue?')) {
+        return;
+      }
+      setMsg('Redirecting to Microsoft...', 'var(--muted)');
+      setTimeout(() => {
+        if (typeof API.forgotPassword === 'function') {
+          API.forgotPassword();
+        } else {
+          // fallback: redirect مباشرة
+          const base = CONFIG.API_URL || '';
+          window.location.href = base + '/' + CONFIG.ENDPOINTS.admin.forgotPassword;
+        }
+      }, 400);
+    });
+  }
 });

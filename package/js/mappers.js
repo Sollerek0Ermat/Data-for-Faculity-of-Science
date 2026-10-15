@@ -64,6 +64,56 @@ const Mappers = {
     return code + num;
   },
 
+  /**
+   * 🎯 أيقونة القسم حسب رمز التخصص الرسمي
+   * MA=رياضيات, ST=إحصاء, CS=علوم الحاسب, PH=فيزياء, MS=علوم المواد,
+   * CH=كيمياء, BC=كيمياء حيوية, GE=جيولوجيا, GP=جيوفيزياء,
+   * BP=فيزياء حيوية, BO=نبات, MB=ميكروبيولوجي, BT=تقنية حيوية,
+   * ZO=علم الحيوان, EN=علم الحشرات
+   */
+  _getDepartmentIcon: function (name) {
+    if (!name) return '\uD83C\uDFDB\uFE0F';
+    var n = String(name).toLowerCase().trim();
+
+    // مطابقة بالكود المختصر أولاً
+    var shortMap = {
+      'ma': '\uD83D\uDCD0',      // 📐 رياضيات
+      'st': '\uD83D\uDCCA',      // 📊 إحصاء
+      'cs': '\uD83D\uDCBB',      // 💻 علوم الحاسب
+      'ph': '\u269B\uFE0F',      // ⚛️ فيزياء
+      'ms': '\uD83D\uDD2C',      // 🔬 علوم المواد
+      'ch': '\uD83E\uDDEA',      // 🧪 كيمياء
+      'bc': '\uD83E\uDDEC',      // 🧬 كيمياء حيوية
+      'ge': '\uD83E\uDEA8',      // 🪨 جيولوجيا
+      'gp': '\uD83C\uDF0D',      // 🌍 جيوفيزياء
+      'bp': '\uD83E\uDDEC',      // 🧬 فيزياء حيوية
+      'bo': '\uD83C\uDF3F',      // 🌿 نبات
+      'mb': '\uD83E\uDDA0',      // 🦠 ميكروبيولوجي
+      'bt': '\uD83E\uDDEB',      // 🧫 تقنية حيوية
+      'zo': '\uD83E\uDD8E',      // 🦎 علم الحيوان
+      'en': '\uD83E\uDD97'       // 🦗 علم الحشرات
+    };
+    if (shortMap[n]) return shortMap[n];
+
+    // مطابقة بالاسم
+    if (n.indexOf('math') !== -1 || n.indexOf('رياض') !== -1) return '\uD83D\uDCD0';
+    if (n.indexOf('statistic') !== -1 || n.indexOf('إحصاء') !== -1 || n.indexOf('احصاء') !== -1) return '\uD83D\uDCCA';
+    if (n.indexOf('computer science') !== -1 || n.indexOf('حاسب') !== -1) return '\uD83D\uDCBB';
+    if (n.indexOf('physic') !== -1 && n.indexOf('bio') === -1) return '\u269B\uFE0F';
+    if (n.indexOf('material') !== -1 || n.indexOf('مواد') !== -1) return '\uD83D\uDD2C';
+    if (n.indexOf('chem') !== -1 && n.indexOf('bio') === -1) return '\uD83E\uDDEA';
+    if (n.indexOf('biochem') !== -1 || n.indexOf('كيمياء حيوية') !== -1) return '\uD83E\uDDEC';
+    if (n.indexOf('geolog') !== -1 || n.indexOf('جيولوج') !== -1) return '\uD83E\uDEA8';
+    if (n.indexOf('geophysic') !== -1 || n.indexOf('جيوفيز') !== -1) return '\uD83C\uDF0D';
+    if (n.indexOf('biophysic') !== -1 || n.indexOf('فيزياء حيوية') !== -1) return '\uD83E\uDDEC';
+    if (n.indexOf('botan') !== -1 || n.indexOf('نبات') !== -1) return '\uD83C\uDF3F';
+    if (n.indexOf('microbio') !== -1 || n.indexOf('ميكروب') !== -1) return '\uD83E\uDDA0';
+    if (n.indexOf('biotech') !== -1 || n.indexOf('تقنية حيوية') !== -1) return '\uD83E\uDDEB';
+    if (n.indexOf('zoolog') !== -1 || n.indexOf('حيوان') !== -1) return '\uD83E\uDD8E';
+    if (n.indexOf('entomolog') !== -1 || n.indexOf('حشرات') !== -1) return '\uD83E\uDD97';
+    return '\uD83C\uDFDB\uFE0F';
+  },
+
   profile: function (raw) {
     if (!raw) return null;
     return {
