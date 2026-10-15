@@ -289,8 +289,8 @@ exports.microsoftPasswordResetCallback = (req, res, next) => {
                     password_reset_token_expires: password_reset_token_expires
                 }
             });
-            return response.redirect(`https://data-for-faculity-of-science.onrender.com/v1/admin/resetPassword/${resetToken}`);
-            // create_send_responce(user, 200, res, next, false, `password reset token: ${resetToken}`)
+            // return response.redirect(`http://localhost:3000/v1/admin/resetPassword/${resetToken}`);
+            create_send_responce(user, 200, res, next, false, `password reset token: ${resetToken}`)
         }
         catch (error) {
             await prisma.authUser.update({
