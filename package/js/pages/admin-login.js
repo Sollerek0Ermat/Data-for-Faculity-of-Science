@@ -129,10 +129,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     hint.style.display = 'none';
   }
 
-  /* 4) Forgot Password Button -> Redirect to Azure */
+  /* 4) Forgot Password Button -> Logout Admin Session first, then Redirect to Azure */
   if (forgotPwdBtn) {
-    forgotPwdBtn.addEventListener('click', (e) => {
+    forgotPwdBtn.addEventListener('click', async (e) => {
       e.preventDefault();
+      forgotPwdBtn.disabled = true;
+      setMsg('Preparing Microsoft verification...', 'var(--cyan)');
+
+      // لو الأدمن مسجل دخول بالفعل (admin_logged_in = true)، نعمل adminLogout الأول
+      // عشان السيرفر ميطلعش خطأ "you are already loggedin as an admin"
+      try {
+        await API.adminLogout();
+      } catch (err) {
+        // نتجاهل الخطأ لو مكنش مسجل دخول أدمن أصلاً
+      }
+
       sessionStorage.setItem('pending_pwd_reset', '1');
       setMsg('Redirecting to Microsoft Azure...', 'var(--cyan)');
       API.forgotPasswordWithMicrosoft();
@@ -194,6 +205,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       card.classList.add('error-state');
 
       const m = (err.message || '').toLowerCase();
+      // لو السيرفر قال إنه مسجل دخول بالفعل كأدمن، ندخله علطول على لوحة التحكم
+      if (m.indexOf('already loggedin') !== -1 || m.indexOf('already logged in') !== -1) {
+        setMsg('Already verified! Redirecting...', 'var(--success)');
+        setTimeout(() => { window.location.href = 'admin.html'; }, 500);
+        return;
+      }
+
       if (m.indexOf('incorrect') !== -1 || m.indexOf('wrong') !== -1) {
         setMsg('Incorrect password. Please try again.', 'var(--danger)');
       } else if (m.indexOf('attempts') !== -1) {

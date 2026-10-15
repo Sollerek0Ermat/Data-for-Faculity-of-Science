@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
@@ -153,33 +153,6 @@
       box-shadow: 0 0 12px rgba(0, 210, 255, 0.2);
     }
 
-    .forgot-wrap {
-      display: flex;
-      justify-content: flex-end;
-      margin: -8px 0 18px;
-    }
-
-    .forgot-link {
-      background: none;
-      border: none;
-      color: var(--cyan);
-      font-size: 12.5px;
-      font-weight: 600;
-      cursor: pointer;
-      padding: 4px 0;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-      text-decoration: none;
-      font-family: inherit;
-    }
-
-    .forgot-link:hover {
-      color: #fff;
-      text-shadow: 0 0 10px var(--cyan);
-    }
-
     .hint-text {
       font-size: 11.5px;
       color: var(--muted);
@@ -266,18 +239,16 @@
         <form id="adminForm">
           <div id="passwordFields"></div>
 
-          <div class="forgot-wrap" id="forgotWrap" style="display:none">
-            <button type="button" class="forgot-link" id="forgotPwdBtn">
-              🔑 Forgot Password? (Verify via Microsoft)
-            </button>
-          </div>
-
           <p class="hint-text" id="hintText" style="display:none">
             First time? Enter a new password to set it. Otherwise, enter your existing password.
           </p>
 
           <button type="submit" class="btn-submit" id="submitBtn">Verify & Continue</button>
         </form>
+
+        <div style="text-align:center;margin-top:14px">
+          <a href="#" id="forgotPwdLink" style="display:none;color:var(--muted);font-size:12.5px;text-decoration:underline">Forgot your password?</a>
+        </div>
 
         <p class="msg" id="msg"></p>
 
