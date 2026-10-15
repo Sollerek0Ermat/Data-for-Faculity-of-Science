@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Admin Access - CS Data</title>
+  <title>Admin Access - DATA</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -207,6 +207,31 @@
       border-color: rgba(255, 255, 255, 0.1);
     }
 
+    .btn-forgot {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid rgba(0, 213, 232, 0.3);
+      border-radius: 30px;
+      color: var(--cyan);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-forgot:hover {
+      border-color: var(--cyan);
+      background: rgba(0, 213, 232, 0.08);
+      box-shadow: 0 0 14px rgba(0, 213, 232, 0.3);
+    }
+
     .msg {
       text-align: center;
       margin-top: 12px;
@@ -245,6 +270,15 @@
 
           <button type="submit" class="btn-submit" id="submitBtn">Verify & Continue</button>
         </form>
+
+        <a href="#" id="forgotBtn" class="btn-forgot">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          Forgot password?
+        </a>
 
         <p class="msg" id="msg"></p>
 

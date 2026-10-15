@@ -1,16 +1,5 @@
 /**
  * Admin Login
- *
- * Flow:
- *  1) Sync session (cookie) → get profile
- *  2) If not logged in      → redirect login.html
- *  3) If role = user        → show "Access Denied" + redirect index.html
- *  4) If role = admin:
- *      - hasPassword = false → show Password + Confirm
- *      - hasPassword = true  → show Password only
- *      - Submit → POST /v1/admin/login
- *      - Success → redirect admin.html
- *  5) Forgot password → Microsoft OAuth → reset
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -33,9 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     msg.style.color = color || 'var(--muted)';
   };
 
-  /* ═══════════════════════════════════════════
-     1) Sync session
-     ═══════════════════════════════════════════ */
+  /* 1) Sync session */
   const profile = await Auth.syncSession();
 
   if (!profile || !profile.role) {
@@ -43,9 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  /* ═══════════════════════════════════════════
-     2) Not staff → Access Denied
-     ═══════════════════════════════════════════ */
+  /* 2) Not staff → Access Denied */
   const staffRoles = ['owner', 'moderator', 'doctor'];
   if (staffRoles.indexOf(profile.role) === -1) {
     card.classList.add('error-state');
@@ -66,14 +51,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     form.style.display = 'none';
     hint.style.display = 'none';
+    const fb = document.getElementById('forgotBtn');
+    if (fb) fb.style.display = 'none';
 
     setTimeout(() => { window.location.href = 'index.html'; }, 3000);
     return;
   }
 
-  /* ═══════════════════════════════════════════
-     3) Staff → show password form
-     ═══════════════════════════════════════════ */
+  /* 3) Staff → show password form */
   const firstTime = !profile.hasPassword;
 
   title.textContent = 'Admin Access';
@@ -122,9 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     hint.style.display = 'none';
   }
 
-  /* ═══════════════════════════════════════════
-     4) Submit
-     ═══════════════════════════════════════════ */
+  /* 4) Submit */
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -132,11 +115,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pwd2El = document.getElementById('pwd2');
     const pwd2 = pwd2El ? pwd2El.value : null;
 
-    if (!pwd1 || pwd1.length < 5) {
+    if (!pwd1 || pwd1.length < 8) {
       return setMsg('Password must be at least 8 characters', 'var(--danger)');
     }
     if (firstTime) {
-      if (!pwd2 || pwd2.length < 5) {
+      if (!pwd2 || pwd2.length < 8) {
         return setMsg('Please confirm your password', 'var(--danger)');
       }
       if (pwd1 !== pwd2) {
@@ -154,7 +137,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         await API.adminLogin(payload);
       } catch (err) {
-        // ✅ لو الباك رجّع "already logged in"، نروح للـ dashboard مباشرة
         const m = (err.message || '').toLowerCase();
         if (m.indexOf('already logged in') !== -1) {
           console.warn('[admin-login] Already logged in — redirecting');
@@ -191,9 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  /* ═══════════════════════════════════════════
-     5) Forgot Password → Microsoft OAuth
-     ═══════════════════════════════════════════ */
+  /* 5) Forgot Password → Microsoft OAuth */
   const forgotBtn = document.getElementById('forgotBtn');
   if (forgotBtn) {
     forgotBtn.addEventListener('click', (e) => {
@@ -206,7 +186,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (typeof API.forgotPassword === 'function') {
           API.forgotPassword();
         } else {
-          // fallback: redirect مباشرة
           const base = CONFIG.API_URL || '';
           window.location.href = base + '/' + CONFIG.ENDPOINTS.admin.forgotPassword;
         }
