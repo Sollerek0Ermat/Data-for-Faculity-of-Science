@@ -2384,3 +2384,17 @@ tbody tr:last-child td { border-bottom: none; }
   .file-card-info h4 { font-size: 15px; }
 }
 
+
+/* تصميم فخم ومميز لشارة الأونر */
+#userRole {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(0, 229, 255, 0.1));
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  padding: 4px 14px;
+  border-radius: 999px;
+  color: #ffd700;
+  font-weight: 700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
+}

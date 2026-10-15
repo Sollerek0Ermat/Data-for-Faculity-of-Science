@@ -1,5 +1,5 @@
 /**
- * Admin Dashboard — Full
+ * Admin Dashboard — Full (Fixed & Optimized)
  */
 
 let _state = {
@@ -16,7 +16,6 @@ let _state = {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Sync session from cookie first (avoids false rejection)
   await Auth.syncSession();
 
   if (!Auth.requireAuth(['owner', 'moderator', 'doctor'])) return;
@@ -30,23 +29,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   _state.userName = (user && user.name) ? user.name : 'Admin';
 
   document.getElementById('welcomeTitle').textContent = '👋 Welcome ' + _state.userName;
-  document.getElementById('userRole').textContent = 'Role: ' + _state.userRole.toUpperCase();
-
-  // Tabs
-  document.querySelectorAll('#adminTabs .tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('#adminTabs .tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-      tab.classList.add('active');
-      const target = document.getElementById('tab-' + tab.dataset.tab);
-      if (target) target.classList.remove('hidden');
-
-      // Load data on first open
-      if (tab.dataset.tab === 'structure' && !_state.departments.length) loadStructure();
-      if (tab.dataset.tab === 'doctors' && !_state.doctors.length) loadDoctorsTab();
-      if (tab.dataset.tab === 'content') loadContentBrowse();
-    });
-  });
+  const roleDisplay = document.querySelector('.hero-content #userRole');
+  if (roleDisplay) roleDisplay.textContent = 'Role: ' + _state.userRole.toUpperCase();
 
   // Hide owner-only tabs for non-owners
   if (_state.userRole !== 'owner') {
@@ -57,7 +41,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Load overview
   await loadOverview();
   AdminUI.init();
 });
@@ -76,7 +59,7 @@ async function loadOverview() {
     const docSet = new Set();
     const subjSet = new Set();
     dws.forEach(item => {
-      docSet.add(item.doctor.name);
+      if (item.doctor && item.doctor.name) docSet.add(item.doctor.name);
       (item.subjects || []).forEach(s => subjSet.add(s.name));
     });
 
@@ -113,15 +96,14 @@ function stat(icon, label, value) {
 }
 
 /* ═══════════════════════════════════════════
-   STRUCTURE — Load
+   STRUCTURE — Load (Sequential Fix!)
    ═══════════════════════════════════════════ */
 async function loadStructure() {
-  await Promise.all([
-    loadDepartments(),
-    loadLevels(),
-    loadSemesters(),
-    loadSubjects()
-  ]);
+  // ⚡ إصلاح: التحميل بالتتابع لأن Levels تعتمد على Departments، و Semesters تعتمد على Levels
+  await loadDepartments();
+  await loadLevels();
+  await loadSemesters();
+  await loadSubjects();
 }
 
 async function loadDepartments() {
@@ -136,11 +118,19 @@ async function loadDepartments() {
 async function loadLevels() {
   const wrap = document.getElementById('levelsList');
   try {
+    if (!_state.departments.length) {
+      _state.departments = await API.getFolders({}) || [];
+    }
     let all = [];
     for (const d of _state.departments) {
       const deptName = d.depName || d.name;
+      if (!deptName) continue;
       const levels = await API.getFolders({ department: deptName }).catch(() => []);
-      levels.forEach(l => all.push({ department: deptName, levelNumber: l.levelNumber }));
+      levels.forEach(l => {
+        if (l.levelNumber !== undefined) {
+          all.push({ department: deptName, levelNumber: l.levelNumber });
+        }
+      });
     }
     _state.levels = all;
     renderLevels();
@@ -155,7 +145,11 @@ async function loadSemesters() {
     let all = [];
     for (const l of _state.levels) {
       const sems = await API.getFolders({ department: l.department, levelNumber: l.levelNumber }).catch(() => []);
-      sems.forEach(s => all.push({ department: l.department, levelNumber: l.levelNumber, semesterNumber: s.semesterNumber }));
+      sems.forEach(s => {
+        if (s.semesterNumber !== undefined) {
+          all.push({ department: l.department, levelNumber: l.levelNumber, semesterNumber: s.semesterNumber });
+        }
+      });
     }
     _state.semesters = all;
     renderSemesters();
@@ -167,13 +161,36 @@ async function loadSemesters() {
 async function loadSubjects() {
   const wrap = document.getElementById('subjectsList');
   try {
-    const dws = await API.getDoctorWithSubjects();
     const subjMap = new Map();
+
+    // جلب المواد من جدول الروابط ومن الفولدرات لضمان ظهور كل المواد حتى غير المربوطة بدكتور
+    const dws = await API.getDoctorWithSubjects().catch(() => []);
     dws.forEach(item => {
       (item.subjects || []).forEach(s => {
-        if (!subjMap.has(s.name)) subjMap.set(s.name, s);
+        if (s && s.name && !subjMap.has(s.name)) subjMap.set(s.name, s);
       });
     });
+
+    for (const s of _state.semesters) {
+      const subs = await API.getFolders({
+        department: s.department,
+        levelNumber: s.levelNumber,
+        semesterNumber: s.semesterNumber
+      }).catch(() => []);
+      subs.forEach(sub => {
+        const name = sub.subjectName || sub.name;
+        if (name && !subjMap.has(name)) {
+          subjMap.set(name, {
+            name,
+            code: sub.code || '',
+            department: s.department,
+            levelNumber: s.levelNumber,
+            semesterNumber: s.semesterNumber
+          });
+        }
+      });
+    }
+
     _state.subjects = Array.from(subjMap.values());
     renderSubjects();
   } catch (e) {
@@ -244,8 +261,8 @@ function renderSubjects() {
       s.name,
       s.code || '',
       [
-        btn('✏️ Edit', 'btn-ghost', () => AdminUI.openEditSubject(s.name)),
-        btn('🗑️ Delete', 'btn-danger', () => AdminUI.deleteSubject(s.name))
+        btn('✏️ Edit', 'btn-ghost', () => AdminUI.openEditSubject(s.name, s.department, s.levelNumber, s.semesterNumber)),
+        btn('🗑️ Delete', 'btn-danger', () => AdminUI.deleteSubject(s.name, s.department, s.levelNumber, s.semesterNumber))
       ]
     );
   }).join('');
@@ -274,9 +291,13 @@ function btn(label, cls, onClick) {
   const id = 'btn_' + Math.random().toString(36).slice(2);
   setTimeout(() => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener('click', onClick);
+    if (el) el.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onClick();
+    });
   }, 0);
-  return `<button id="${id}" class="btn ${cls} btn-sm" style="padding:6px 12px;font-size:12px">${label}</button>`;
+  return `<button type="button" id="${id}" class="btn ${cls} btn-sm" style="padding:6px 12px;font-size:12px">${label}</button>`;
 }
 
 function emptyBox(msg) {
@@ -304,6 +325,13 @@ async function renderContentLevel() {
   grid.innerHTML = '<div class="loader"></div>';
   actions.innerHTML = '';
 
+  const actionBtns = [];
+
+  // زر رجوع سريع إذا لم نكن في الصفحة الرئيسية
+  if (p.department) {
+    actionBtns.push(btn('⬅️ Back', 'btn-ghost', () => AdminUI.stepBack()));
+  }
+
   try {
     let items = [];
     let levelName = '';
@@ -311,33 +339,45 @@ async function renderContentLevel() {
     if (!p.department) {
       items = await API.getFolders({});
       levelName = '🏛️ Departments';
-      actions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="AdminUI.openAddDepartment()">➕ Add Department</button>`;
     } else if (!p.levelNumber) {
       items = await API.getFolders({ department: p.department });
       levelName = `📊 Levels in ${p.department}`;
-      actions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="AdminUI.openAddLevel()">➕ Add Level</button>`;
     } else if (!p.semesterNumber) {
       items = await API.getFolders({ department: p.department, levelNumber: p.levelNumber });
       levelName = `📅 Semesters in Level ${p.levelNumber}`;
-      actions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="AdminUI.openAddSemester()">➕ Add Semester</button>`;
     } else if (!p.subject) {
       items = await API.getFolders({ department: p.department, levelNumber: p.levelNumber, semesterNumber: p.semesterNumber });
       levelName = `📖 Subjects in Sem ${p.semesterNumber}`;
-      actions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="AdminUI.openAddSubject()">➕ Add Subject</button>`;
     } else if (!p.doctor) {
       items = await API.getFolders({ department: p.department, levelNumber: p.levelNumber, semesterNumber: p.semesterNumber, subject: p.subject });
       levelName = `👨‍🏫 Doctors for ${p.subject}`;
-      actions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="AdminUI.openLinkDoctor()">🔗 Link Doctor</button>`;
+      actionBtns.push(btn('🔗 Link Doctor', 'btn-primary', () => AdminUI.openLinkDoctor()));
     } else if (!p.dataType) {
-      items = await API.getFolders({ department: p.department, levelNumber: p.levelNumber, semesterNumber: p.semesterNumber, subject: p.subject, doctor: p.doctor });
-      levelName = `📂 Content Types`;
+      // في مستوى أنواع المحتوى: نضمن عرض الفولدرات الأربعة الأساسية بشكل نظيف
+      levelName = `📂 Content Types (${p.doctor})`;
+      items = [
+        { dataType: 'sections', label: 'Sections (السكاشن)' },
+        { dataType: 'videos', label: 'Videos (الفيديوهات)' },
+        { dataType: 'summaries', label: 'Summaries (الملخصات)' },
+        { dataType: 'resources', label: 'Resources (المصادر والمراجع)' }
+      ];
+      actionBtns.push(btn('➕ Quick Upload Content', 'btn-primary', () => AdminUI.openAddFileChoice()));
     } else {
-      items = await API.getFolders({ department: p.department, levelNumber: p.levelNumber, semesterNumber: p.semesterNumber, subject: p.subject, doctor: p.doctor, dataType: p.dataType });
-      levelName = `📄 Files`;
-      actions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="AdminUI.openAddFile('${p.dataType}')">➕ Add ${p.dataType}</button>`;
+      const apiType = p.dataType === 'resource' ? 'recourses' : p.dataType + 's';
+      items = await API.getFolders({
+        department: p.department,
+        levelNumber: p.levelNumber,
+        semesterNumber: p.semesterNumber,
+        subject: p.subject,
+        doctor: p.doctor,
+        dataType: p.dataType
+      }).catch(() => []);
+      levelName = `📄 ${p.dataType.toUpperCase()}S`;
+      actionBtns.push(btn(`➕ Add ${p.dataType}`, 'btn-primary', () => AdminUI.openAddFile(p.dataType)));
     }
 
     title.textContent = levelName;
+    actions.innerHTML = actionBtns.join(' ');
     renderContentItems(items);
   } catch (e) {
     grid.innerHTML = errBox(e.message);
@@ -353,73 +393,93 @@ function renderContentItems(items) {
     return;
   }
 
-  grid.innerHTML = items.map(item => {
+  // فلترة أي عنصر تالف أو فارغ عند عرض الملفات
+  const validItems = items.filter(item => {
+    if (!p.dataType) return true;
+    const titleKey = p.dataType === 'section' ? 'sectionTitle'
+      : p.dataType === 'video' ? 'videoTitle'
+      : p.dataType === 'summary' ? 'summaryTitle'
+      : 'resourceTitle';
+    return Boolean(item && item[titleKey] && String(item[titleKey]).trim() !== '');
+  });
+
+  if (!validItems.length) {
+    grid.innerHTML = emptyBox('No uploaded files yet. Click "+ Add" above to upload.');
+    return;
+  }
+
+  grid.innerHTML = validItems.map(item => {
     // Department
     if (item.depName) {
       return contentCard('🏛️', item.depName, item.code || '', 'department',
         () => { _state.path.department = item.depName; renderContentLevel(); },
-        () => AdminUI.openEditDepartment(item.depName),
-        () => AdminUI.deleteDepartment(item.depName)
+        null,
+        null
       );
     }
     // Level
-    if (item.levelNumber !== undefined) {
+    if (item.levelNumber !== undefined && !p.levelNumber) {
       return contentCard('📊', 'Level ' + item.levelNumber, '', 'level',
         () => { _state.path.levelNumber = item.levelNumber; renderContentLevel(); },
         null,
-        () => AdminUI.deleteLevel(p.department, item.levelNumber)
+        null
       );
     }
     // Semester
-    if (item.semesterNumber !== undefined) {
+    if (item.semesterNumber !== undefined && !p.semesterNumber) {
       return contentCard('📅', 'Semester ' + item.semesterNumber, '', 'semester',
         () => { _state.path.semesterNumber = item.semesterNumber; renderContentLevel(); },
         null,
-        () => AdminUI.deleteSemester(p.department, p.levelNumber, item.semesterNumber)
+        null
       );
     }
     // Subject
-    if (item.subjectName) {
+    if (item.subjectName && !p.subject) {
       const icon = (window.Mappers && Mappers._getIcon) ? Mappers._getIcon(item.subjectName) : '📖';
       return contentCard(icon, item.subjectName, '', 'subject',
         () => { _state.path.subject = item.subjectName; renderContentLevel(); },
-        () => AdminUI.openEditSubject(item.subjectName),
-        () => AdminUI.deleteSubject(item.subjectName)
+        null,
+        null
       );
     }
     // Doctor
-    if (item.doctorName) {
+    if (item.doctorName && !p.doctor) {
       return contentCard('👨‍🏫', item.doctorName, '', 'doctor',
         () => { _state.path.doctor = item.doctorName; renderContentLevel(); },
         null,
         null
       );
     }
-    // DataType
-    if (item.dataType) {
-      const icon = { sections: '📄', videos: '🎬', summaries: '📝', recourses: '📦' }[item.dataType] || '📁';
-      return contentCard(icon, item.dataType, '', 'datatype',
-        () => { _state.path.dataType = item.dataType.replace(/s$/, '').replace('recourse', 'resource'); renderContentLevel(); },
+    // DataType Folder
+    if (item.dataType && !p.dataType) {
+      const normalized = item.dataType.replace(/s$/, '').replace('recourse', 'resource');
+      const icon = { section: '📄', video: '🎬', summary: '📝', resource: '📦' }[normalized] || '📁';
+      const displayTitle = item.label || (normalized.charAt(0).toUpperCase() + normalized.slice(1) + 's');
+      return contentCard(icon, displayTitle, 'Click to view or upload ' + normalized + 's', 'datatype',
+        () => { _state.path.dataType = normalized; renderContentLevel(); },
         null,
         null
       );
     }
-    // File
-    const titleKey = p.dataType === 'section' ? 'sectionTitle'
-      : p.dataType === 'video' ? 'videoTitle'
-      : p.dataType === 'summary' ? 'summaryTitle'
-      : 'resourceTitle';
-    const fileTitle = item[titleKey] || '(no title)';
-    return contentCard('📄', fileTitle, 'Published by ' + (item.sectionPublishedBy || item.videoPublishedBy || item.summaryPublishedBy || item.resourcePublishedBy || '?'), 'file',
-      null,
-      () => AdminUI.openEditFile(p.dataType, fileTitle),
-      () => AdminUI.deleteFile(p.dataType, fileTitle)
-    );
+    // File (Inside a specific dataType)
+    if (p.dataType) {
+      const titleKey = p.dataType === 'section' ? 'sectionTitle'
+        : p.dataType === 'video' ? 'videoTitle'
+        : p.dataType === 'summary' ? 'summaryTitle'
+        : 'resourceTitle';
+      const fileTitle = item[titleKey];
+      const pubBy = item.sectionPublishedBy || item.videoPublishedBy || item.summaryPublishedBy || item.resourcePublishedBy || _state.userName || 'Admin';
+      return contentCard('📄', fileTitle, 'Published by ' + pubBy, 'file',
+        null,
+        () => AdminUI.openEditFile(p.dataType, fileTitle),
+        () => AdminUI.deleteFile(p.dataType, fileTitle)
+      );
+    }
+    return '';
   }).join('');
 }
 
 function contentCard(icon, title, sub, type, onClick, onEdit, onDelete) {
-  const id = 'card_' + Math.random().toString(36).slice(2);
   const mainId = 'main_' + Math.random().toString(36).slice(2);
   setTimeout(() => {
     if (onClick) {
@@ -443,19 +503,33 @@ function contentCard(icon, title, sub, type, onClick, onEdit, onDelete) {
   `;
 }
 
+/* ═══ BREADCRUMBS (Clickable Every Step!) ═══ */
 function renderBreadcrumbs() {
   const el = document.getElementById('contentBreadcrumbs');
   const p = _state.path;
-  const parts = [`<a href="#" data-action="resetPath" id="crumb_home">🏠 Home</a>`];
 
-  if (p.department) parts.push(`<span>${escapeHtml(p.department)}</span>`);
-  if (p.levelNumber) parts.push(`<span>Level ${p.levelNumber}</span>`);
-  if (p.semesterNumber) parts.push(`<span>Sem ${p.semesterNumber}</span>`);
-  if (p.subject) parts.push(`<span>${escapeHtml(p.subject)}</span>`);
-  if (p.doctor) parts.push(`<span>${escapeHtml(p.doctor)}</span>`);
-  if (p.dataType) parts.push(`<span>${escapeHtml(p.dataType)}</span>`);
+  const crumbs = [
+    { label: '🏠 Home', step: 0 }
+  ];
+  if (p.department)     crumbs.push({ label: p.department, step: 1 });
+  if (p.levelNumber)    crumbs.push({ label: 'Level ' + p.levelNumber, step: 2 });
+  if (p.semesterNumber) crumbs.push({ label: 'Sem ' + p.semesterNumber, step: 3 });
+  if (p.subject)        crumbs.push({ label: p.subject, step: 4 });
+  if (p.doctor)         crumbs.push({ label: p.doctor, step: 5 });
+  if (p.dataType)       crumbs.push({ label: p.dataType + 's', step: 6 });
 
-  el.innerHTML = parts.join(' <span class="breadcrumb-sep">/</span> ');
+  el.innerHTML = crumbs.map((c, idx) => {
+    const isLast = idx === crumbs.length - 1;
+    return `<a href="#" data-crumb-step="${c.step}" style="color:${isLast ? '#fff' : 'var(--cyan)'};text-decoration:none;font-weight:${isLast ? '700' : '500'};cursor:pointer">${escapeHtml(c.label)}</a>`;
+  }).join(' <span class="breadcrumb-sep" style="margin:0 6px;color:var(--muted)">/</span> ');
+
+  el.querySelectorAll('[data-crumb-step]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const step = parseInt(link.dataset.crumbStep, 10);
+      AdminUI.navigateToStep(step);
+    });
+  });
 }
 
 /* ═══════════════════════════════════════════
@@ -467,6 +541,7 @@ async function loadDoctorsTab() {
     const docMap = new Map();
     dws.forEach(item => {
       const doc = item.doctor;
+      if (!doc || !doc.name) return;
       if (!docMap.has(doc.name)) docMap.set(doc.name, { doctor: doc, subjects: [] });
       docMap.get(doc.name).subjects.push(...(item.subjects || []));
     });
@@ -519,9 +594,15 @@ function renderLinks() {
    ═══════════════════════════════════════════ */
 const AdminUI = {
   init() {
-    // Override default tab loading
+    // Tabs switching
     document.querySelectorAll('#adminTabs .tab').forEach(tab => {
       tab.addEventListener('click', () => {
+        document.querySelectorAll('#adminTabs .tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        tab.classList.add('active');
+        const target = document.getElementById('tab-' + tab.dataset.tab);
+        if (target) target.classList.remove('hidden');
+
         const t = tab.dataset.tab;
         if (t === 'structure') loadStructure();
         if (t === 'doctors') loadDoctorsTab();
@@ -529,7 +610,7 @@ const AdminUI = {
       });
     });
 
-    // ⚡ ربط الأزرار (بدل onclick)
+    // Static [data-action] buttons
     const actions = {
       openAddDepartment: () => AdminUI.openAddDepartment(),
       openAddLevel:      () => AdminUI.openAddLevel(),
@@ -546,36 +627,101 @@ const AdminUI = {
     document.querySelectorAll('[data-action]').forEach(el => {
       const action = el.dataset.action;
       if (actions[action]) {
-        el.addEventListener('click', actions[action]);
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          actions[action]();
+        });
       }
+    });
+
+    // ⚡ Event Delegation شامل لإغلاق الـ Modal بأمان بدون onclick (متوافق مع CSP)
+    document.addEventListener('click', (e) => {
+      if (e.target.matches('#modalCancelBtn, [data-modal-close="true"]') || e.target.id === 'modalOverlay') {
+        e.preventDefault();
+        AdminUI.closeModal();
+      }
+    });
+
+    // إغلاق الـ Modal بزر Escape من الكيبورد
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') AdminUI.closeModal();
     });
   },
 
-  resetPath() {
-    _state.path = { department: null, levelNumber: null, semesterNumber: null, subject: null, doctor: null, dataType: null };
+  navigateToStep(step) {
+    const keys = ['department', 'levelNumber', 'semesterNumber', 'subject', 'doctor', 'dataType'];
+    for (let i = step; i < keys.length; i++) {
+      _state.path[keys[i]] = null;
+    }
     renderContentLevel();
   },
 
-  /* ═══ MODAL ═══ */
-  modal(title, bodyHtml, onSave) {
+  stepBack() {
+    const keys = ['department', 'levelNumber', 'semesterNumber', 'subject', 'doctor', 'dataType'];
+    for (let i = keys.length - 1; i >= 0; i--) {
+      if (_state.path[keys[i]] !== null) {
+        _state.path[keys[i]] = null;
+        break;
+      }
+    }
+    renderContentLevel();
+  },
+
+  resetPath() {
+    this.navigateToStep(0);
+  },
+
+  /* ═══ MODAL (Supports "Save & Add Another" + Event Listeners) ═══ */
+  modal(title, bodyHtml, onSave, allowMultiple = false) {
     const root = document.getElementById('modalRoot');
     root.innerHTML = `
       <div id="modalOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)">
         <div style="background:var(--panel);border:1px solid var(--cyan);border-radius:14px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;padding:24px;box-shadow:0 0 40px rgba(0,229,255,.3)">
-          <h3 style="color:var(--cyan);font-size:18px;margin-bottom:18px">${title}</h3>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+            <h3 style="color:var(--cyan);font-size:18px;margin:0">${title}</h3>
+            <button type="button" data-modal-close="true" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+          </div>
           <div id="modalBody">${bodyHtml}</div>
-          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
-            <button class="btn btn-ghost btn-sm" onclick="AdminUI.closeModal()">Cancel</button>
-            <button class="btn btn-primary btn-sm" id="modalSaveBtn">💾 Save</button>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap">
+            <button type="button" class="btn btn-ghost btn-sm" id="modalCancelBtn" data-modal-close="true">Cancel</button>
+            ${allowMultiple ? `<button type="button" class="btn btn-success btn-sm" id="modalSaveAnotherBtn">➕ Save & Add Another</button>` : ''}
+            <button type="button" class="btn btn-primary btn-sm" id="modalSaveBtn">💾 Save</button>
           </div>
         </div>
       </div>
     `;
-    document.getElementById('modalSaveBtn').addEventListener('click', onSave);
+
+    const cancelBtn = document.getElementById('modalCancelBtn');
+    if (cancelBtn) cancelBtn.addEventListener('click', () => AdminUI.closeModal());
+
+    const saveBtn = document.getElementById('modalSaveBtn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', async () => {
+        saveBtn.disabled = true;
+        try {
+          await onSave(false);
+        } finally {
+          if (document.getElementById('modalSaveBtn')) saveBtn.disabled = false;
+        }
+      });
+    }
+
+    const saveAnotherBtn = document.getElementById('modalSaveAnotherBtn');
+    if (saveAnotherBtn) {
+      saveAnotherBtn.addEventListener('click', async () => {
+        saveAnotherBtn.disabled = true;
+        try {
+          await onSave(true);
+        } finally {
+          if (document.getElementById('modalSaveAnotherBtn')) saveAnotherBtn.disabled = false;
+        }
+      });
+    }
   },
 
   closeModal() {
-    document.getElementById('modalRoot').innerHTML = '';
+    const root = document.getElementById('modalRoot');
+    if (root) root.innerHTML = '';
   },
 
   /* ═══ DEPARTMENT ═══ */
@@ -585,7 +731,7 @@ const AdminUI = {
       <div class="field"><label>Description</label><input type="text" id="mDeptDesc" placeholder="..."></div>
       <div class="field"><label>Expected Jobs</label><input type="text" id="mDeptJobs" placeholder="..."></div>
       <div class="field"><label>Code</label><input type="text" id="mDeptCode" placeholder="CS"></div>
-    `, async () => {
+    `, async (keepOpen) => {
       const d = {
         DepartmentName: document.getElementById('mDeptName').value.trim(),
         departmentDescription: document.getElementById('mDeptDesc').value.trim(),
@@ -596,11 +742,18 @@ const AdminUI = {
       try {
         await API.addDepartments([d]);
         UI.success('Department added');
-        AdminUI.closeModal();
-        await loadDepartments();
-        await loadLevels();
+        await loadStructure();
+        if (keepOpen) {
+          document.getElementById('mDeptName').value = '';
+          document.getElementById('mDeptDesc').value = '';
+          document.getElementById('mDeptJobs').value = '';
+          document.getElementById('mDeptCode').value = '';
+          document.getElementById('mDeptName').focus();
+        } else {
+          AdminUI.closeModal();
+        }
       } catch (e) { UI.error(e.message); }
-    });
+    }, true);
   },
 
   openEditDepartment(oldName) {
@@ -622,7 +775,7 @@ const AdminUI = {
         await API.editDepartment(p);
         UI.success('Department updated');
         AdminUI.closeModal();
-        await loadDepartments();
+        await loadStructure();
       } catch (e) { UI.error(e.message); }
     });
   },
@@ -632,28 +785,35 @@ const AdminUI = {
     try {
       await API.deleteDepartments([name]);
       UI.success('Deleted');
-      await loadDepartments();
+      await loadStructure();
     } catch (e) { UI.error(e.message); }
   },
 
   /* ═══ LEVEL ═══ */
   openAddLevel() {
+    const defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
     this.modal('➕ Add Level', `
-      <div class="field"><label>Department</label><input type="text" id="mLvlDept" placeholder="computer science"></div>
-      <div class="field"><label>Level Number</label><input type="number" id="mLvlNum" value="1"></div>
-    `, async () => {
+      <div class="field"><label>Department</label><input type="text" id="mLvlDept" value="${escapeHtml(defaultDept)}" placeholder="computer science"></div>
+      <div class="field"><label>Level Number</label><input type="number" id="mLvlNum" value="1" min="1" max="6"></div>
+    `, async (keepOpen) => {
       const p = {
         DepartmentName: document.getElementById('mLvlDept').value.trim(),
-        levelNumber: parseInt(document.getElementById('mLvlNum').value)
+        levelNumber: parseInt(document.getElementById('mLvlNum').value, 10)
       };
       if (!p.DepartmentName) return UI.error('Department required');
       try {
         await API.addLevels([p]);
         UI.success('Level added');
-        AdminUI.closeModal();
         await loadLevels();
+        await loadSemesters();
+        if (keepOpen) {
+          document.getElementById('mLvlNum').value = p.levelNumber + 1;
+          document.getElementById('mLvlNum').focus();
+        } else {
+          AdminUI.closeModal();
+        }
       } catch (e) { UI.error(e.message); }
-    });
+    }, true);
   },
 
   async deleteLevel(dept, num) {
@@ -662,29 +822,36 @@ const AdminUI = {
       await API.deleteLevels([{ DepartmentName: dept, levelNumber: num }]);
       UI.success('Deleted');
       await loadLevels();
+      await loadSemesters();
     } catch (e) { UI.error(e.message); }
   },
 
   /* ═══ SEMESTER ═══ */
   openAddSemester() {
+    const defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
+    const defaultLvl = _state.path.levelNumber || 1;
     this.modal('➕ Add Semester', `
-      <div class="field"><label>Department</label><input type="text" id="mSemDept" placeholder="computer science"></div>
-      <div class="field"><label>Level Number</label><input type="number" id="mSemLvl" value="1"></div>
+      <div class="field"><label>Department</label><input type="text" id="mSemDept" value="${escapeHtml(defaultDept)}" placeholder="computer science"></div>
+      <div class="field"><label>Level Number</label><input type="number" id="mSemLvl" value="${defaultLvl}"></div>
       <div class="field"><label>Semester Number</label><input type="number" id="mSemNum" value="1"></div>
-    `, async () => {
+    `, async (keepOpen) => {
       const p = {
         DepartmentName: document.getElementById('mSemDept').value.trim(),
-        levelNumber: parseInt(document.getElementById('mSemLvl').value),
-        semesterNumber: parseInt(document.getElementById('mSemNum').value)
+        levelNumber: parseInt(document.getElementById('mSemLvl').value, 10),
+        semesterNumber: parseInt(document.getElementById('mSemNum').value, 10)
       };
       if (!p.DepartmentName) return UI.error('Department required');
       try {
         await API.addSemesters([p]);
         UI.success('Semester added');
-        AdminUI.closeModal();
         await loadSemesters();
+        if (keepOpen) {
+          document.getElementById('mSemNum').value = p.semesterNumber === 1 ? 2 : 1;
+        } else {
+          AdminUI.closeModal();
+        }
       } catch (e) { UI.error(e.message); }
-    });
+    }, true);
   },
 
   async deleteSemester(dept, lvl, sem) {
@@ -698,18 +865,21 @@ const AdminUI = {
 
   /* ═══ SUBJECT ═══ */
   openAddSubject() {
+    const defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
+    const defaultLvl = _state.path.levelNumber || 2;
+    const defaultSem = _state.path.semesterNumber || 1;
     this.modal('➕ Add Subject', `
-      <div class="field"><label>Department</label><input type="text" id="mSubDept" placeholder="computer science"></div>
-      <div class="field"><label>Level</label><input type="number" id="mSubLvl" value="2"></div>
-      <div class="field"><label>Semester</label><input type="number" id="mSubSem" value="1"></div>
+      <div class="field"><label>Department</label><input type="text" id="mSubDept" value="${escapeHtml(defaultDept)}" placeholder="computer science"></div>
+      <div class="field"><label>Level</label><input type="number" id="mSubLvl" value="${defaultLvl}"></div>
+      <div class="field"><label>Semester</label><input type="number" id="mSubSem" value="${defaultSem}"></div>
       <div class="field"><label>Subject Name</label><input type="text" id="mSubName" placeholder="algorithm"></div>
       <div class="field"><label>Description</label><input type="text" id="mSubDesc"></div>
       <div class="field"><label>Code</label><input type="text" id="mSubCode"></div>
-    `, async () => {
+    `, async (keepOpen) => {
       const p = {
         DepartmentName: document.getElementById('mSubDept').value.trim(),
-        levelNumber: parseInt(document.getElementById('mSubLvl').value),
-        semesterNumber: parseInt(document.getElementById('mSubSem').value),
+        levelNumber: parseInt(document.getElementById('mSubLvl').value, 10),
+        semesterNumber: parseInt(document.getElementById('mSubSem').value, 10),
         subjectName: document.getElementById('mSubName').value.trim(),
         subjectDescription: document.getElementById('mSubDesc').value.trim(),
         subjectCode: document.getElementById('mSubCode').value.trim()
@@ -718,17 +888,27 @@ const AdminUI = {
       try {
         await API.addSubjects([p]);
         UI.success('Subject added');
-        AdminUI.closeModal();
         await loadSubjects();
+        if (keepOpen) {
+          document.getElementById('mSubName').value = '';
+          document.getElementById('mSubDesc').value = '';
+          document.getElementById('mSubCode').value = '';
+          document.getElementById('mSubName').focus();
+        } else {
+          AdminUI.closeModal();
+        }
       } catch (e) { UI.error(e.message); }
-    });
+    }, true);
   },
 
-  openEditSubject(oldName) {
+  openEditSubject(oldName, dept, lvl, sem) {
+    const defaultDept = dept || _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
+    const defaultLvl = lvl || _state.path.levelNumber || 2;
+    const defaultSem = sem || _state.path.semesterNumber || 1;
     this.modal('✏️ Edit Subject', `
-      <div class="field"><label>Department</label><input type="text" id="mSubDept" placeholder="computer science"></div>
-      <div class="field"><label>Level</label><input type="number" id="mSubLvl" value="2"></div>
-      <div class="field"><label>Semester</label><input type="number" id="mSubSem" value="1"></div>
+      <div class="field"><label>Department</label><input type="text" id="mSubDept" value="${escapeHtml(defaultDept)}" placeholder="computer science"></div>
+      <div class="field"><label>Level</label><input type="number" id="mSubLvl" value="${defaultLvl}"></div>
+      <div class="field"><label>Semester</label><input type="number" id="mSubSem" value="${defaultSem}"></div>
       <div class="field"><label>Old Name</label><input type="text" value="${escapeHtml(oldName)}" readonly style="opacity:.6"></div>
       <div class="field"><label>New Name</label><input type="text" id="mSubNew"></div>
       <div class="field"><label>New Description</label><input type="text" id="mSubDesc"></div>
@@ -736,8 +916,8 @@ const AdminUI = {
     `, async () => {
       const p = {
         departmentName: document.getElementById('mSubDept').value.trim(),
-        levelNumber: parseInt(document.getElementById('mSubLvl').value),
-        semesterNumber: parseInt(document.getElementById('mSubSem').value),
+        levelNumber: parseInt(document.getElementById('mSubLvl').value, 10),
+        semesterNumber: parseInt(document.getElementById('mSubSem').value, 10),
         subjectName: oldName,
         newSubjectName: document.getElementById('mSubNew').value.trim() || undefined,
         subjectDescription: document.getElementById('mSubDesc').value.trim() || undefined,
@@ -753,10 +933,15 @@ const AdminUI = {
     });
   },
 
-  async deleteSubject(name) {
+  async deleteSubject(name, dept, lvl, sem) {
     if (!confirm(`Delete subject "${name}"?`)) return;
     try {
-      const payload = [{ DepartmentName: CONFIG.DEFAULTS.department, levelNumber: CONFIG.DEFAULTS.levelNumber, semesterNumber: CONFIG.DEFAULTS.semesterNumber, subjectName: name }];
+      const payload = [{
+        DepartmentName: dept || _state.path.department || CONFIG.DEFAULTS.department,
+        levelNumber: lvl || _state.path.levelNumber || CONFIG.DEFAULTS.levelNumber,
+        semesterNumber: sem || _state.path.semesterNumber || CONFIG.DEFAULTS.semesterNumber,
+        subjectName: name
+      }];
       await API.deleteSubjects(payload);
       UI.success('Deleted');
       await loadSubjects();
@@ -770,7 +955,7 @@ const AdminUI = {
       <div class="field"><label>Academic Degree</label><input type="text" id="mDocDeg" placeholder="PhD"></div>
       <div class="field"><label>Description</label><input type="text" id="mDocDesc"></div>
       <div class="field"><label>Photo (required)</label><input type="file" id="mDocPhoto" accept="image/*"></div>
-    `, async () => {
+    `, async (keepOpen) => {
       const name = document.getElementById('mDocName').value.trim();
       const photo = document.getElementById('mDocPhoto').files[0];
       if (!name || !photo) return UI.error('Name + Photo required');
@@ -788,10 +973,17 @@ const AdminUI = {
       try {
         await API.addDoctors(fd);
         UI.success('Doctor added');
-        AdminUI.closeModal();
         await loadDoctorsTab();
+        if (keepOpen) {
+          document.getElementById('mDocName').value = '';
+          document.getElementById('mDocDesc').value = '';
+          document.getElementById('mDocPhoto').value = '';
+          document.getElementById('mDocName').focus();
+        } else {
+          AdminUI.closeModal();
+        }
       } catch (e) { UI.error(e.message); }
-    });
+    }, true);
   },
 
   openEditDoctor(name) {
@@ -830,39 +1022,45 @@ const AdminUI = {
 
   /* ═══ LINK DOCTOR ═══ */
   openLinkDoctor() {
+    const p = _state.path;
     this.modal('🔗 Link Doctor to Subject', `
-      <div class="field"><label>Department</label><input type="text" id="mLnkDept" placeholder="computer science"></div>
-      <div class="field"><label>Level</label><input type="number" id="mLnkLvl" value="2"></div>
-      <div class="field"><label>Semester</label><input type="number" id="mLnkSem" value="1"></div>
-      <div class="field"><label>Subject</label><input type="text" id="mLnkSub" placeholder="algorithm"></div>
+      <div class="field"><label>Department</label><input type="text" id="mLnkDept" value="${escapeHtml(p.department || '')}" placeholder="computer science"></div>
+      <div class="field"><label>Level</label><input type="number" id="mLnkLvl" value="${p.levelNumber || 2}"></div>
+      <div class="field"><label>Semester</label><input type="number" id="mLnkSem" value="${p.semesterNumber || 1}"></div>
+      <div class="field"><label>Subject</label><input type="text" id="mLnkSub" value="${escapeHtml(p.subject || '')}" placeholder="algorithm"></div>
       <div class="field"><label>Doctor</label><input type="text" id="mLnkDoc" placeholder="Amgad Salama"></div>
-    `, async () => {
-      const p = [{
+    `, async (keepOpen) => {
+      const payload = [{
         DepartmentName: document.getElementById('mLnkDept').value.trim(),
-        levelNumber: parseInt(document.getElementById('mLnkLvl').value),
-        semesterNumber: parseInt(document.getElementById('mLnkSem').value),
+        levelNumber: parseInt(document.getElementById('mLnkLvl').value, 10),
+        semesterNumber: parseInt(document.getElementById('mLnkSem').value, 10),
         subjectName: document.getElementById('mLnkSub').value.trim(),
         doctorName: document.getElementById('mLnkDoc').value.trim()
       }];
-      if (!p[0].DepartmentName || !p[0].subjectName || !p[0].doctorName) return UI.error('Fill all fields');
+      if (!payload[0].DepartmentName || !payload[0].subjectName || !payload[0].doctorName) return UI.error('Fill all fields');
       try {
-        await API.linkDoctors(p);
+        await API.linkDoctors(payload);
         UI.success('Linked');
-        AdminUI.closeModal();
         await loadDoctorsTab();
+        if ( p.subject ) await renderContentLevel();
+        if (keepOpen) {
+          document.getElementById('mLnkDoc').value = '';
+          document.getElementById('mLnkDoc').focus();
+        } else {
+          AdminUI.closeModal();
+        }
       } catch (e) { UI.error(e.message); }
-    });
+    }, true);
   },
 
   async unlinkDoctor(link) {
     if (!confirm(`Unlink ${link.subjectName} ↔ ${link.doctorName}?`)) return;
     try {
-      // Extract data from link
       const url = new URL(link.link, 'http://x');
       const p = [{
         DepartmentName: url.searchParams.get('department'),
-        levelNumber: parseInt(url.searchParams.get('levelNumber')),
-        semesterNumber: parseInt(url.searchParams.get('semesterNumber')),
+        levelNumber: parseInt(url.searchParams.get('levelNumber'), 10),
+        semesterNumber: parseInt(url.searchParams.get('semesterNumber'), 10),
         subjectName: url.searchParams.get('subject'),
         doctorName: url.searchParams.get('doctor')
       }];
@@ -872,48 +1070,90 @@ const AdminUI = {
     } catch (e) { UI.error(e.message); }
   },
 
-  /* ═══ FILE (Content) ═══ */
+  /* ═══ FILE (Content) — Upload from Content Types or Inside Folder ═══ */
+  openAddFileChoice() {
+    this.modal('➕ Upload Content (Section / Video / Summary / Resource)', `
+      <div class="field">
+        <label>Content Type</label>
+        <select id="mChoiceType">
+          <option value="section">📄 Section (سكشن / محاضرة)</option>
+          <option value="video">🎬 Video (رابط فيديو)</option>
+          <option value="summary">📝 Summary (ملخص)</option>
+          <option value="resource">📦 Resource (مرجع / كتاب)</option>
+        </select>
+      </div>
+      <div class="field"><label>Title</label><input type="text" id="mFileTitle" placeholder="Lecture 1 / Section 1"></div>
+      <div class="field" id="mFileWrap"><label>File</label><input type="file" id="mFileInput"></div>
+      <div class="field hidden" id="mVideoWrap" style="display:none"><label>Video URL</label><input type="text" id="mFileVideo" placeholder="https://youtube.com/..."></div>
+    `, async (keepOpen) => {
+      const dataType = document.getElementById('mChoiceType').value;
+      await this._submitFileUpload(dataType, keepOpen);
+    }, true);
+
+    const selectEl = document.getElementById('mChoiceType');
+    if (selectEl) {
+      selectEl.addEventListener('change', () => {
+        const isVid = selectEl.value === 'video';
+        document.getElementById('mFileWrap').style.display = isVid ? 'none' : 'block';
+        document.getElementById('mVideoWrap').style.display = isVid ? 'block' : 'none';
+      });
+    }
+  },
+
   openAddFile(dataType) {
-    const titleField = dataType + 'Title';
     const isVideo = dataType === 'video';
     this.modal(`➕ Add ${dataType}`, `
-      <div class="field"><label>Title</label><input type="text" id="mFileTitle"></div>
+      <div class="field"><label>Title</label><input type="text" id="mFileTitle" placeholder="Enter title..."></div>
       ${isVideo
         ? '<div class="field"><label>Video URL</label><input type="text" id="mFileVideo" placeholder="https://..."></div>'
         : '<div class="field"><label>File</label><input type="file" id="mFileInput"></div>'}
-    `, async () => {
-      const title = document.getElementById('mFileTitle').value.trim();
-      if (!title) return UI.error('Title required');
+    `, async (keepOpen) => {
+      await this._submitFileUpload(dataType, keepOpen);
+    }, true);
+  },
 
-      const p = _state.path;
-      const payload = {
-        subjectName: p.subject,
-        doctorName: p.doctor
-      };
-      payload[titleField] = title;
+  async _submitFileUpload(dataType, keepOpen) {
+    const titleField = dataType + 'Title';
+    const isVideo = dataType === 'video';
+    const title = document.getElementById('mFileTitle').value.trim();
+    if (!title) return UI.error('Title required');
 
-      try {
-        if (isVideo) {
-          const url = document.getElementById('mFileVideo').value.trim();
-          if (!url) return UI.error('URL required');
-          payload.video = url;
-          await API.addVideos([payload]);
-        } else {
-          const file = document.getElementById('mFileInput').files[0];
-          if (!file) return UI.error('File required');
-          const fd = new FormData();
-          payload[dataType + 'File'] = 'file1';
-          fd.append('data', JSON.stringify([payload]));
-          fd.append('file1', file);
-          if (dataType === 'section') await API.addSections(fd);
-          if (dataType === 'summary') await API.addSummaries(fd);
-          if (dataType === 'resource') await API.addResources(fd);
-        }
-        UI.success('Added');
+    const p = _state.path;
+    const payload = {
+      subjectName: p.subject,
+      doctorName: p.doctor
+    };
+    payload[titleField] = title;
+
+    try {
+      if (isVideo) {
+        const url = document.getElementById('mFileVideo').value.trim();
+        if (!url) return UI.error('URL required');
+        payload.video = url;
+        await API.addVideos([payload]);
+      } else {
+        const fileInput = document.getElementById('mFileInput');
+        const file = fileInput && fileInput.files[0];
+        if (!file) return UI.error('File required');
+        const fd = new FormData();
+        payload[dataType + 'File'] = 'file1';
+        fd.append('data', JSON.stringify([payload]));
+        fd.append('file1', file);
+        if (dataType === 'section') await API.addSections(fd);
+        if (dataType === 'summary') await API.addSummaries(fd);
+        if (dataType === 'resource') await API.addResources(fd);
+      }
+      UI.success('Added successfully');
+      await renderContentLevel();
+      if (keepOpen) {
+        document.getElementById('mFileTitle').value = '';
+        if (document.getElementById('mFileVideo')) document.getElementById('mFileVideo').value = '';
+        if (document.getElementById('mFileInput')) document.getElementById('mFileInput').value = '';
+        document.getElementById('mFileTitle').focus();
+      } else {
         AdminUI.closeModal();
-        await renderContentLevel();
-      } catch (e) { UI.error(e.message); }
-    });
+      }
+    } catch (e) { UI.error(e.message); }
   },
 
   openEditFile(dataType, oldTitle) {
@@ -955,8 +1195,6 @@ const AdminUI = {
   async deleteFile(dataType, title) {
     if (!confirm(`Delete "${title}"?`)) return;
     try {
-      const titleKey = dataType + 'Title';
-      const payload = {}; payload[titleKey] = title;
       if (dataType === 'section') await API.deleteSections(title);
       if (dataType === 'summary') await API.deleteSummaries(title);
       if (dataType === 'resource') await API.deleteResources(title);
@@ -970,9 +1208,10 @@ const AdminUI = {
   async changeRole() {
     const emails = document.getElementById('userEmails').value.trim().split(/\n+/).filter(Boolean);
     if (!emails.length) return UI.error('Enter emails');
-    const role = document.getElementById('userRole').value;
+    const roleSelect = document.querySelector('#tab-users select#userRole');
+    const role = roleSelect ? roleSelect.value : 'user';
     const department = document.getElementById('userDept').value.trim();
-    const level = parseInt(document.getElementById('userLevel').value) || 1;
+    const level = parseInt(document.getElementById('userLevel').value, 10) || 1;
     try {
       await API.garanteeRoles({ students: emails, role, department, level });
       UI.success('Roles updated');

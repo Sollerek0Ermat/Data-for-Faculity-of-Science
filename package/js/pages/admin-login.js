@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Admin Login
  *
  * Flow:
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       '</div>'
     ].join('');
     hint.style.display = 'block';
-    hint.textContent = 'Set a strong password (min 8 chars, must contain uppercase, lowercase, number, and symbol).';
+    hint.textContent = 'Enter a password (min 5 characters).';
   } else {
     fields.innerHTML = [
       '<div class="input-group">',
@@ -133,11 +133,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pwd2El = document.getElementById('pwd2');
     const pwd2 = pwd2El ? pwd2El.value : null;
 
-    if (!pwd1 || pwd1.length < 8) {
+    if (!pwd1 || pwd1.length < 5) {
       return setMsg('Password must be at least 8 characters', 'var(--danger)');
     }
     if (firstTime) {
-      if (!pwd2 || pwd2.length < 8) {
+      if (!pwd2 || pwd2.length < 5) {
         return setMsg('Please confirm your password', 'var(--danger)');
       }
       if (pwd1 !== pwd2) {
