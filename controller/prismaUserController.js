@@ -205,7 +205,7 @@ exports.getUserInfo = async (request, response, next) => {
             }
         });
 
-        const { password, ...userToAdd } = user
+        const { password, ...userToAdd } = user 
 
         response.status(200).json({
             status: 'success',
