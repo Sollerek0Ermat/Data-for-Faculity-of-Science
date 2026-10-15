@@ -1,0 +1,86 @@
+/**
+ * Admin Login - Direct (بدون Microsoft)
+ */
+
+document.addEventListener('DOMContentLoaded', async () => {
+  renderTopbar();
+  const footer = document.getElementById('footerPlaceholder');
+  if (footer) footer.outerHTML = renderFooter();
+
+  const step1 = document.getElementById('step1');
+  const step2 = document.getElementById('step2');
+  const subTitle = document.getElementById('subTitle');
+  const msg = document.getElementById('msg');
+
+  if (step1) step1.style.display = 'none';
+  if (step2) step2.style.display = 'block';
+  if (subTitle) subTitle.textContent = 'Admin Login';
+
+  const form = document.getElementById('pwdForm');
+  const emailInput = document.getElementById('adminEmail');
+  const pwdInput = document.getElementById('adminPwd');
+  const btn = document.getElementById('submitBtn');
+  const hint = document.getElementById('pwdHint');
+
+  if (hint) {
+    hint.textContent = 'First time? Enter a new password to set it. Otherwise, enter your existing password.';
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = emailInput.value.trim();
+    const password = pwdInput.value;
+
+    if (!email) return UI.error('Enter your email');
+    if (!password || password.length < 8) {
+      msg.textContent = 'Password must be at least 8 characters';
+      msg.style.color = 'var(--danger)';
+      return;
+    }
+
+    btn.disabled = true;
+    msg.textContent = 'Verifying...';
+    msg.style.color = 'var(--muted)';
+
+    try {
+      // نستخدم endpoint مباشر
+      const res = await fetch('/v1/admin/loginDirect', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      // احفظ الـ token
+      if (data.token) {
+        localStorage.setItem('cs_jwt_token', data.token);
+      }
+      if (data.user) {
+        localStorage.setItem('cs_session', JSON.stringify({
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+          role: data.user.role,
+          photo: data.user.photo,
+          token: data.token
+        }));
+      }
+
+      UI.success('Welcome ' + (data.user ? data.user.name : ''));
+      setTimeout(() => { window.location.href = 'admin.html'; }, 800);
+
+    } catch (err) {
+      console.error('adminLogin error:', err);
+      msg.textContent = 'Error: ' + (err.message || 'Login failed');
+      msg.style.color = 'var(--danger)';
+      btn.disabled = false;
+    }
+  });
+});
