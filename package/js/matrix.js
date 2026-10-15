@@ -1,6 +1,5 @@
-/**
- * 🌧️ Matrix Rain — Cyan only
- * Auto-injects canvas if not present
+﻿/**
+ * 🌧️ Matrix Rain — Cyan (always on, transparent)
  */
 (function () {
   'use strict';
@@ -10,22 +9,20 @@
   if (!canvas) {
     canvas = document.createElement('canvas');
     canvas.id = 'matrixCanvas';
-    document.body.insertBefore(canvas, document.body.firstChild);
+    if (document.body.firstChild) {
+      document.body.insertBefore(canvas, document.body.firstChild);
+    } else {
+      document.body.appendChild(canvas);
+    }
   }
 
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const cores  = navigator.hardwareConcurrency || 8;
-  const memory = navigator.deviceMemory || 8;
+  // ✨ شيلنا الـ condition — المطر بيشتغل دايمًا
+  canvas.style.display = 'block';
 
-  if (reducedMotion || cores <= 4 || memory <= 4) {
-    canvas.style.display = 'none';
-    return;
-  }
-
-  const ctx = canvas.getContext('2d', { alpha: false });
+  const ctx = canvas.getContext('2d', { alpha: true });
 
   let width, height, columns, drops;
-  let fontSize = 20;
+  let fontSize = 18;
   let frameInterval = 100;
   let lastFrame = 0;
   let rafId = null;
@@ -33,7 +30,7 @@
 
   const isMobile = window.innerWidth < 768;
   if (isMobile) {
-    fontSize = 26;
+    fontSize = 24;
     frameInterval = 150;
   }
 
@@ -46,8 +43,7 @@
     canvas.style.height = height + 'px';
     columns = Math.floor(width / fontSize);
     drops = Array(columns).fill(1);
-    ctx.fillStyle = '#07111F';
-    ctx.fillRect(0, 0, width, height);
+    ctx.clearRect(0, 0, width, height);
   }
 
   const chars = '01アイウエオカキクケコ';
@@ -60,7 +56,8 @@
     }
     lastFrame = timestamp;
 
-    ctx.fillStyle = 'rgba(7, 17, 31, 0.15)';
+    // خلفية شفافة
+    ctx.fillStyle = 'rgba(6, 9, 25, 0.08)';
     ctx.fillRect(0, 0, width, height);
 
     ctx.font = fontSize + 'px "JetBrains Mono", monospace';
@@ -72,9 +69,9 @@
       const y = drops[i] * fontSize;
 
       if (Math.random() > 0.99) {
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
       } else {
-        ctx.fillStyle = 'rgba(0, 213, 232, 0.75)';
+        ctx.fillStyle = 'rgba(0, 213, 232, 0.5)';
       }
 
       ctx.fillText(char, x, y);

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Topbar + Footer + Mobile Menu
  */
 
@@ -22,7 +22,7 @@ function renderTopbar(activePage) {
     '<header class="topbar">',
     '<button class="menu-toggle-btn" id="menuToggle" aria-label="Toggle menu" aria-expanded="false">Menu</button>',
     '<a href="index.html" class="brand">',
-    '<div class="brand-logo"></div>',
+    '<i class="fa-solid fa-graduation-cap brand-logo" aria-hidden="true"></i>',
     '<span class="brand-text">DATA<span>.</span></span>',
     '</a>',
     '<nav class="nav" id="mainNav">',
