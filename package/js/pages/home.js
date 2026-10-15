@@ -1,19 +1,16 @@
 /**
  * Home page — نفس نظام folder.js بالظبط، بس جوه نفس الصفحة بدون إعادة تحميل
- * المستوى الكامل: department → level → semester → subject → doctor → dataType → file
  */
 
 var _homeParams = {};
 
 document.addEventListener('DOMContentLoaded', async function () {
-  // 1) Verify session (زي index.js الأصلي)
   var profile = await Auth.syncSession();
   if (!profile || !profile.role) {
     window.location.href = 'login.html';
     return;
   }
 
-  // 2) Intro redirect (أول زيارة بس)
   var introSeen = localStorage.getItem('intro_seen_v3');
   var skipIntro = new URLSearchParams(location.search).get('skip_intro');
   if (!introSeen && !skipIntro) {
@@ -22,7 +19,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     return;
   }
 
-  // 3) Render page
   renderTopbar('index.html');
   var footer = document.getElementById('footerPlaceholder');
   if (footer) footer.outerHTML = renderFooter();
@@ -39,6 +35,8 @@ function renderHomeBreadcrumbs() {
   var trail = FolderBrowser.breadcrumbTrail(_homeParams);
 
   trail.forEach(function (step) {
+    if (!step.label || step.label.trim() === '' || step.label === 'undefined' || step.label === 'null') return;
+
     html += ' / ';
     if (step.isLast) {
       html += '<span style="color:#fff;cursor:default">' + escapeHtml(step.label) + '</span>';
@@ -67,31 +65,26 @@ async function loadHomeLevel() {
     params: _homeParams,
     gridEl: grid,
     titleEl: titleEl,
-    navKeyFor: function () { return '1'; }, // مجرد علامة إننا هنمسك الكليك بنفسنا
-    hrefFor: function () { return '#'; }     // مفيش reload — هنفتح نفس الصفحة
+    navKeyFor: function () { return '1'; },
+    hrefFor: function () { return '#'; }
   });
 
   if (result.level !== 'file') bindHomeCardClicks(grid, result.items);
 }
 
 function bindHomeCardClicks(grid, items) {
-  // الكروت العادية (subject-card / dataType-card) — نلتقط الكليك ونمنع الانتقال الافتراضي
   grid.querySelectorAll('a[data-nav]').forEach(function (a, idx) {
     a.addEventListener('click', function (e) {
       e.preventDefault();
       var item = items[idx];
       if (!item) return;
-
-      // ملحوظة: item.link هو رابط API خام (/v1/student/folder?...) راجع من السيرفر
-      // لو تفتحه في المتصفح هيعرض JSON خام — مش صفحة. نتجاهله خالص ونكمل التنقل
-      // بنفس آلية nextParams زي باقي المستويات.
       goTo(FolderBrowser.nextParams(_homeParams, item));
     });
   });
 }
 
 function goTo(newParams) {
-  _homeParams = newParams;
+  _homeParams = cleanParams(newParams || {});
   renderHomeBreadcrumbs();
   loadHomeLevel();
 }

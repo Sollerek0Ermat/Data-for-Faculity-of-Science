@@ -171,15 +171,17 @@ const Mappers = {
     if (raw.doctorName) {
       return { level: 'doctor', id: raw.doctorName, name: raw.doctorName, link: raw.link || null };
     }
-    if (raw.dataType) {
+    if (raw.dataType && raw.dataType !== 'undefined' && raw.dataType !== 'null') {
       return { level: 'dataType', id: raw.dataType, dataType: raw.dataType, link: raw.link || null };
     }
-    return { level: 'unknown', id: JSON.stringify(raw), raw: raw };
+    return null;
   },
 
   folderList: function (raw) {
     if (!raw || !Array.isArray(raw)) return [];
-    return raw.map(function (item) { return Mappers.folder(item); });
+    return raw
+      .map(function (item) { return Mappers.folder(item); })
+      .filter(function (x) { return x !== null && x !== undefined; });
   },
 
   doctorWithSubjects: function (raw) {

@@ -49,6 +49,34 @@ function buildUrl(path, params = {}) {
   return q ? `${path}?${q}` : path;
 }
 
+/* 🧹 تنظيف الـ params من أي قيمة undefined/null/empty/"undefined"/"null" */
+function cleanParams(p) {
+  var out = {};
+  Object.keys(p || {}).forEach(function(k) {
+    var v = p[k];
+    if (
+      v !== undefined &&
+      v !== null &&
+      v !== '' &&
+      v !== 'undefined' &&
+      v !== 'null' &&
+      v !== 'NaN' &&
+      !(typeof v === 'number' && isNaN(v))
+    ) {
+      out[k] = v;
+    }
+  });
+  return out;
+}
+
+/* 🧹 تنظيف أي نص من undefined/null */
+function safeText(v) {
+  if (v === undefined || v === null) return '';
+  var s = String(v);
+  if (s === 'undefined' || s === 'null' || s === 'NaN') return '';
+  return s;
+}
+
 function $ (sel, root = document) { return root.querySelector(sel); }
 function $$ (sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
 

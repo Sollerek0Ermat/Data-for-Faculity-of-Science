@@ -1,6 +1,5 @@
 /**
  * Folder Browser — التصفح الهرمي (URL-based)
- * شغال دلوقتي فوق محرك FolderBrowser المشترك (js/folderBrowser.js)
  */
 
 var _params = {};
@@ -11,14 +10,14 @@ document.addEventListener('DOMContentLoaded', async function () {
   if (footer) footer.outerHTML = renderFooter();
 
   var urlParams = new URLSearchParams(location.search);
-  _params = {
+  _params = cleanParams({
     department:     urlParams.get('dept'),
     levelNumber:    urlParams.get('level'),
     semesterNumber: urlParams.get('sem'),
     subject:        urlParams.get('subject'),
     doctor:         urlParams.get('doctor'),
     dataType:       urlParams.get('type')
-  };
+  });
 
   renderBreadcrumbs();
   await loadFolder();
@@ -32,6 +31,8 @@ function renderBreadcrumbs() {
   var trail = FolderBrowser.breadcrumbTrail(_params);
 
   trail.forEach(function (step) {
+    if (!step.label || step.label.trim() === '' || step.label === 'undefined' || step.label === 'null') return;
+
     if (step.isLast) {
       items.push('<span>' + escapeHtml(step.label) + '</span>');
       return;

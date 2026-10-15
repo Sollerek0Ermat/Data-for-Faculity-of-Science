@@ -11,7 +11,6 @@ let _state = {
   subjects: [],
   doctors: [],
   links: [],
-  // Content browse path
   path: { department: null, levelNumber: null, semesterNumber: null, subject: null, doctor: null, dataType: null }
 };
 
@@ -32,7 +31,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const roleDisplay = document.querySelector('.hero-content #userRole');
   if (roleDisplay) roleDisplay.textContent = 'Role: ' + _state.userRole.toUpperCase();
 
-  // Hide owner-only tabs for non-owners
   if (_state.userRole !== 'owner') {
     const ownerTabs = ['structure', 'users'];
     ownerTabs.forEach(t => {
@@ -96,10 +94,9 @@ function stat(icon, label, value) {
 }
 
 /* ═══════════════════════════════════════════
-   STRUCTURE — Load (Sequential Fix!)
+   STRUCTURE
    ═══════════════════════════════════════════ */
 async function loadStructure() {
-  // ⚡ إصلاح: التحميل بالتتابع لأن Levels تعتمد على Departments، و Semesters تعتمد على Levels
   await loadDepartments();
   await loadLevels();
   await loadSemesters();
@@ -163,7 +160,6 @@ async function loadSubjects() {
   try {
     const subjMap = new Map();
 
-    // جلب المواد من جدول الروابط ومن الفولدرات لضمان ظهور كل المواد حتى غير المربوطة بدكتور
     const dws = await API.getDoctorWithSubjects().catch(() => []);
     dws.forEach(item => {
       (item.subjects || []).forEach(s => {
@@ -309,7 +305,7 @@ function errBox(msg) {
 }
 
 /* ═══════════════════════════════════════════
-   CONTENT BROWSE (الشجرة الهرمية)
+   CONTENT BROWSE
    ═══════════════════════════════════════════ */
 async function loadContentBrowse() {
   await renderContentLevel();
@@ -327,7 +323,6 @@ async function renderContentLevel() {
 
   const actionBtns = [];
 
-  // زر رجوع سريع إذا لم نكن في الصفحة الرئيسية
   if (p.department) {
     actionBtns.push(btn('⬅️ Back', 'btn-ghost', () => AdminUI.stepBack()));
   }
@@ -339,31 +334,34 @@ async function renderContentLevel() {
     if (!p.department) {
       items = await API.getFolders({});
       levelName = '🏛️ Departments';
+      actionBtns.push(btn('➕ Add Department', 'btn-primary', () => AdminUI.openAddDepartment()));
     } else if (!p.levelNumber) {
       items = await API.getFolders({ department: p.department });
       levelName = `📊 Levels in ${p.department}`;
+      actionBtns.push(btn('➕ Add Level', 'btn-primary', () => AdminUI.openAddLevel()));
     } else if (!p.semesterNumber) {
       items = await API.getFolders({ department: p.department, levelNumber: p.levelNumber });
       levelName = `📅 Semesters in Level ${p.levelNumber}`;
+      actionBtns.push(btn('➕ Add Semester', 'btn-primary', () => AdminUI.openAddSemester()));
     } else if (!p.subject) {
       items = await API.getFolders({ department: p.department, levelNumber: p.levelNumber, semesterNumber: p.semesterNumber });
       levelName = `📖 Subjects in Sem ${p.semesterNumber}`;
+      actionBtns.push(btn('➕ Add Subject', 'btn-primary', () => AdminUI.openAddSubject()));
     } else if (!p.doctor) {
       items = await API.getFolders({ department: p.department, levelNumber: p.levelNumber, semesterNumber: p.semesterNumber, subject: p.subject });
       levelName = `👨‍🏫 Doctors for ${p.subject}`;
-      actionBtns.push(btn('🔗 Link Doctor', 'btn-primary', () => AdminUI.openLinkDoctor()));
+      actionBtns.push(btn('➕ Add Doctor', 'btn-primary', () => AdminUI.openAddDoctor()));
+      actionBtns.push(btn('🔗 Link Doctor', 'btn-ghost', () => AdminUI.openLinkDoctor()));
     } else if (!p.dataType) {
-      // في مستوى أنواع المحتوى: نضمن عرض الفولدرات الأربعة الأساسية بشكل نظيف
       levelName = `📂 Content Types (${p.doctor})`;
       items = [
-        { dataType: 'sections', label: 'Sections (السكاشن)' },
-        { dataType: 'videos', label: 'Videos (الفيديوهات)' },
-        { dataType: 'summaries', label: 'Summaries (الملخصات)' },
-        { dataType: 'resources', label: 'Resources (المصادر والمراجع)' }
+        { dataType: 'sections', label: 'Sections' },
+        { dataType: 'videos', label: 'Videos' },
+        { dataType: 'summaries', label: 'Summaries' },
+        { dataType: 'resources', label: 'Resources' }
       ];
       actionBtns.push(btn('➕ Quick Upload Content', 'btn-primary', () => AdminUI.openAddFileChoice()));
     } else {
-      const apiType = p.dataType === 'resource' ? 'recourses' : p.dataType + 's';
       items = await API.getFolders({
         department: p.department,
         levelNumber: p.levelNumber,
@@ -393,14 +391,15 @@ function renderContentItems(items) {
     return;
   }
 
-  // فلترة أي عنصر تالف أو فارغ عند عرض الملفات
   const validItems = items.filter(item => {
+    if (!item) return false;
     if (!p.dataType) return true;
     const titleKey = p.dataType === 'section' ? 'sectionTitle'
       : p.dataType === 'video' ? 'videoTitle'
       : p.dataType === 'summary' ? 'summaryTitle'
       : 'resourceTitle';
-    return Boolean(item && item[titleKey] && String(item[titleKey]).trim() !== '');
+    const t = item[titleKey];
+    return Boolean(t && String(t).trim() !== '' && t !== 'undefined' && t !== 'null');
   });
 
   if (!validItems.length) {
@@ -409,59 +408,46 @@ function renderContentItems(items) {
   }
 
   grid.innerHTML = validItems.map(item => {
-    // Department
     if (item.depName) {
       return contentCard('🏛️', item.depName, item.code || '', 'department',
         () => { _state.path.department = item.depName; renderContentLevel(); },
-        null,
-        null
+        null, null
       );
     }
-    // Level
-    if (item.levelNumber !== undefined && !p.levelNumber) {
+    if (item.levelNumber !== undefined && item.levelNumber !== null && !p.levelNumber) {
       return contentCard('📊', 'Level ' + item.levelNumber, '', 'level',
         () => { _state.path.levelNumber = item.levelNumber; renderContentLevel(); },
-        null,
-        null
+        null, null
       );
     }
-    // Semester
-    if (item.semesterNumber !== undefined && !p.semesterNumber) {
+    if (item.semesterNumber !== undefined && item.semesterNumber !== null && !p.semesterNumber) {
       return contentCard('📅', 'Semester ' + item.semesterNumber, '', 'semester',
         () => { _state.path.semesterNumber = item.semesterNumber; renderContentLevel(); },
-        null,
-        null
+        null, null
       );
     }
-    // Subject
     if (item.subjectName && !p.subject) {
       const icon = (window.Mappers && Mappers._getIcon) ? Mappers._getIcon(item.subjectName) : '📖';
       return contentCard(icon, item.subjectName, '', 'subject',
         () => { _state.path.subject = item.subjectName; renderContentLevel(); },
-        null,
-        null
+        null, null
       );
     }
-    // Doctor
     if (item.doctorName && !p.doctor) {
       return contentCard('👨‍🏫', item.doctorName, '', 'doctor',
         () => { _state.path.doctor = item.doctorName; renderContentLevel(); },
-        null,
-        null
+        null, null
       );
     }
-    // DataType Folder
     if (item.dataType && !p.dataType) {
-      const normalized = item.dataType.replace(/s$/, '').replace('recourse', 'resource');
+      const normalized = String(item.dataType).replace(/s$/, '').replace('recourse', 'resource');
       const icon = { section: '📄', video: '🎬', summary: '📝', resource: '📦' }[normalized] || '📁';
       const displayTitle = item.label || (normalized.charAt(0).toUpperCase() + normalized.slice(1) + 's');
       return contentCard(icon, displayTitle, 'Click to view or upload ' + normalized + 's', 'datatype',
         () => { _state.path.dataType = normalized; renderContentLevel(); },
-        null,
-        null
+        null, null
       );
     }
-    // File (Inside a specific dataType)
     if (p.dataType) {
       const titleKey = p.dataType === 'section' ? 'sectionTitle'
         : p.dataType === 'video' ? 'videoTitle'
@@ -491,7 +477,7 @@ function contentCard(icon, title, sub, type, onClick, onEdit, onDelete) {
     <div style="background:rgba(0,229,255,.04);border:1px solid var(--line-glass);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
       <div id="${mainId}" ${onClick ? 'style="cursor:pointer;flex:1"' : 'style="flex:1"'}>
         <div style="font-size:15px;font-weight:600;color:#fff">
-          <span style="margin-right:8px">${icon}</span>${escapeHtml(title)}
+          <span style="margin-right:8px">${icon}</span>${escapeHtml(title || '')}
         </div>
         ${sub ? `<div style="color:var(--muted);font-size:12px;margin-top:2px">${escapeHtml(sub)}</div>` : ''}
       </div>
@@ -503,20 +489,19 @@ function contentCard(icon, title, sub, type, onClick, onEdit, onDelete) {
   `;
 }
 
-/* ═══ BREADCRUMBS (Clickable Every Step!) ═══ */
+/* ═══ BREADCRUMBS ═══ */
 function renderBreadcrumbs() {
   const el = document.getElementById('contentBreadcrumbs');
   const p = _state.path;
 
-  const crumbs = [
-    { label: '🏠 Home', step: 0 }
-  ];
-  if (p.department)     crumbs.push({ label: p.department, step: 1 });
-  if (p.levelNumber)    crumbs.push({ label: 'Level ' + p.levelNumber, step: 2 });
-  if (p.semesterNumber) crumbs.push({ label: 'Sem ' + p.semesterNumber, step: 3 });
-  if (p.subject)        crumbs.push({ label: p.subject, step: 4 });
-  if (p.doctor)         crumbs.push({ label: p.doctor, step: 5 });
-  if (p.dataType)       crumbs.push({ label: p.dataType + 's', step: 6 });
+  const crumbs = [{ label: '🏠 Home', step: 0 }];
+
+  if (p.department && p.department !== 'undefined')     crumbs.push({ label: p.department, step: 1 });
+  if (p.levelNumber != null)                            crumbs.push({ label: 'Level ' + p.levelNumber, step: 2 });
+  if (p.semesterNumber != null)                         crumbs.push({ label: 'Sem ' + p.semesterNumber, step: 3 });
+  if (p.subject && p.subject !== 'undefined')           crumbs.push({ label: p.subject, step: 4 });
+  if (p.doctor && p.doctor !== 'undefined')             crumbs.push({ label: p.doctor, step: 5 });
+  if (p.dataType && p.dataType !== 'undefined')         crumbs.push({ label: p.dataType + 's', step: 6 });
 
   el.innerHTML = crumbs.map((c, idx) => {
     const isLast = idx === crumbs.length - 1;
@@ -594,7 +579,6 @@ function renderLinks() {
    ═══════════════════════════════════════════ */
 const AdminUI = {
   init() {
-    // Tabs switching
     document.querySelectorAll('#adminTabs .tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('#adminTabs .tab').forEach(t => t.classList.remove('active'));
@@ -610,7 +594,6 @@ const AdminUI = {
       });
     });
 
-    // Static [data-action] buttons
     const actions = {
       openAddDepartment: () => AdminUI.openAddDepartment(),
       openAddLevel:      () => AdminUI.openAddLevel(),
@@ -634,7 +617,6 @@ const AdminUI = {
       }
     });
 
-    // ⚡ Event Delegation شامل لإغلاق الـ Modal بأمان بدون onclick (متوافق مع CSP)
     document.addEventListener('click', (e) => {
       if (e.target.matches('#modalCancelBtn, [data-modal-close="true"]') || e.target.id === 'modalOverlay') {
         e.preventDefault();
@@ -642,13 +624,12 @@ const AdminUI = {
       }
     });
 
-    // إغلاق الـ Modal بزر Escape من الكيبورد
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') AdminUI.closeModal();
     });
   },
 
-  navigateToStep(step) {
+   navigateToStep(step) {
     const keys = ['department', 'levelNumber', 'semesterNumber', 'subject', 'doctor', 'dataType'];
     for (let i = step; i < keys.length; i++) {
       _state.path[keys[i]] = null;
@@ -656,10 +637,11 @@ const AdminUI = {
     renderContentLevel();
   },
 
-  stepBack() {
+   stepBack() {
     const keys = ['department', 'levelNumber', 'semesterNumber', 'subject', 'doctor', 'dataType'];
     for (let i = keys.length - 1; i >= 0; i--) {
-      if (_state.path[keys[i]] !== null) {
+      const v = _state.path[keys[i]];
+      if (v !== null && v !== undefined && v !== '') {
         _state.path[keys[i]] = null;
         break;
       }
@@ -671,7 +653,6 @@ const AdminUI = {
     this.navigateToStep(0);
   },
 
-  /* ═══ MODAL (Supports "Save & Add Another" + Event Listeners) ═══ */
   modal(title, bodyHtml, onSave, allowMultiple = false) {
     const root = document.getElementById('modalRoot');
     root.innerHTML = `
@@ -724,7 +705,7 @@ const AdminUI = {
     if (root) root.innerHTML = '';
   },
 
-  /* ═══ DEPARTMENT ═══ */
+  /* DEPARTMENT */
   openAddDepartment() {
     this.modal('➕ Add Department', `
       <div class="field"><label>Name</label><input type="text" id="mDeptName" placeholder="computer science"></div>
@@ -789,7 +770,7 @@ const AdminUI = {
     } catch (e) { UI.error(e.message); }
   },
 
-  /* ═══ LEVEL ═══ */
+  /* LEVEL */
   openAddLevel() {
     const defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
     this.modal('➕ Add Level', `
@@ -826,7 +807,7 @@ const AdminUI = {
     } catch (e) { UI.error(e.message); }
   },
 
-  /* ═══ SEMESTER ═══ */
+  /* SEMESTER */
   openAddSemester() {
     const defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
     const defaultLvl = _state.path.levelNumber || 1;
@@ -863,7 +844,7 @@ const AdminUI = {
     } catch (e) { UI.error(e.message); }
   },
 
-  /* ═══ SUBJECT ═══ */
+  /* SUBJECT */
   openAddSubject() {
     const defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
     const defaultLvl = _state.path.levelNumber || 2;
@@ -948,7 +929,7 @@ const AdminUI = {
     } catch (e) { UI.error(e.message); }
   },
 
-  /* ═══ DOCTOR ═══ */
+  /* DOCTOR */
   openAddDoctor() {
     this.modal('➕ Add Doctor', `
       <div class="field"><label>Name</label><input type="text" id="mDocName" placeholder="Amgad Salama"></div>
@@ -1020,7 +1001,7 @@ const AdminUI = {
     } catch (e) { UI.error(e.message); }
   },
 
-  /* ═══ LINK DOCTOR ═══ */
+  /* LINK DOCTOR */
   openLinkDoctor() {
     const p = _state.path;
     this.modal('🔗 Link Doctor to Subject', `
@@ -1070,16 +1051,16 @@ const AdminUI = {
     } catch (e) { UI.error(e.message); }
   },
 
-  /* ═══ FILE (Content) — Upload from Content Types or Inside Folder ═══ */
+  /* FILE UPLOAD */
   openAddFileChoice() {
     this.modal('➕ Upload Content (Section / Video / Summary / Resource)', `
       <div class="field">
         <label>Content Type</label>
         <select id="mChoiceType">
-          <option value="section">📄 Section (سكشن / محاضرة)</option>
-          <option value="video">🎬 Video (رابط فيديو)</option>
-          <option value="summary">📝 Summary (ملخص)</option>
-          <option value="resource">📦 Resource (مرجع / كتاب)</option>
+          <option value="section">📄 Section</option>
+          <option value="video">🎬 Video</option>
+          <option value="summary">📝 Summary</option>
+          <option value="resource">📦 Resource</option>
         </select>
       </div>
       <div class="field"><label>Title</label><input type="text" id="mFileTitle" placeholder="Lecture 1 / Section 1"></div>
@@ -1204,7 +1185,7 @@ const AdminUI = {
     } catch (e) { UI.error(e.message); }
   },
 
-  /* ═══ USERS ═══ */
+  /* USERS */
   async changeRole() {
     const emails = document.getElementById('userEmails').value.trim().split(/\n+/).filter(Boolean);
     if (!emails.length) return UI.error('Enter emails');

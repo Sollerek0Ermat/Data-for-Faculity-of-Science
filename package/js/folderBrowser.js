@@ -1,9 +1,5 @@
 /**
  * FolderBrowser — المحرك المشترك للتصفح الهرمي
- * (department → level → semester → subject → doctor → dataType → file)
- *
- * بيستخدمه folder.js (تصفح بروابط URL) وصفحة الهوم (تصفح جوه نفس الصفحة بدون reload).
- * نفس الكلاسات بالظبط المستخدمة في style.css: subject-card / dataType-card / file-card / breadcrumbs
  */
 
 const FolderBrowser = (function () {
@@ -30,7 +26,6 @@ const FolderBrowser = (function () {
 
   const FILE_ICONS = { section: 'S', summary: 'M', resource: 'R', video: 'V' };
 
-  /** يحدد إحنا في أي مستوى حسب الـ params الحالية */
   function resolveLevel(params) {
     if (params.dataType)            return 'file';
     if (params.doctor)              return 'dataType';
@@ -41,7 +36,6 @@ const FolderBrowser = (function () {
     return 'department';
   }
 
-  /** يبني params المستوى الجاي بناءً على الكارت اللي اتدوس */
   function nextParams(params, item) {
     var p = Object.assign({}, params);
     if (item.level === 'department')  p.department = item.name;
@@ -50,15 +44,15 @@ const FolderBrowser = (function () {
     if (item.level === 'subject')     p.subject = item.name;
     if (item.level === 'doctor')      p.doctor = item.name;
     if (item.level === 'dataType') {
-      var dt = item.dataType.replace(/s$/, '');
+      var dt = (item.dataType || '').replace(/s$/, '');
       if (dt === 'recourse') dt = 'resource';
       p.dataType = dt;
     }
-    return p;
+    return cleanParams(p);
   }
 
-  /** يحول params لـ query string (يُستخدم في التصفح بروابط URL زي folder.html) */
   function buildQuery(p) {
+    p = cleanParams(p || {});
     var qs = [];
     if (p.department)     qs.push('dept=' + encodeURIComponent(p.department));
     if (p.levelNumber)    qs.push('level=' + p.levelNumber);
@@ -69,32 +63,39 @@ const FolderBrowser = (function () {
     return qs.join('&');
   }
 
-  /** يرجع نص breadcrumb جاهز حسب params الحالية (dept / level X / semester X ...) */
+  /* ✅ breadcrumbTrail — بيمنع أي قيمة undefined/null من الظهور */
   function breadcrumbTrail(params) {
+    params = cleanParams(params || {});
     var parts = [];
-    if (params.department)     parts.push({ key: 'department', label: params.department });
-    if (params.levelNumber)    parts.push({ key: 'levelNumber', label: 'Level ' + params.levelNumber });
-    if (params.semesterNumber) parts.push({ key: 'semesterNumber', label: 'Semester ' + params.semesterNumber });
-    if (params.subject)        parts.push({ key: 'subject', label: params.subject });
-    if (params.doctor)         parts.push({ key: 'doctor', label: params.doctor });
-    if (params.dataType)       parts.push({ key: 'dataType', label: params.dataType, isLast: true });
-    return parts;
+
+    if (params.department)     parts.push({ key: 'department',     label: safeText(params.department) });
+    if (params.levelNumber)    parts.push({ key: 'levelNumber',    label: 'Level ' + safeText(params.levelNumber) });
+    if (params.semesterNumber) parts.push({ key: 'semesterNumber', label: 'Semester ' + safeText(params.semesterNumber) });
+    if (params.subject)        parts.push({ key: 'subject',        label: safeText(params.subject) });
+    if (params.doctor)         parts.push({ key: 'doctor',         label: safeText(params.doctor) });
+    if (params.dataType)       parts.push({ key: 'dataType',       label: safeText(params.dataType), isLast: true });
+
+    return parts.filter(function (p) { return p.label && p.label.trim() !== ''; });
   }
 
-  /** يقطع params عند مفتاح معين (علشان لما تدوس على breadcrumb تقدر ترجع لمستوى فوق) */
   function truncateAt(params, key) {
+    params = cleanParams(params || {});
     var order = ['department', 'levelNumber', 'semesterNumber', 'subject', 'doctor', 'dataType'];
     var idx = order.indexOf(key);
     var p = {};
-    for (var i = 0; i <= idx; i++) p[order[i]] = params[order[i]];
-    return p;
+    for (var i = 0; i <= idx; i++) {
+      if (params[order[i]] !== undefined) p[order[i]] = params[order[i]];
+    }
+    return cleanParams(p);
   }
-
-  // ---------- Card builders (نفس markup وكلاسات folder.js بالظبط) ----------
 
   function folderCardHTML(item, href, navKey) {
     var icon = FOLDER_ICONS[item.level] || '📁';
-    var label = item.name || (item.levelNumber ? 'Level ' + item.levelNumber : '') || (item.semesterNumber ? 'Semester ' + item.semesterNumber : '');
+    var label =
+      safeText(item.name) ||
+      (item.levelNumber != null ? 'Level ' + safeText(item.levelNumber) : '') ||
+      (item.semesterNumber != null ? 'Semester ' + safeText(item.semesterNumber) : '');
+    if (!label) label = '—';
     return [
       '<a href="' + href + '" class="subject-card"' + (navKey ? ' data-nav="' + navKey + '"' : '') + '>',
       '  <span class="subject-icon">' + icon + '</span>',
@@ -105,7 +106,7 @@ const FolderBrowser = (function () {
   }
 
   function dataTypeCardHTML(item, href, navKey) {
-    var meta = DATA_TYPE_META[item.dataType] || { icon: '📁', label: item.dataType, desc: '' };
+    var meta = DATA_TYPE_META[item.dataType] || { icon: '📁', label: item.dataType || 'Folder', desc: '' };
     return [
       '<a href="' + href + '" class="dataType-card"' + (navKey ? ' data-nav="' + navKey + '"' : '') + '>',
       '  <div class="dataType-icon">' + meta.icon + '</div>',
@@ -124,17 +125,17 @@ const FolderBrowser = (function () {
       '  <div class="file-card-head">',
       '    <div class="file-card-icon">' + icon + '</div>',
       '    <div class="file-card-info">',
-      '      <h4>' + escapeHtml(item.title) + '</h4>',
+      '      <h4>' + escapeHtml(safeText(item.title)) + '</h4>',
       '      <div class="file-card-meta">',
       '        <span>Published ' + formatDate(item.created_at) + '</span>',
-      '        <span>By ' + escapeHtml(item.publisher) + '</span>',
+      '        <span>By ' + escapeHtml(safeText(item.publisher)) + '</span>',
       item.size ? '        <span>' + escapeHtml(String(item.size)) + ' MB</span>' : '',
       '      </div>',
       '    </div>',
       '  </div>',
       '  <div class="file-card-actions">',
-      '    <button class="file-action-btn" data-action="view" data-name="' + escapeHtml(item.title) + '">View</button>',
-      '    <button class="file-action-btn primary" data-action="download" data-name="' + escapeHtml(item.title) + '">Download</button>',
+      '    <button class="file-action-btn" data-action="view" data-name="' + escapeHtml(safeText(item.title)) + '">View</button>',
+      '    <button class="file-action-btn primary" data-action="download" data-name="' + escapeHtml(safeText(item.title)) + '">Download</button>',
       '  </div>',
       '</div>'
     ].join('');
@@ -149,17 +150,8 @@ const FolderBrowser = (function () {
     });
   }
 
-  /**
-   * يجيب ويعرض مستوى واحد.
-   * opts: {
-   *   params, gridEl, titleEl,
-   *   hrefFor(item)         -> رابط الكارت (URL أو "#")
-   *   navKeyFor(item)        -> اختياري: قيمة data-nav لو هتستخدم click handler بدل href
-   * }
-   * يرجع { level, items } بعد العرض.
-   */
   async function renderLevel(opts) {
-    var params = opts.params;
+    var params = cleanParams(opts.params || {});
     var grid = opts.gridEl;
     var level = resolveLevel(params);
 
