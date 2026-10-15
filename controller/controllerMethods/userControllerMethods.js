@@ -78,24 +78,30 @@ const sendEmail = async (request, user, subject, email_message) => {
 }
 
 const getJWTToken = async (request) => {
-    const test_token = request.headers.authorization
-    let token
+    try {
+        const test_token = request.headers.authorization
+        let token
 
-    if (test_token && test_token.startsWith('Bearer')) {
-        token = test_token.split(' ')[1] // to get the token from the header
+        if (test_token && test_token.startsWith('Bearer')) {
+            token = test_token.split(' ')[1] // to get the token from the header
+        }
+        else if (request.cookies && request.cookies.jwt) {
+            token = request.cookies.jwt;
+        }
+
+
+        //2 validate the token
+        const verifyAsync = util.promisify(jwt.verify);
+        const decoded_token = await verifyAsync(token, process.env.secret_string);
+
+        // console.log(decoded_token)
+
+        return { token, decoded_token }
     }
-    else if (request.cookies && request.cookies.jwt) {
-        token = request.cookies.jwt;
+    catch (error) {
+        const err = new custom_error('we didnt find your information, please clear your cookies and login again')
+        throw err
     }
-
-
-    //2 validate the token
-    const verifyAsync = util.promisify(jwt.verify);
-    const decoded_token = await verifyAsync(token, process.env.secret_string);
-
-    // console.log(decoded_token)
-
-    return { token, decoded_token }
 }
 
 const getMainFolderInfo = async (FolderName, searchTitle, searchParams, selectData) => {

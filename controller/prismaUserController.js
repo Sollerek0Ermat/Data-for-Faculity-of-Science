@@ -113,7 +113,7 @@ exports.microsoftLoginCallback = (req, res, next) => {
                 options.secure = true
             }
             res.cookie('jwt', token, options) //to add the jwt to cookies to use it later in the web application
-            return res.redirect(`https://data-for-faculity-of-science.onrender.com/index.html`);
+            return res.redirect(`https://data-for-faculity-of-science.onrender.com/intro.html?next=index.html`);
 
 
 
@@ -385,8 +385,6 @@ exports.getFolders = async (request, response, next) => {
                 folderMap = folders.map(folder => ({
                     doctorName: folder.doctor.doctorName,
                     link: `/v1/student/folder?department=${encodeURIComponent(department)}&levelNumber=${levelNumber}&semesterNumber=${semesterNumber}&subject=${encodeURIComponent(subject)}&doctor=${encodeURIComponent(folder.doctor.doctorName)}`,
-                    subjectInfo: `/v1/student/folderinfo/subject/${encodeURIComponent(subject)}`
-
                 }));
             }
             else if (department && levelNumber && semesterNumber) {
@@ -397,6 +395,8 @@ exports.getFolders = async (request, response, next) => {
                 folderMap = folders.map(folder => ({
                     subjectName: folder.subjectName,
                     link: `/v1/student/folder?department=${encodeURIComponent(department)}&levelNumber=${levelNumber}&semesterNumber=${semesterNumber}&subject=${encodeURIComponent(folder.subjectName)}`,
+                    subjectInfo: `/v1/student/folderinfo/subject/${encodeURIComponent(folder.subjectName)}`
+
                 }));
             }
             else if (department && levelNumber) {
@@ -417,7 +417,6 @@ exports.getFolders = async (request, response, next) => {
                 folderMap = folders.map(folder => ({
                     levelNumber: folder.levelNumber,
                     link: `/v1/student/folder?department=${encodeURIComponent(department)}&levelNumber=${folder.levelNumber}`,
-                    departmentInfo: `/v1/student/folderinfo/department/${encodeURIComponent(department)}`
                 }));
             }
             else {
@@ -429,6 +428,8 @@ exports.getFolders = async (request, response, next) => {
                 folderMap = folders.map(folder => ({
                     depName: folder.depName,
                     link: `/v1/student/folder?department=${encodeURIComponent(folder.depName)}`,
+                    departmentInfo: `/v1/student/folderinfo/department/${encodeURIComponent(folder.depName)}`
+
                 }));
             }
 
