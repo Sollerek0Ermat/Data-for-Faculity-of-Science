@@ -174,23 +174,6 @@ const Mappers = {
     if (raw.dataType) {
       return { level: 'dataType', id: raw.dataType, dataType: raw.dataType, link: raw.link || null };
     }
-
-    // ملف فعلي (section / summary / resource / video) — مش مستوى فولدر.
-    // قبل كده كان بيوقع هنا وما كانش بيترسم صح (publisher/date فاضيين)
-    // لأن مفيش case بيتعرف عليه. بنعرف نوعه من اسم المفتاح الموجود في الـ raw
-    // وبنستخدم Mappers.file() الجاهزة والصح أصلاً.
-    var fileType = raw.sectionTitle  ? 'section'
-                 : raw.summaryTitle  ? 'summary'
-                 : (raw.resourceTitle || raw.recourseTitle) ? 'resource'
-                 : raw.videoTitle    ? 'video'
-                 : null;
-
-    if (fileType) {
-      var mapped = Mappers.file(raw, fileType);
-      mapped.level = 'file';
-      return mapped;
-    }
-
     return { level: 'unknown', id: JSON.stringify(raw), raw: raw };
   },
 

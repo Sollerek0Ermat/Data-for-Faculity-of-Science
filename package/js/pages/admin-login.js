@@ -1,5 +1,15 @@
 ﻿/**
- * Admin Login + Forgot/Reset Password via Microsoft Azure
+ * Admin Login
+ *
+ * Flow:
+ *  1) Sync session (cookie) → get profile
+ *  2) If not logged in      → redirect login.html
+ *  3) If role = user        → show "Access Denied" + redirect index.html
+ *  4) If role = admin:
+ *      - hasPassword = false → show Password + Confirm
+ *      - hasPassword = true  → show Password only
+ *      - Submit → POST /v1/admin/login
+ *      - Success → redirect admin.html
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -7,32 +17,35 @@ document.addEventListener('DOMContentLoaded', async () => {
   const footer = document.getElementById('footerPlaceholder');
   if (footer) footer.outerHTML = renderFooter();
 
-  const card         = document.getElementById('adminCard');
-  const title        = document.getElementById('adminTitle');
-  const subtitle     = document.getElementById('adminSubtitle');
-  const errorBanner  = document.getElementById('errorBanner');
-  const form         = document.getElementById('adminForm');
-  const fields       = document.getElementById('passwordFields');
-  const forgotWrap   = document.getElementById('forgotWrap');
-  const forgotPwdBtn = document.getElementById('forgotPwdBtn');
-  const hint         = document.getElementById('hintText');
-  const submitBtn    = document.getElementById('submitBtn');
-  const msg          = document.getElementById('msg');
+  const card        = document.getElementById('adminCard');
+  const title       = document.getElementById('adminTitle');
+  const subtitle    = document.getElementById('adminSubtitle');
+  const errorBanner = document.getElementById('errorBanner');
+  const form        = document.getElementById('adminForm');
+  const fields      = document.getElementById('passwordFields');
+  const hint        = document.getElementById('hintText');
+  const submitBtn   = document.getElementById('submitBtn');
+  const msg         = document.getElementById('msg');
 
   const setMsg = (text, color) => {
     msg.textContent = text || '';
     msg.style.color = color || 'var(--muted)';
   };
 
-  /* 1) Sync session */
+  /* ═══════════════════════════════════════════
+     1) Sync session
+     ═══════════════════════════════════════════ */
   const profile = await Auth.syncSession();
 
   if (!profile || !profile.role) {
+    // Not logged in with Microsoft → back to login
     window.location.href = 'login.html';
     return;
   }
 
-  /* 2) Not staff -> Access Denied */
+  /* ═══════════════════════════════════════════
+     2) Not staff → Access Denied
+     ═══════════════════════════════════════════ */
   const staffRoles = ['owner', 'moderator', 'doctor'];
   if (staffRoles.indexOf(profile.role) === -1) {
     card.classList.add('error-state');
@@ -54,35 +67,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     form.style.display = 'none';
     hint.style.display = 'none';
 
+    // Auto-redirect after 3 seconds
     setTimeout(() => { window.location.href = 'index.html'; }, 3000);
     return;
   }
 
-  /* 3) Check Mode (Normal vs First-Time vs Reset after Azure) */
-  const urlParams = new URLSearchParams(location.search);
-  const isResetUrl = urlParams.get('reset') === '1'
-                  || urlParams.get('mode') === 'reset'
-                  || urlParams.get('resetPassword') === 'true'
-                  || sessionStorage.getItem('pending_pwd_reset') === '1';
+  /* ═══════════════════════════════════════════
+     3) Staff → show password form
+     ═══════════════════════════════════════════ */
+  const firstTime = !profile.hasPassword;
 
-  const firstTime = !profile.hasPassword && !isResetUrl;
-  const resetMode = isResetUrl;
+  title.textContent = 'Admin Access';
+  subtitle.textContent = firstTime
+    ? 'First time - create your admin password'
+    : 'Welcome back, ' + (profile.name || 'admin');
 
-  if (resetMode) {
-    title.textContent = 'Reset Admin Password';
-    subtitle.textContent = 'Microsoft verified! Enter your new password below';
-    submitBtn.textContent = 'Update Password';
-  } else if (firstTime) {
-    title.textContent = 'Admin Access';
-    subtitle.textContent = 'First time - create your admin password';
-    submitBtn.textContent = 'Set Password & Continue';
-  } else {
-    title.textContent = 'Admin Access';
-    subtitle.textContent = 'Welcome back, ' + (profile.name || 'admin');
-    submitBtn.textContent = 'Verify & Continue';
-  }
-
-  if (firstTime || resetMode) {
+  if (firstTime) {
     fields.innerHTML = [
       '<div class="input-group">',
       '  <label>New Password</label>',
@@ -105,12 +105,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       '  </div>',
       '</div>'
     ].join('');
-
-    if (forgotWrap) forgotWrap.style.display = 'none';
     hint.style.display = 'block';
-    hint.textContent = resetMode
-      ? 'Choose a strong password (at least 8 characters).'
-      : 'Enter a password (min 8 characters).';
+    hint.textContent = 'Enter a password (min 5 characters).';
   } else {
     fields.innerHTML = [
       '<div class="input-group">',
@@ -124,33 +120,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       '  </div>',
       '</div>'
     ].join('');
-
-    if (forgotWrap) forgotWrap.style.display = 'flex';
     hint.style.display = 'none';
   }
 
-  /* 4) Forgot Password Button -> Logout Admin Session first, then Redirect to Azure */
-  if (forgotPwdBtn) {
-    forgotPwdBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      forgotPwdBtn.disabled = true;
-      setMsg('Preparing Microsoft verification...', 'var(--cyan)');
-
-      // لو الأدمن مسجل دخول بالفعل (admin_logged_in = true)، نعمل adminLogout الأول
-      // عشان السيرفر ميطلعش خطأ "you are already loggedin as an admin"
-      try {
-        await API.adminLogout();
-      } catch (err) {
-        // نتجاهل الخطأ لو مكنش مسجل دخول أدمن أصلاً
-      }
-
-      sessionStorage.setItem('pending_pwd_reset', '1');
-      setMsg('Redirecting to Microsoft Azure...', 'var(--cyan)');
-      API.forgotPasswordWithMicrosoft();
-    });
-  }
-
-  /* 5) Submit */
+  /* ═══════════════════════════════════════════
+     4) Submit
+     ═══════════════════════════════════════════ */
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -158,11 +133,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pwd2El = document.getElementById('pwd2');
     const pwd2 = pwd2El ? pwd2El.value : null;
 
-    if (!pwd1 || pwd1.length < 8) {
+    if (!pwd1 || pwd1.length < 5) {
       return setMsg('Password must be at least 8 characters', 'var(--danger)');
     }
-    if (firstTime || resetMode) {
-      if (!pwd2 || pwd2.length < 8) {
+    if (firstTime) {
+      if (!pwd2 || pwd2.length < 5) {
         return setMsg('Please confirm your password', 'var(--danger)');
       }
       if (pwd1 !== pwd2) {
@@ -171,53 +146,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     submitBtn.disabled = true;
-    setMsg(resetMode ? 'Updating password...' : 'Verifying...', 'var(--muted)');
+    setMsg('Verifying...', 'var(--muted)');
 
     try {
-      if (resetMode) {
-        await API.resetPassword({
-          password: pwd1,
-          confirm_password: pwd2
-        });
-        sessionStorage.removeItem('pending_pwd_reset');
-        await Auth.syncSession();
-        setMsg('✅ Password updated successfully!', 'var(--success)');
-        if (typeof UI !== 'undefined') UI.success('Password updated');
-        setTimeout(() => { window.location.href = 'admin.html'; }, 800);
-        return;
-      }
-
       const payload = { password: pwd1 };
       if (firstTime) payload.confirm_password = pwd2;
 
       await API.adminLogin(payload);
+
+      // Sync session again to update adminLoggedIn + hasPassword
       await Auth.syncSession();
+
+      // Mark password set (client-side hint)
       localStorage.setItem('admin_password_set', '1');
 
       setMsg('Welcome!', 'var(--success)');
+
       setTimeout(() => { window.location.href = 'admin.html'; }, 600);
 
     } catch (err) {
-      console.error('adminLogin/reset error:', err);
+      console.error('adminLogin error:', err);
 
+      card.classList.add('error-state');
       card.classList.remove('error-state');
       void card.offsetWidth;
       card.classList.add('error-state');
 
       const m = (err.message || '').toLowerCase();
-      // لو السيرفر قال إنه مسجل دخول بالفعل كأدمن، ندخله علطول على لوحة التحكم
-      if (m.indexOf('already loggedin') !== -1 || m.indexOf('already logged in') !== -1) {
-        setMsg('Already verified! Redirecting...', 'var(--success)');
-        setTimeout(() => { window.location.href = 'admin.html'; }, 500);
-        return;
-      }
-
       if (m.indexOf('incorrect') !== -1 || m.indexOf('wrong') !== -1) {
         setMsg('Incorrect password. Please try again.', 'var(--danger)');
       } else if (m.indexOf('attempts') !== -1) {
         setMsg(err.message, 'var(--warning)');
       } else {
-        setMsg(err.message || 'Operation failed', 'var(--danger)');
+        setMsg(err.message || 'Login failed', 'var(--danger)');
       }
 
       submitBtn.disabled = false;

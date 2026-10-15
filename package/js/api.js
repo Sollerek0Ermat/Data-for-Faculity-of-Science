@@ -1,4 +1,4 @@
-﻿/**
+/**
  * API - Cookie-Only Authentication
  * JWT is stored ONLY in HttpOnly cookies (backend manages it).
  * Frontend NEVER reads/stores/sends the token.
@@ -35,7 +35,7 @@ const API = (function() {
       throw new Error("Cannot reach server");
     }
 
-    // On 401 -> clear session + redirect (avoid loop)
+    // On 401 → clear session + redirect (avoid loop)
     if (res.status === 401) {
       if (typeof Auth !== 'undefined') Auth.clearSession();
       const onLogin = location.pathname.indexOf("login.html") !== -1;
@@ -158,6 +158,7 @@ const API = (function() {
 
   /* Admin */
   async function adminLogin(opts) {
+    // opts: { password, confirm_password? }
     const body = { password: opts.password };
     if (opts.confirm_password !== undefined) {
       body.confirm_password = opts.confirm_password;
@@ -185,26 +186,6 @@ const API = (function() {
         confirm_password: opts.confirm_password
       }
     });
-  }
-
-  function forgotPasswordWithMicrosoft() {
-    const base = CONFIG.API_URL ? CONFIG.API_URL.replace(/\/$/, "") : "";
-    window.location.href = base + "/" + ep.admin.forgotPassword.replace(/^\//, "");
-  }
-
-  async function resetPassword(opts) {
-    const body = {
-      password: opts.password,
-      confirm_password: opts.confirm_password || opts.password
-    };
-    try {
-      return await request(ep.admin.resetPassword, { method: "PATCH", body: body });
-    } catch (err) {
-      if (err.message && (err.message.indexOf("404") !== -1 || err.message.indexOf("405") !== -1 || err.message.toLowerCase().indexOf("cannot patch") !== -1)) {
-        return await request(ep.admin.resetPassword, { method: "POST", body: body });
-      }
-      throw err;
-    }
   }
 
   /* Moderator */
@@ -268,8 +249,6 @@ const API = (function() {
     adminLoginDirect: adminLoginDirect,
     adminLogout: adminLogout,
     changePassword: changePassword,
-    forgotPasswordWithMicrosoft: forgotPasswordWithMicrosoft,
-    resetPassword: resetPassword,
     addSections: addSections, deleteSections: deleteSections, editSection: editSection,
     addVideos: addVideos, deleteVideos: deleteVideos, editVideo: editVideo,
     addResources: addResources, deleteResources: deleteResources, editResource: editResource,
