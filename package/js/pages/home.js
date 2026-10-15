@@ -82,12 +82,9 @@ function bindHomeCardClicks(grid, items) {
       var item = items[idx];
       if (!item) return;
 
-      // لو المستوى الحالي subject والعنصر عليه link مباشر (مادة بيها رابط خاص) افتحه
-      if (item.level === 'subject' && item.link) {
-        window.location.href = item.link;
-        return;
-      }
-
+      // ملحوظة: item.link هو رابط API خام (/v1/student/folder?...) راجع من السيرفر
+      // لو تفتحه في المتصفح هيعرض JSON خام — مش صفحة. نتجاهله خالص ونكمل التنقل
+      // بنفس آلية nextParams زي باقي المستويات.
       goTo(FolderBrowser.nextParams(_homeParams, item));
     });
   });
