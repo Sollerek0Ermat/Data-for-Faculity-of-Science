@@ -266,11 +266,13 @@ exports.microsoftforgotPassword = passport.authenticate('microsoft_passwordReset
 exports.microsoftPasswordResetCallback = (req, res, next) => {
     passport.authenticate('microsoft_passwordReset', { session: false, failureRedirect: '/login-failed' }, async (err, user, message) => {
         if (err || !user) {
-            return res.status(401).json({
-                status: 'fail',
-                message: 'Microsoft authentication failed',
-                error: message
-            });
+            // return res.status(401).json({
+            //     status: 'fail',
+            //     message: 'Microsoft authentication failed',
+            //     error: message
+            // });
+            const redMessage = `Microsoft authentication failed, ${message}`
+            return res.redirect(`https://data-for-faculity-of-science.onrender.com/resetPasswordCallback.html?error=${redMessage}`);
         }
         const { resetToken, password_reset_token, password_reset_token_expires } = await prismaUserValidation.createResetPasswordToken()
         if (user.password_reset_token_sent_at && user.password_reset_token_sent_at.getTime() > new Date(Date.now()) - password_token_reset_delay) {
@@ -289,8 +291,8 @@ exports.microsoftPasswordResetCallback = (req, res, next) => {
                     password_reset_token_expires: password_reset_token_expires
                 }
             });
-            // return response.redirect(`http://localhost:3000/v1/admin/resetPassword/${resetToken}`);
-            create_send_responce(user, 200, res, next, false, `password reset token: ${resetToken}`)
+            return res.redirect(`https://data-for-faculity-of-science.onrender.com/resetPasswordCallback.html?token=${resetToken}`);
+            // create_send_responce(user, 200, res, next, false, `password reset token: ${resetToken}`)
         }
         catch (error) {
             await prisma.authUser.update({
