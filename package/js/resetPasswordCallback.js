@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 🔑 Reset Password Callback Handler
  * يستقبل token أو error من الـ URL ويعمل redirect
  */
@@ -16,7 +16,7 @@
     if (error) {
       statusMsg.textContent = '❌ ' + decodeURIComponent(error);
       statusMsg.style.color = 'var(--danger)';
-      setTimeout(function () { location.href = 'admin-login.html'; }, 3000);
+      setTimeout(function () { location.href = 'admin-login.html'; }, 5000);
       return;
     }
 

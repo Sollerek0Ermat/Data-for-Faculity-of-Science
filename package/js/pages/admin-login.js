@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Admin Login
  */
 
@@ -22,12 +22,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     msg.style.color = color || 'var(--muted)';
   };
 
-  /* ✨ قراءة error من URL (بيجي من redirect) */
+  /* ✨ قراءة error من URL */
   const _urlParams = new URLSearchParams(location.search);
   const _errorFromUrl = _urlParams.get('error');
   if (_errorFromUrl) {
     setMsg('❌ ' + decodeURIComponent(_errorFromUrl), 'var(--danger)');
-    // نمسح الـ error من الـ URL علشان لو عمل refresh ميعرضهوش تاني
     history.replaceState({}, document.title, location.pathname);
   }
 
@@ -39,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  /* 2) Not staff â†’ Access Denied */
+  /* 2) Not staff → Access Denied */
   const staffRoles = ['owner', 'moderator', 'doctor'];
   if (staffRoles.indexOf(profile.role) === -1) {
     card.classList.add('error-state');
@@ -67,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  /* 3) Staff â†’ show password form */
+  /* 3) Staff → show password form */
   const firstTime = !profile.hasPassword;
 
   title.textContent = 'Admin Access';
@@ -148,7 +147,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       } catch (err) {
         const m = (err.message || '').toLowerCase();
         if (m.indexOf('already logged in') !== -1) {
-          console.warn('[admin-login] Already logged in â€” redirecting');
+          console.warn('[admin-login] Already logged in — redirecting');
           await Auth.syncSession();
           window.location.href = 'admin.html';
           return;
@@ -169,10 +168,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       void card.offsetWidth;
       card.classList.add('error-state');
 
-      const m = (err.message || '').toLowerCase();        if (m.indexOf('minutes') !== -1 || m.indexOf('try again in') !== -1 || m.indexOf('wait') !== -1) {
-          setMsg('⏳ ' + err.message, 'var(--warning)');
-        } else
-      if (m.indexOf('incorrect') !== -1 || m.indexOf('wrong') !== -1) {
+      const m = (err.message || '').toLowerCase();
+      if (m.indexOf('minutes') !== -1 || m.indexOf('try again in') !== -1 || m.indexOf('wait') !== -1) {
+        setMsg('⏳ ' + err.message, 'var(--warning)');
+      } else if (m.indexOf('incorrect') !== -1 || m.indexOf('wrong') !== -1) {
         setMsg('Incorrect password. Please try again.', 'var(--danger)');
       } else if (m.indexOf('attempts') !== -1) {
         setMsg(err.message, 'var(--warning)');
@@ -184,12 +183,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  /* 5) Forgot Password â†’ Microsoft OAuth */
+  /* 5) Forgot Password → Microsoft OAuth */
   const forgotBtn = document.getElementById('forgotBtn');
   if (forgotBtn) {
     forgotBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      if (!confirm('You will be redirected to Microsoft to verify your identity, then you can set a new password.\n\nContinue?')) {
+      if (!confirm('You will be redirected to Microsoft to verify your identity.\n\nNote: You can only request this once every 10 minutes.\n\nContinue?')) {
         return;
       }
       setMsg('Redirecting to Microsoft...', 'var(--muted)');
