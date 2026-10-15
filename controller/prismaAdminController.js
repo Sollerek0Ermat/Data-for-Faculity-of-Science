@@ -272,7 +272,7 @@ exports.microsoftPasswordResetCallback = (req, res, next) => {
             //     error: message
             // });
             const redMessage = `Microsoft authentication failed, ${message}`
-            return res.redirect(`https://data-for-faculity-of-science.onrender.com/resetPasswordCallback.html?error=${redMessage}`);
+            return res.redirect(`https://data-for-faculity-of-science.onrender.com/resetPasswordCallback.html?error=${encodeURIComponent(redMessage)}`);
         }
         const { resetToken, password_reset_token, password_reset_token_expires } = await prismaUserValidation.createResetPasswordToken()
         if (user.password_reset_token_sent_at && user.password_reset_token_sent_at.getTime() > new Date(Date.now()) - password_token_reset_delay) {
@@ -291,7 +291,7 @@ exports.microsoftPasswordResetCallback = (req, res, next) => {
                     password_reset_token_expires: password_reset_token_expires
                 }
             });
-            return res.redirect(`https://data-for-faculity-of-science.onrender.com/resetPasswordCallback.html?token=${resetToken}`);
+            return res.redirect(`https://data-for-faculity-of-science.onrender.com/resetPasswordCallback.html?token=${encodeURIComponent(resetToken)}`);
             // create_send_responce(user, 200, res, next, false, `password reset token: ${resetToken}`)
         }
         catch (error) {
