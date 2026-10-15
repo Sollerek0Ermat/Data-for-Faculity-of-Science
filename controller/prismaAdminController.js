@@ -271,7 +271,7 @@ exports.microsoftPasswordResetCallback = (req, res, next) => {
             //     message: 'Microsoft authentication failed',
             //     error: message
             // });
-            const redMessage = `Microsoft authentication failed, ${message}`
+            const redMessage = `Microsoft authentication failed, ${encodeURIComponent(message)}`
             return res.redirect(`https://data-for-faculity-of-science.onrender.com/resetPasswordCallback.html?error=${encodeURIComponent(redMessage)}`);
         }
         const { resetToken, password_reset_token, password_reset_token_expires } = await prismaUserValidation.createResetPasswordToken()
