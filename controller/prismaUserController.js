@@ -95,7 +95,7 @@ exports.microsoftLoginCallback = (req, res, next) => {
             //     error: message
             // });
             const redMessage = encodeURIComponent(`Microsoft authentication failed, ${message}`);
-            res.redirect(401, `/https://data-for-faculity-of-science.onrender.com/login.html?message=${redMessage}`);
+            return res.redirect(401, `/https://data-for-faculity-of-science.onrender.com/login.html?message=${redMessage}`);
         }
 
         try {
