@@ -4413,3 +4413,278 @@ a.subject-card:hover::after {
   color: #a9b8e3 !important;
   text-shadow: 0 0 12px rgba(0, 242, 254, 0.3);
 }
+
+
+/* ═══════════════════════════════════════════════════════════
+   🎯 HERO UPGRADE — Buttons + Stats + Chips + Glow
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── أقوى glowing border للـ hero ─── */
+html body .hero-home {
+  position: relative !important;
+  border: 1.5px solid transparent !important;
+  background:
+    linear-gradient(135deg, rgba(11,20,69,.95), rgba(10,15,46,.95) 55%, rgba(23,10,56,.95)) padding-box,
+    linear-gradient(135deg, #00f2fe, #7b2cbf 50%, #ff007f) border-box !important;
+  box-shadow:
+    0 0 28px rgba(0, 242, 254, .4),
+    0 0 70px rgba(255, 0, 127, .28),
+    0 0 100px rgba(123, 44, 191, .22) !important;
+  transition: box-shadow .4s ease !important;
+}
+
+html body .hero-home:hover {
+  box-shadow:
+    0 0 38px rgba(0, 242, 254, .55),
+    0 0 90px rgba(255, 0, 127, .38),
+    0 0 130px rgba(123, 44, 191, .3) !important;
+}
+
+/* ─── Buttons ─── */
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+  position: relative;
+  z-index: 5;
+}
+
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 26px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .25s ease;
+  will-change: transform;
+}
+
+.hero-btn-primary {
+  background: linear-gradient(90deg, #00f2fe, #7b2cbf 55%, #ff007f);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .4);
+  border: none;
+  box-shadow: 0 0 20px rgba(0, 242, 254, .45);
+}
+.hero-btn-primary:hover,
+.hero-btn-primary:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(255, 0, 127, .6), 0 0 45px rgba(123, 44, 191, .4);
+}
+
+.hero-btn-ghost {
+  background: rgba(10, 14, 40, .45);
+  color: #e6ecff;
+  border: 1.5px solid rgba(0, 242, 254, .6);
+  box-shadow: 0 0 14px rgba(123, 44, 191, .3), inset 0 0 12px rgba(123, 44, 191, .18);
+}
+.hero-btn-ghost:hover,
+.hero-btn-ghost:focus-visible {
+  background: rgba(123, 44, 191, .3);
+  border-color: #00f2fe;
+  transform: translateY(-2px);
+  box-shadow: 0 0 22px rgba(0, 242, 254, .5);
+}
+
+/* ─── Stats Row ─── */
+.hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgba(10, 14, 40, .7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 242, 254, .25);
+  box-shadow: 0 0 20px rgba(0, 242, 254, .18);
+  width: fit-content;
+  position: relative;
+  z-index: 5;
+}
+
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 18px;
+  min-width: 90px;
+}
+.hero-stat + .hero-stat {
+  border-left: 1px solid rgba(255, 255, 255, .12);
+}
+
+.hero-stat-num {
+  font-family: 'Instrument Serif', 'Karla', serif;
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.1;
+  background: linear-gradient(90deg, #00f2fe, #d08bff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 0 8px rgba(0, 242, 254, .45));
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #d5e0ff;
+  letter-spacing: .3px;
+  margin-top: 2px;
+}
+
+/* ─── Floating Chips ─── */
+.hero-chips {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.hero-chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #e6ecff;
+  background: rgba(10, 14, 40, .82);
+  border: 1px solid rgba(0, 242, 254, .4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 0 16px rgba(0, 242, 254, .3), 0 0 32px rgba(255, 0, 127, .15);
+  animation: chipFloat 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.hero-chip svg {
+  width: 14px;
+  height: 14px;
+  color: #00f2fe;
+  filter: drop-shadow(0 0 6px rgba(0, 242, 254, .8));
+}
+
+.hero-chip-1 { top: 16%; right: 10%; animation-delay: 0s; }
+.hero-chip-2 { top: 44%; right: 32%; animation-delay: -2s; }
+.hero-chip-3 { top: 74%; right: 12%; animation-delay: -4s; }
+
+@keyframes chipFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .hero-chip { animation: none !important; }
+  .hero-btn { transition: none !important; }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  html body .hero-home { padding: 32px 20px !important; }
+  .hero-actions { justify-content: center; }
+  .hero-stats {
+    width: 100%;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero-stat { flex: 1; min-width: 0; padding: 4px 10px; }
+  .hero-stat-num { font-size: 22px; }
+  .hero-chip { display: none; }
+}
+
+@media (max-width: 600px) {
+  .hero-chips { display: none; }
+  .hero-stat-num { font-size: 20px; }
+  .hero-stat-label { font-size: 11px; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   ❌ LOGIN ERROR BANNER — Neon Style
+   ═══════════════════════════════════════════════════════════ */
+.login-error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(255, 0, 127, 0.08));
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  border-left: 4px solid #ef4444;
+  border-radius: 12px;
+  color: #ffccd5;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  box-shadow:
+    0 0 20px rgba(239, 68, 68, 0.2),
+    inset 0 0 20px rgba(239, 68, 68, 0.05);
+  position: relative;
+  z-index: 2;
+}
+
+.login-error-banner.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.login-error-banner svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #ff5566;
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.6));
+}
+
+.login-error-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.login-error-text strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ff8595;
+  letter-spacing: 0.3px;
+}
+
+.login-error-text span {
+  display: block;
+  font-size: 13px;
+  color: #ffd6db;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 480px) {
+  .login-error-banner {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+  .login-error-text strong { font-size: 13px; }
+  .login-error-text span   { font-size: 12px; }
+}
+
