@@ -183,23 +183,88 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  /* 5) Forgot Password → Microsoft OAuth */
+  /* 5) Forgot Password → Custom Modal → Microsoft OAuth */
   const forgotBtn = document.getElementById('forgotBtn');
   if (forgotBtn) {
-    forgotBtn.addEventListener('click', (e) => {
+    forgotBtn.addEventListener('click', function (e) {
       e.preventDefault();
-      if (!confirm('You will be redirected to Microsoft to verify your identity.\n\nNote: You can only request this once every 10 minutes.\n\nContinue?')) {
-        return;
-      }
-      setMsg('Redirecting to Microsoft...', 'var(--muted)');
-      setTimeout(() => {
-        if (typeof API.forgotPassword === 'function') {
-          API.forgotPassword();
-        } else {
-          const base = CONFIG.API_URL || '';
-          window.location.href = base + '/' + CONFIG.ENDPOINTS.admin.forgotPassword;
+      showNeonConfirm({
+        title: 'Confirm Identity',
+        message: 'You will be redirected to Microsoft to verify your identity.\n\nNote: You can only request this once every 10 minutes.',
+        icon: 'shield',
+        confirmText: 'Continue',
+        cancelText: 'Cancel',
+        onConfirm: function () {
+          setMsg('Redirecting to Microsoft...', 'var(--muted)');
+          setTimeout(function () {
+            if (typeof API.forgotPassword === 'function') {
+              API.forgotPassword();
+            } else {
+              const base = CONFIG.API_URL || '';
+              window.location.href = base + '/' + CONFIG.ENDPOINTS.admin.forgotPassword;
+            }
+          }, 300);
         }
-      }, 400);
+      });
     });
   }
 });
+
+/* ═══════════════════════════════════════════════════════════
+   💬 NEON CONFIRM MODAL
+   ═══════════════════════════════════════════════════════════ */
+function showNeonConfirm(opts) {
+  // شيل أي modal موجود
+  var existing = document.querySelector('.neon-modal-overlay');
+  if (existing) existing.remove();
+
+  var icons = {
+    shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+    warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+  };
+
+  var overlay = document.createElement('div');
+  overlay.className = 'neon-modal-overlay';
+  overlay.innerHTML =
+    '<div class="neon-modal">' +
+      '<div class="neon-modal-icon">' + (icons[opts.icon] || icons.info) + '</div>' +
+      '<h3 class="neon-modal-title">' + (opts.title || 'Confirm') + '</h3>' +
+      '<p class="neon-modal-message">' + (opts.message || '') + '</p>' +
+      '<div class="neon-modal-actions">' +
+        '<button type="button" class="neon-modal-btn neon-modal-btn-cancel">' + (opts.cancelText || 'Cancel') + '</button>' +
+        '<button type="button" class="neon-modal-btn neon-modal-btn-confirm">' + (opts.confirmText || 'Continue') + '</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+
+  var cancelBtn = overlay.querySelector('.neon-modal-btn-cancel');
+  var confirmBtn = overlay.querySelector('.neon-modal-btn-confirm');
+
+  function close() {
+    overlay.style.animation = 'neonModalFadeIn 0.2s ease reverse forwards';
+    setTimeout(function () { overlay.remove(); }, 200);
+  }
+
+  cancelBtn.addEventListener('click', close);
+  confirmBtn.addEventListener('click', function () {
+    close();
+    if (typeof opts.onConfirm === 'function') opts.onConfirm();
+  });
+
+  overlay.addEventListener('click', function (ev) {
+    if (ev.target === overlay) close();
+  });
+
+  function onKey(ev) {
+    if (ev.key === 'Escape') {
+      close();
+      document.removeEventListener('keydown', onKey);
+    }
+  }
+  document.addEventListener('keydown', onKey);
+}
+
+// اجعلها متاحة globally
+window.showNeonConfirm = showNeonConfirm;

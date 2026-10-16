@@ -4389,3 +4389,27 @@ a.subject-card:hover::after {
 .tab.active {
   box-shadow: inset 0 0 0 1px #00f2fe !important;
 }
+
+
+/* ═══════════════════════════════════════════════════════════
+   ⏳ SOON PLACEHOLDER — للمحتوى اللي لسه مش موجود
+   ═══════════════════════════════════════════════════════════ */
+.text-muted.text-center[style*="grid-column"] {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: var(--muted) !important;
+  letter-spacing: 0.3px;
+  padding: 60px 20px !important;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+/* لو النص فيه "Soon" — نميزه بشكل أحلى */
+.text-muted.text-center[style*="grid-column"]:has(*:contains("Soon")),
+.empty-soon {
+  color: #a9b8e3 !important;
+  text-shadow: 0 0 12px rgba(0, 242, 254, 0.3);
+}

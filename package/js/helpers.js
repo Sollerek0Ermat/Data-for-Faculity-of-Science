@@ -1,4 +1,4 @@
-/**
+﻿/**
  *  Helpers
  */
 
@@ -87,7 +87,14 @@ function setLoading(el) {
 
 function setEmpty(el, text) {
   if (!el) return;
-  el.innerHTML = `<p class="text-muted text-center" style="grid-column:1/-1;padding:40px">${escapeHtml(text)}</p>`;
+  // ✨ رسالة لطيفة لما مفيش محتوى
+  var finalText = text || 'Coming Soon';
+  el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px">' +
+    '<div style="font-size:42px;margin-bottom:12px;opacity:.6">⏳</div>' +
+    '<p style="color:var(--muted);font-size:16px;font-weight:500;letter-spacing:0.3px;margin:0">' +
+    escapeHtml(finalText) +
+    '</p>' +
+    '</div>';
 }
 
 function goTo(path) {

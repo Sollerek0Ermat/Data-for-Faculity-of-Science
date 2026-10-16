@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FolderBrowser — المحرك المشترك للتصفح الهرمي
  */
 
@@ -176,7 +176,7 @@ const FolderBrowser = (function () {
       var items = Mappers.folderList(raw);
 
       if (!items.length) {
-        setEmpty(grid, 'No items');
+        setEmpty(grid, '⏳ Soon — Content will be added');
         return { level: level, items: [] };
       }
 
