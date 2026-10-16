@@ -4,7 +4,7 @@
 
 const I18N = {
   dict: {
-    pageTitle: 'DATA - Tanta University',
+    pageTitle: 'DATA - SCIENCE | Tanta University',
     banner: 'Designed for Science students',
 
     nav_home:     'Home',
@@ -14,8 +14,8 @@ const I18N = {
     nav_dashboard:'Dashboard',
     nav_logout:   'Logout',
 
-    hero_title:    'DATA - Tanta University',
-    hero_subtitle: 'Everything you need in one place',
+    hero_title:    'DATA - SCIENCE',
+    hero_subtitle: 'Tanta University',
 
     section_events:  '📢 Current Events',
     section_courses: '📚 Courses',

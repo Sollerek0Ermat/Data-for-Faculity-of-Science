@@ -1,5 +1,5 @@
-﻿/**
- * Admin Dashboard — Full (Fixed & Optimized)
+/**
+ * Admin Dashboard � Full (Fixed & Optimized)
  */
 
 let _state = {
@@ -43,9 +43,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   AdminUI.init();
 });
 
-/* ═══════════════════════════════════════════
+/* -------------------------------------------
    OVERVIEW
-   ═══════════════════════════════════════════ */
+   ------------------------------------------- */
 async function loadOverview() {
   try {
     const [depts, dws] = await Promise.all([
@@ -62,10 +62,10 @@ async function loadOverview() {
     });
 
     document.getElementById('statsGrid').innerHTML = [
-      stat('🏛️', 'Departments', deptCount),
-      stat('👨‍🏫', 'Doctors', docSet.size),
-      stat('📖', 'Subjects', subjSet.size),
-      stat('🔗', 'Links', dws.length)
+      stat('???', 'Departments', deptCount),
+      stat('?????', 'Doctors', docSet.size),
+      stat('??', 'Subjects', subjSet.size),
+      stat('??', 'Links', dws.length)
     ].join('');
 
     document.getElementById('quickStats').innerHTML = `
@@ -93,9 +93,9 @@ function stat(icon, label, value) {
   `;
 }
 
-/* ═══════════════════════════════════════════
+/* -------------------------------------------
    STRUCTURE
-   ═══════════════════════════════════════════ */
+   ------------------------------------------- */
 async function loadStructure() {
   await loadDepartments();
   await loadLevels();
@@ -194,9 +194,9 @@ async function loadSubjects() {
   }
 }
 
-/* ═══════════════════════════════════════════
+/* -------------------------------------------
    RENDER LISTS
-   ═══════════════════════════════════════════ */
+   ------------------------------------------- */
 function renderDepartments() {
   const wrap = document.getElementById('deptsList');
   if (!_state.departments.length) { wrap.innerHTML = emptyBox('No departments'); return; }
@@ -204,12 +204,12 @@ function renderDepartments() {
   wrap.innerHTML = _state.departments.map(d => {
     const name = d.depName || d.name;
     return row(
-      '🏛️',
+      '???',
       name,
       d.code || '',
       [
-        btn('✏️ Edit', 'btn-ghost', () => AdminUI.openEditDepartment(name)),
-        btn('🗑️ Delete', 'btn-danger', () => AdminUI.deleteDepartment(name))
+        btn('?? Edit', 'btn-ghost', () => AdminUI.openEditDepartment(name)),
+        btn('??? Delete', 'btn-danger', () => AdminUI.deleteDepartment(name))
       ]
     );
   }).join('');
@@ -221,11 +221,11 @@ function renderLevels() {
 
   wrap.innerHTML = _state.levels.map(l => {
     return row(
-      '📊',
-      `${l.department} — Level ${l.levelNumber}`,
+      '??',
+      `${l.department} � Level ${l.levelNumber}`,
       '',
       [
-        btn('🗑️ Delete', 'btn-danger', () => AdminUI.deleteLevel(l.department, l.levelNumber))
+        btn('??? Delete', 'btn-danger', () => AdminUI.deleteLevel(l.department, l.levelNumber))
       ]
     );
   }).join('');
@@ -237,11 +237,11 @@ function renderSemesters() {
 
   wrap.innerHTML = _state.semesters.map(s => {
     return row(
-      '📅',
-      `${s.department} — Level ${s.levelNumber} — Sem ${s.semesterNumber}`,
+      '??',
+      `${s.department} � Level ${s.levelNumber} � Sem ${s.semesterNumber}`,
       '',
       [
-        btn('🗑️ Delete', 'btn-danger', () => AdminUI.deleteSemester(s.department, s.levelNumber, s.semesterNumber))
+        btn('??? Delete', 'btn-danger', () => AdminUI.deleteSemester(s.department, s.levelNumber, s.semesterNumber))
       ]
     );
   }).join('');
@@ -253,20 +253,20 @@ function renderSubjects() {
 
   wrap.innerHTML = _state.subjects.map(s => {
     return row(
-      s.icon || '📖',
+      s.icon || '??',
       s.name,
       s.code || '',
       [
-        btn('✏️ Edit', 'btn-ghost', () => AdminUI.openEditSubject(s.name, s.department, s.levelNumber, s.semesterNumber)),
-        btn('🗑️ Delete', 'btn-danger', () => AdminUI.deleteSubject(s.name, s.department, s.levelNumber, s.semesterNumber))
+        btn('?? Edit', 'btn-ghost', () => AdminUI.openEditSubject(s.name, s.department, s.levelNumber, s.semesterNumber)),
+        btn('??? Delete', 'btn-danger', () => AdminUI.deleteSubject(s.name, s.department, s.levelNumber, s.semesterNumber))
       ]
     );
   }).join('');
 }
 
-/* ═══════════════════════════════════════════
+/* -------------------------------------------
    HELPERS
-   ═══════════════════════════════════════════ */
+   ------------------------------------------- */
 function row(icon, title, sub, actions) {
   return `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(0,220,255,.1);gap:12px;flex-wrap:wrap">
@@ -301,12 +301,12 @@ function emptyBox(msg) {
 }
 
 function errBox(msg) {
-  return `<p style="color:var(--danger);text-align:center;padding:24px;font-size:13px">❌ ${escapeHtml(msg)}</p>`;
+  return `<p style="color:var(--danger);text-align:center;padding:24px;font-size:13px">? ${escapeHtml(msg)}</p>`;
 }
 
-/* ═══════════════════════════════════════════
+/* -------------------------------------------
    CONTENT BROWSE
-   ═══════════════════════════════════════════ */
+   ------------------------------------------- */
 async function loadContentBrowse() {
   await renderContentLevel();
 }
@@ -324,7 +324,7 @@ async function renderContentLevel() {
   const actionBtns = [];
 
   if (p.department) {
-    actionBtns.push(btn('⬅️ Back', 'btn-ghost', () => AdminUI.stepBack()));
+    actionBtns.push(btn('?? Back', 'btn-ghost', () => AdminUI.stepBack()));
   }
 
   try {
@@ -333,34 +333,34 @@ async function renderContentLevel() {
 
     if (!p.department) {
       items = await API.getFolders({});
-      levelName = '🏛️ Departments';
-      actionBtns.push(btn('➕ Add Department', 'btn-primary', () => AdminUI.openAddDepartment()));
+      levelName = '??? Departments';
+      actionBtns.push(btn('? Add Department', 'btn-primary', () => AdminUI.openAddDepartment()));
     } else if (!p.levelNumber) {
       items = await API.getFolders({ department: p.department });
-      levelName = `📊 Levels in ${p.department}`;
-      actionBtns.push(btn('➕ Add Level', 'btn-primary', () => AdminUI.openAddLevel()));
+      levelName = `?? Levels in ${p.department}`;
+      actionBtns.push(btn('? Add Level', 'btn-primary', () => AdminUI.openAddLevel()));
     } else if (!p.semesterNumber) {
       items = await API.getFolders({ department: p.department, levelNumber: p.levelNumber });
-      levelName = `📅 Semesters in Level ${p.levelNumber}`;
-      actionBtns.push(btn('➕ Add Semester', 'btn-primary', () => AdminUI.openAddSemester()));
+      levelName = `?? Semesters in Level ${p.levelNumber}`;
+      actionBtns.push(btn('? Add Semester', 'btn-primary', () => AdminUI.openAddSemester()));
     } else if (!p.subject) {
       items = await API.getFolders({ department: p.department, levelNumber: p.levelNumber, semesterNumber: p.semesterNumber });
-      levelName = `📖 Subjects in Sem ${p.semesterNumber}`;
-      actionBtns.push(btn('➕ Add Subject', 'btn-primary', () => AdminUI.openAddSubject()));
+      levelName = `?? Subjects in Sem ${p.semesterNumber}`;
+      actionBtns.push(btn('? Add Subject', 'btn-primary', () => AdminUI.openAddSubject()));
     } else if (!p.doctor) {
       items = await API.getFolders({ department: p.department, levelNumber: p.levelNumber, semesterNumber: p.semesterNumber, subject: p.subject });
-      levelName = `👨‍🏫 Doctors for ${p.subject}`;
-      actionBtns.push(btn('➕ Add Doctor', 'btn-primary', () => AdminUI.openAddDoctor()));
-      actionBtns.push(btn('🔗 Link Doctor', 'btn-ghost', () => AdminUI.openLinkDoctor()));
+      levelName = `????? Doctors for ${p.subject}`;
+      actionBtns.push(btn('? Add Doctor', 'btn-primary', () => AdminUI.openAddDoctor()));
+      actionBtns.push(btn('?? Link Doctor', 'btn-ghost', () => AdminUI.openLinkDoctor()));
     } else if (!p.dataType) {
-      levelName = `📂 Content Types (${p.doctor})`;
+      levelName = `?? Content Types (${p.doctor})`;
       items = [
         { dataType: 'sections', label: 'Sections' },
         { dataType: 'videos', label: 'Videos' },
         { dataType: 'summaries', label: 'Summaries' },
         { dataType: 'resources', label: 'Resources' }
       ];
-      actionBtns.push(btn('➕ Quick Upload Content', 'btn-primary', () => AdminUI.openAddFileChoice()));
+      actionBtns.push(btn('? Quick Upload Content', 'btn-primary', () => AdminUI.openAddFileChoice()));
     } else {
       items = await API.getFolders({
         department: p.department,
@@ -370,8 +370,8 @@ async function renderContentLevel() {
         doctor: p.doctor,
         dataType: p.dataType
       }).catch(() => []);
-      levelName = `📄 ${p.dataType.toUpperCase()}S`;
-      actionBtns.push(btn(`➕ Add ${p.dataType}`, 'btn-primary', () => AdminUI.openAddFile(p.dataType)));
+      levelName = `?? ${p.dataType.toUpperCase()}S`;
+      actionBtns.push(btn(`? Add ${p.dataType}`, 'btn-primary', () => AdminUI.openAddFile(p.dataType)));
     }
 
     title.textContent = levelName;
@@ -409,39 +409,39 @@ function renderContentItems(items) {
 
   grid.innerHTML = validItems.map(item => {
     if (item.depName) {
-      return contentCard('🏛️', item.depName, item.code || '', 'department',
+      return contentCard('???', item.depName, item.code || '', 'department',
         () => { _state.path.department = item.depName; renderContentLevel(); },
         null, null
       );
     }
     if (item.levelNumber !== undefined && item.levelNumber !== null && !p.levelNumber) {
-      return contentCard('📊', 'Level ' + item.levelNumber, '', 'level',
+      return contentCard('??', 'Level ' + item.levelNumber, '', 'level',
         () => { _state.path.levelNumber = item.levelNumber; renderContentLevel(); },
         null, null
       );
     }
     if (item.semesterNumber !== undefined && item.semesterNumber !== null && !p.semesterNumber) {
-      return contentCard('📅', 'Semester ' + item.semesterNumber, '', 'semester',
+      return contentCard('??', 'Semester ' + item.semesterNumber, '', 'semester',
         () => { _state.path.semesterNumber = item.semesterNumber; renderContentLevel(); },
         null, null
       );
     }
     if (item.subjectName && !p.subject) {
-      const icon = (window.Mappers && Mappers._getIcon) ? Mappers._getIcon(item.subjectName) : '📖';
+      const icon = (window.Mappers && Mappers._getIcon) ? Mappers._getIcon(item.subjectName) : '??';
       return contentCard(icon, item.subjectName, '', 'subject',
         () => { _state.path.subject = item.subjectName; renderContentLevel(); },
         null, null
       );
     }
     if (item.doctorName && !p.doctor) {
-      return contentCard('👨‍🏫', item.doctorName, '', 'doctor',
+      return contentCard('?????', item.doctorName, '', 'doctor',
         () => { _state.path.doctor = item.doctorName; renderContentLevel(); },
         null, null
       );
     }
     if (item.dataType && !p.dataType) {
       const normalized = String(item.dataType).replace(/s$/, '').replace('recourse', 'resource');
-      const icon = { section: '📄', video: '🎬', summary: '📝', resource: '📦' }[normalized] || '📁';
+      const icon = { section: '??', video: '??', summary: '??', resource: '??' }[normalized] || '??';
       const displayTitle = item.label || (normalized.charAt(0).toUpperCase() + normalized.slice(1) + 's');
       return contentCard(icon, displayTitle, 'Click to view or upload ' + normalized + 's', 'datatype',
         () => { _state.path.dataType = normalized; renderContentLevel(); },
@@ -455,7 +455,7 @@ function renderContentItems(items) {
         : 'resourceTitle';
       const fileTitle = item[titleKey];
       const pubBy = item.sectionPublishedBy || item.videoPublishedBy || item.summaryPublishedBy || item.resourcePublishedBy || _state.userName || 'Admin';
-      return contentCard('📄', fileTitle, 'Published by ' + pubBy, 'file',
+      return contentCard('??', fileTitle, 'Published by ' + pubBy, 'file',
         null,
         () => AdminUI.openEditFile(p.dataType, fileTitle),
         () => AdminUI.deleteFile(p.dataType, fileTitle)
@@ -482,19 +482,19 @@ function contentCard(icon, title, sub, type, onClick, onEdit, onDelete) {
         ${sub ? `<div style="color:var(--muted);font-size:12px;margin-top:2px">${escapeHtml(sub)}</div>` : ''}
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
-        ${onEdit ? btn('✏️ Edit', 'btn-ghost', onEdit) : ''}
-        ${onDelete ? btn('🗑️ Delete', 'btn-danger', onDelete) : ''}
+        ${onEdit ? btn('?? Edit', 'btn-ghost', onEdit) : ''}
+        ${onDelete ? btn('??? Delete', 'btn-danger', onDelete) : ''}
       </div>
     </div>
   `;
 }
 
-/* ═══ BREADCRUMBS ═══ */
+/* --- BREADCRUMBS --- */
 function renderBreadcrumbs() {
   const el = document.getElementById('contentBreadcrumbs');
   const p = _state.path;
 
-  const crumbs = [{ label: '🏠 Home', step: 0 }];
+  const crumbs = [{ label: '?? Home', step: 0 }];
 
   if (p.department && p.department !== 'undefined')     crumbs.push({ label: p.department, step: 1 });
   if (p.levelNumber != null)                            crumbs.push({ label: 'Level ' + p.levelNumber, step: 2 });
@@ -517,9 +517,9 @@ function renderBreadcrumbs() {
   });
 }
 
-/* ═══════════════════════════════════════════
+/* -------------------------------------------
    DOCTORS TAB
-   ═══════════════════════════════════════════ */
+   ------------------------------------------- */
 async function loadDoctorsTab() {
   try {
     const dws = await API.getDoctorWithSubjects();
@@ -547,12 +547,12 @@ function renderDoctorsTab() {
     const d = item.doctor;
     const subjects = item.subjects.map(s => s.name).join(', ');
     return row(
-      '👨‍🏫',
+      '?????',
       d.name,
-      `${d.academicDegree || ''} ${subjects ? '• ' + subjects : ''}`,
+      `${d.academicDegree || ''} ${subjects ? '� ' + subjects : ''}`,
       [
-        btn('✏️ Edit', 'btn-ghost', () => AdminUI.openEditDoctor(d.name)),
-        btn('🗑️ Delete', 'btn-danger', () => AdminUI.deleteDoctor(d.name))
+        btn('?? Edit', 'btn-ghost', () => AdminUI.openEditDoctor(d.name)),
+        btn('??? Delete', 'btn-danger', () => AdminUI.deleteDoctor(d.name))
       ]
     );
   }).join('');
@@ -564,19 +564,19 @@ function renderLinks() {
 
   wrap.innerHTML = _state.links.map(link => {
     return row(
-      '🔗',
-      `${link.subjectName} ↔ ${link.doctorName}`,
+      '??',
+      `${link.subjectName} ? ${link.doctorName}`,
       '',
       [
-        btn('🔓 Unlink', 'btn-danger', () => AdminUI.unlinkDoctor(link))
+        btn('?? Unlink', 'btn-danger', () => AdminUI.unlinkDoctor(link))
       ]
     );
   }).join('');
 }
 
-/* ═══════════════════════════════════════════
-   AdminUI — Global Actions
-   ═══════════════════════════════════════════ */
+/* -------------------------------------------
+   AdminUI � Global Actions
+   ------------------------------------------- */
 const AdminUI = {
   init() {
     document.querySelectorAll('#adminTabs .tab').forEach(tab => {
@@ -653,7 +653,7 @@ const AdminUI = {
     this.navigateToStep(0);
   },
 
-  /* ═══ MODAL ═══ */
+  /* --- MODAL --- */
   modal(title, bodyHtml, onSave, allowMultiple = false) {
     const root = document.getElementById('modalRoot');
     root.innerHTML = `
@@ -661,13 +661,13 @@ const AdminUI = {
         <div style="background:var(--panel);border:1px solid var(--cyan);border-radius:14px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;padding:24px;box-shadow:0 0 40px rgba(0,229,255,.3)">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
             <h3 style="color:var(--cyan);font-size:18px;margin:0">${title}</h3>
-            <button type="button" data-modal-close="true" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+            <button type="button" data-modal-close="true" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">?</button>
           </div>
           <div id="modalBody">${bodyHtml}</div>
           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap">
             <button type="button" class="btn btn-ghost btn-sm" id="modalCancelBtn" data-modal-close="true">Cancel</button>
-            ${allowMultiple ? `<button type="button" class="btn btn-success btn-sm" id="modalSaveAnotherBtn">➕ Save & Add Another</button>` : ''}
-            <button type="button" class="btn btn-primary btn-sm" id="modalSaveBtn">💾 Save</button>
+            ${allowMultiple ? `<button type="button" class="btn btn-success btn-sm" id="modalSaveAnotherBtn">? Save & Add Another</button>` : ''}
+            <button type="button" class="btn btn-primary btn-sm" id="modalSaveBtn">?? Save</button>
           </div>
         </div>
       </div>
@@ -680,14 +680,14 @@ const AdminUI = {
     if (saveBtn) {
       saveBtn.addEventListener('click', async () => {
         saveBtn.disabled = true;
-        saveBtn.textContent = '⏳ Saving...';
+        saveBtn.textContent = '? Saving...';
         try {
           await onSave(false);
         } catch (e) {
           console.error('Save failed:', e);
         } finally {
           const btn = document.getElementById('modalSaveBtn');
-          if (btn) { btn.disabled = false; btn.textContent = '💾 Save'; }
+          if (btn) { btn.disabled = false; btn.textContent = '?? Save'; }
         }
       });
     }
@@ -696,22 +696,22 @@ const AdminUI = {
     if (saveAnotherBtn) {
       saveAnotherBtn.addEventListener('click', async () => {
         saveAnotherBtn.disabled = true;
-        saveAnotherBtn.textContent = '⏳ Saving...';
+        saveAnotherBtn.textContent = '? Saving...';
         try {
           await onSave(true);
         } catch (e) {
           console.error('Save & Add Another failed:', e);
         } finally {
           const btn = document.getElementById('modalSaveAnotherBtn');
-          if (btn) { btn.disabled = false; btn.textContent = '➕ Save & Add Another'; }
+          if (btn) { btn.disabled = false; btn.textContent = '? Save & Add Another'; }
         }
       });
     }
   },
 
-  /* ═══════════════════════════════════════════════════════════
-     📦 BULK MODAL — Generic Function
-     ═══════════════════════════════════════════════════════════ */
+  /* -----------------------------------------------------------
+     ?? BULK MODAL � Generic Function
+     ----------------------------------------------------------- */
   bulkModal(config) {
     var root = document.getElementById('modalRoot');
     var title = config.title || 'Add Items';
@@ -719,7 +719,7 @@ const AdminUI = {
     var defaultValues = config.defaultValues || {};
     var buildPayload = config.buildPayload || function(row) { return row; };
     var saveHandler = config.saveHandler;
-    var itemIcon = config.itemIcon || '📦';
+    var itemIcon = config.itemIcon || '??';
     var itemLabel = config.itemLabel || function(item) { return item.name || JSON.stringify(item).substring(0, 40); };
 
     var buildRow = function(index) {
@@ -739,7 +739,7 @@ const AdminUI = {
       return [
         '<div class="bulk-row" data-row="' + index + '">',
         '  <div class="bulk-row-number">#' + (index + 1) + '</div>',
-        (index > 0 ? '<button type="button" class="bulk-row-remove" data-remove="' + index + '">×</button>' : ''),
+        (index > 0 ? '<button type="button" class="bulk-row-remove" data-remove="' + index + '">�</button>' : ''),
         fieldsHtml,
         '</div>'
       ].join('');
@@ -750,7 +750,7 @@ const AdminUI = {
       '  <div class="bulk-modal">',
       '    <div class="bulk-header">',
       '      <h3 class="bulk-title">' + title + ' <span class="bulk-count" id="bulkCount">1</span></h3>',
-      '      <button type="button" class="bulk-close" data-close="true">✕</button>',
+      '      <button type="button" class="bulk-close" data-close="true">?</button>',
       '    </div>',
       '    <div class="bulk-rows" id="bulkRows">',
       buildRow(0),
@@ -762,7 +762,7 @@ const AdminUI = {
       '      </button>',
       '      <div class="bulk-actions-right">',
       '        <button type="button" class="bulk-btn bulk-btn-ghost" data-close="true">Cancel</button>',
-      '        <button type="button" class="bulk-btn bulk-btn-save" id="bulkSaveBtn">💾 Save All</button>',
+      '        <button type="button" class="bulk-btn bulk-btn-save" id="bulkSaveBtn">?? Save All</button>',
       '      </div>',
       '    </div>',
       '  </div>',
@@ -810,7 +810,7 @@ const AdminUI = {
       rows.insertAdjacentHTML('beforeend', buildRow(idx));
       var newRow = rows.lastElementChild;
 
-      // اربط زرار الحذف
+      // ???? ???? ?????
       var removeBtn = newRow.querySelector('.bulk-row-remove');
       if (removeBtn) {
         removeBtn.onclick = function() { removeRow(newRow); };
@@ -845,7 +845,7 @@ const AdminUI = {
 
     bindRemove();
 
-    // ✨ Save All
+    // ? Save All
     document.getElementById('bulkSaveBtn').onclick = async function() {
       var items = [];
       var hasError = false;
@@ -861,11 +861,11 @@ const AdminUI = {
           raw[inp.dataset.field] = v;
         });
 
-        // تحقق من الحقول الإلزامية
+        // ???? ?? ?????? ?????????
         var missing = fields.filter(function(f) { return f.required && !raw[f.name]; });
         if (missing.length) {
           if (!hasError) {
-            UI.error(missing[0].label + ' مطلوب في صف ' + (items.length + 1));
+            UI.error(missing[0].label + ' ????? ?? ?? ' + (items.length + 1));
             var inp = row.querySelector('[data-field="' + missing[0].name + '"]');
             if (inp) inp.focus();
           }
@@ -885,7 +885,7 @@ const AdminUI = {
 
       var btn = document.getElementById('bulkSaveBtn');
       btn.disabled = true;
-      btn.innerHTML = '⏳ Saving ' + items.length + '...';
+      btn.innerHTML = '? Saving ' + items.length + '...';
 
       try {
         await saveHandler(items);
@@ -893,7 +893,7 @@ const AdminUI = {
       } catch (e) {
         UI.error(e.message);
         btn.disabled = false;
-        btn.innerHTML = '💾 Save All';
+        btn.innerHTML = '?? Save All';
       }
     };
 
@@ -903,11 +903,11 @@ const AdminUI = {
     }, 100);
   },
 
-  /* ═══ DEPARTMENT — Bulk ═══ */
+  /* --- DEPARTMENT � Bulk --- */
   openAddDepartment() {
     this.bulkModal({
-      title: '➕ Add Departments',
-      itemIcon: '🏛️',
+      title: '? Add Departments',
+      itemIcon: '???',
       fields: [
         { name: 'DepartmentName', label: 'Name', placeholder: 'computer science', required: true },
         { name: 'departmentDescription', label: 'Description', placeholder: '...' },
@@ -917,24 +917,24 @@ const AdminUI = {
       buildPayload: function(row) { return row; },
       saveHandler: async function(items) {
         await API.addDepartments(items);
-        UI.success('✅ Added ' + items.length + ' department' + (items.length > 1 ? 's' : ''));
+        UI.success('? Added ' + items.length + ' department' + (items.length > 1 ? 's' : ''));
         await loadStructure();
       }
     });
   },
 
-  /* ═══ LEVEL — Bulk ═══ */
+  /* --- LEVEL � Bulk --- */
   openAddLevel() {
     var deptOpts = this.deptOptions();
     var defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
 
-    // ✨ Datalist للقسم
+    // ? Datalist ?????
     var datalistHtml = '<datalist id="bulkDeptList">' + deptOpts + '</datalist>';
     var datalistPlaced = false;
 
     this.bulkModal({
-      title: '➕ Add Levels',
-      itemIcon: '📊',
+      title: '? Add Levels',
+      itemIcon: '??',
       fields: [
         { name: 'DepartmentName', label: 'Department', placeholder: 'computer science', required: true, default: defaultDept, datalist: 'bulkDeptList' },
         { name: 'levelNumber', label: 'Level Number', placeholder: '1', required: true, default: 1, type: 'number' }
@@ -947,30 +947,30 @@ const AdminUI = {
       },
       saveHandler: async function(items) {
         await API.addLevels(items);
-        UI.success('✅ Added ' + items.length + ' level' + (items.length > 1 ? 's' : ''));
+        UI.success('? Added ' + items.length + ' level' + (items.length > 1 ? 's' : ''));
         await loadLevels();
         await loadSemesters();
       }
     });
 
-    // ضيف الـ datalist في الصفحة
+    // ??? ??? datalist ?? ??????
     if (!document.getElementById('bulkDeptList')) {
       document.body.insertAdjacentHTML('beforeend', datalistHtml);
-      // اربط الـ inputs بالـ datalist
+      // ???? ??? inputs ???? datalist
       document.querySelectorAll('.bulk-row [data-field="DepartmentName"]').forEach(function(inp) {
         inp.setAttribute('list', 'bulkDeptList');
       });
     }
   },
 
-  /* ═══ SEMESTER — Bulk ═══ */
+  /* --- SEMESTER � Bulk --- */
   openAddSemester() {
     var deptOpts = this.deptOptions();
     var defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
 
     this.bulkModal({
-      title: '➕ Add Semesters',
-      itemIcon: '📅',
+      title: '? Add Semesters',
+      itemIcon: '??',
       fields: [
         { name: 'DepartmentName', label: 'Department', placeholder: 'computer science', required: true, default: defaultDept },
         { name: 'levelNumber', label: 'Level Number', placeholder: '1', required: true, default: 1, type: 'number' },
@@ -979,13 +979,13 @@ const AdminUI = {
       buildPayload: function(row) { return row; },
       saveHandler: async function(items) {
         await API.addSemesters(items);
-        UI.success('✅ Added ' + items.length + ' semester' + (items.length > 1 ? 's' : ''));
+        UI.success('? Added ' + items.length + ' semester' + (items.length > 1 ? 's' : ''));
         await loadSemesters();
       }
     });
   },
 
-  /* ═══ SUBJECT — Bulk ═══ */
+  /* --- SUBJECT � Bulk --- */
   openAddSubject() {
     var deptOpts = this.deptOptions();
     var defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
@@ -993,8 +993,8 @@ const AdminUI = {
     var defaultSem = _state.path.semesterNumber || 1;
 
     this.bulkModal({
-      title: '➕ Add Subjects',
-      itemIcon: '📚',
+      title: '? Add Subjects',
+      itemIcon: '??',
       fields: [
         { name: 'DepartmentName', label: 'Department', placeholder: 'computer science', required: true, default: defaultDept },
         { name: 'levelNumber', label: 'Level', placeholder: '1', required: true, default: defaultLvl, type: 'number' },
@@ -1006,13 +1006,13 @@ const AdminUI = {
       buildPayload: function(row) { return row; },
       saveHandler: async function(items) {
         await API.addSubjects(items);
-        UI.success('✅ Added ' + items.length + ' subject' + (items.length > 1 ? 's' : ''));
+        UI.success('? Added ' + items.length + ' subject' + (items.length > 1 ? 's' : ''));
         await loadSubjects();
       }
     });
   },
 
-  /* ═══ DOCTOR — Bulk with Photo ═══ */
+  /* --- DOCTOR � Bulk with Photo --- */
   openAddDoctor() {
     var self = this;
     var root = document.getElementById('modalRoot');
@@ -1023,7 +1023,7 @@ const AdminUI = {
       return [
         '<div class="bulk-row" data-row="' + index + '">',
         '  <div class="bulk-row-number">#' + (index + 1) + '</div>',
-        (index > 0 ? '<button type="button" class="bulk-row-remove" data-remove="' + index + '">×</button>' : ''),
+        (index > 0 ? '<button type="button" class="bulk-row-remove" data-remove="' + index + '">�</button>' : ''),
         '  <div class="field"><label>Name</label><input type="text" data-field="doctorName" placeholder="Amgad Salama" autocomplete="off"></div>',
         '  <div class="field"><label>Academic Degree</label><input type="text" data-field="doctorAcademicDegree" placeholder="PhD" autocomplete="off"></div>',
         '  <div class="field"><label>Description</label><input type="text" data-field="doctorDescription" placeholder="..." autocomplete="off"></div>',
@@ -1036,17 +1036,17 @@ const AdminUI = {
       '<div class="bulk-overlay" id="bulkOverlay">',
       '  <div class="bulk-modal">',
       '    <div class="bulk-header">',
-      '      <h3 class="bulk-title">➕ Add Doctors <span class="bulk-count" id="bulkCount">1</span></h3>',
-      '      <button type="button" class="bulk-close" data-close="true">✕</button>',
+      '      <h3 class="bulk-title">? Add Doctors <span class="bulk-count" id="bulkCount">1</span></h3>',
+      '      <button type="button" class="bulk-close" data-close="true">?</button>',
       '    </div>',
       '    <div class="bulk-rows" id="bulkRows">',
       buildRow(0),
       '    </div>',
       '    <div class="bulk-actions">',
-      '      <button type="button" class="bulk-btn bulk-btn-add" id="bulkAddRowBtn">➕ Add Another</button>',
+      '      <button type="button" class="bulk-btn bulk-btn-add" id="bulkAddRowBtn">? Add Another</button>',
       '      <div class="bulk-actions-right">',
       '        <button type="button" class="bulk-btn bulk-btn-ghost" data-close="true">Cancel</button>',
-      '        <button type="button" class="bulk-btn bulk-btn-save" id="bulkSaveBtn">💾 Save All</button>',
+      '        <button type="button" class="bulk-btn bulk-btn-save" id="bulkSaveBtn">?? Save All</button>',
       '      </div>',
       '    </div>',
       '  </div>',
@@ -1106,7 +1106,7 @@ const AdminUI = {
     };
     document.addEventListener('keydown', escHandler);
 
-    // اربط زر الحذف الأول
+    // ???? ?? ????? ?????
     document.querySelectorAll('.bulk-row-remove').forEach(function(btn) {
       btn.onclick = function() {
         var row = btn.closest('.bulk-row');
@@ -1114,7 +1114,7 @@ const AdminUI = {
       };
     });
 
-    // ✨ Save
+    // ? Save
     document.getElementById('bulkSaveBtn').onclick = async function() {
       var dataItems = [];
       var photoFiles = [];
@@ -1128,12 +1128,12 @@ const AdminUI = {
         var photo = photoInput && photoInput.files[0];
 
         if (!name) {
-          if (!hasError) UI.error('Name مطلوب في صف #' + (i + 1));
+          if (!hasError) UI.error('Name ????? ?? ?? #' + (i + 1));
           hasError = true;
           return;
         }
         if (!photo) {
-          if (!hasError) UI.error('Photo مطلوبة في صف #' + (i + 1));
+          if (!hasError) UI.error('Photo ?????? ?? ?? #' + (i + 1));
           hasError = true;
           return;
         }
@@ -1156,7 +1156,7 @@ const AdminUI = {
 
       var btn = document.getElementById('bulkSaveBtn');
       btn.disabled = true;
-      btn.innerHTML = '⏳ Saving ' + dataItems.length + '...';
+      btn.innerHTML = '? Saving ' + dataItems.length + '...';
 
       try {
         var fd = new FormData();
@@ -1164,18 +1164,18 @@ const AdminUI = {
         photoFiles.forEach(function(p) { fd.append(p.key, p.file); });
 
         await API.addDoctors(fd);
-        UI.success('✅ Added ' + dataItems.length + ' doctor' + (dataItems.length > 1 ? 's' : ''));
+        UI.success('? Added ' + dataItems.length + ' doctor' + (dataItems.length > 1 ? 's' : ''));
         self.closeModal();
         await loadDoctorsTab();
       } catch (e) {
         UI.error(e.message);
         btn.disabled = false;
-        btn.innerHTML = '💾 Save All';
+        btn.innerHTML = '?? Save All';
       }
     };
   },
 
-  /* ═══ LINK DOCTOR — Bulk ═══ */
+  /* --- LINK DOCTOR � Bulk --- */
   openLinkDoctor() {
     var deptOpts = this.deptOptions();
     var subjOpts = this.subjectsOptions();
@@ -1184,8 +1184,8 @@ const AdminUI = {
     var defaultDept = p.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
 
     this.bulkModal({
-      title: '🔗 Link Doctors to Subjects',
-      itemIcon: '🔗',
+      title: '?? Link Doctors to Subjects',
+      itemIcon: '??',
       fields: [
         { name: 'DepartmentName', label: 'Department', placeholder: 'computer science', required: true, default: defaultDept },
         { name: 'levelNumber', label: 'Level', placeholder: '1', required: true, default: p.levelNumber || 1, type: 'number' },
@@ -1196,7 +1196,7 @@ const AdminUI = {
       buildPayload: function(row) { return row; },
       saveHandler: async function(items) {
         await API.linkDoctors(items);
-        UI.success('✅ Linked ' + items.length + ' doctor' + (items.length > 1 ? 's' : ''));
+        UI.success('? Linked ' + items.length + ' doctor' + (items.length > 1 ? 's' : ''));
         await loadDoctorsTab();
         if (p.subject) await renderContentLevel();
       }
@@ -1208,7 +1208,7 @@ const AdminUI = {
     if (root) root.innerHTML = '';
   },
 
-  /* ═══ DATALIST OPTIONS HELPERS ═══ */
+  /* --- DATALIST OPTIONS HELPERS --- */
   deptOptions() {
     return (_state.departments || []).map(d => {
       const name = d.depName || d.name;
@@ -1229,11 +1229,11 @@ const AdminUI = {
     }).join('');
   },
 
-  /* ═══ DEPARTMENT ═══ */
+  /* --- DEPARTMENT --- */
   
 
   openEditDepartment(oldName) {
-    this.modal('✏️ Edit Department', `
+    this.modal('?? Edit Department', `
       <div class="field"><label>Name</label><input type="text" id="mDeptName" value="${escapeHtml(oldName)}" readonly style="opacity:.6"></div>
       <div class="field"><label>New Name</label><input type="text" id="mDeptNew" placeholder="new name"></div>
       <div class="field"><label>Description</label><input type="text" id="mDeptDesc"></div>
@@ -1265,7 +1265,7 @@ const AdminUI = {
     } catch (e) { UI.error(e.message); }
   },
 
-  /* ═══ LEVEL ═══ */
+  /* --- LEVEL --- */
   
 
   async deleteLevel(dept, num) {
@@ -1278,7 +1278,7 @@ const AdminUI = {
     } catch (e) { UI.error(e.message); }
   },
 
-  /* ═══ SEMESTER ═══ */
+  /* --- SEMESTER --- */
   
 
   async deleteSemester(dept, lvl, sem) {
@@ -1290,14 +1290,14 @@ const AdminUI = {
     } catch (e) { UI.error(e.message); }
   },
 
-  /* ═══ SUBJECT ═══ */
+  /* --- SUBJECT --- */
   
 
   openEditSubject(oldName, dept, lvl, sem) {
     const defaultDept = dept || _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
     const defaultLvl = lvl || _state.path.levelNumber || 1;
     const defaultSem = sem || _state.path.semesterNumber || 1;
-    this.modal('✏️ Edit Subject', `
+    this.modal('?? Edit Subject', `
       <div class="field"><label>Department</label><input type="text" id="mSubDept" value="${escapeHtml(defaultDept)}" readonly style="opacity:.6"></div>
       <div class="field"><label>Level</label><input type="number" id="mSubLvl" value="${defaultLvl}"></div>
       <div class="field"><label>Semester</label><input type="number" id="mSubSem" value="${defaultSem}"></div>
@@ -1340,11 +1340,11 @@ const AdminUI = {
     } catch (e) { UI.error(e.message); }
   },
 
-  /* ═══ DOCTOR ═══ */
+  /* --- DOCTOR --- */
   
 
   openEditDoctor(name) {
-    this.modal('✏️ Edit Doctor', `
+    this.modal('?? Edit Doctor', `
       <div class="field"><label>Name</label><input type="text" value="${escapeHtml(name)}" readonly style="opacity:.6"></div>
       <div class="field"><label>New Degree</label><input type="text" id="mDocDeg"></div>
       <div class="field"><label>New Description</label><input type="text" id="mDocDesc"></div>
@@ -1377,11 +1377,11 @@ const AdminUI = {
     } catch (e) { UI.error(e.message); }
   },
 
-  /* ═══ LINK DOCTOR ═══ */
+  /* --- LINK DOCTOR --- */
   
 
   async unlinkDoctor(link) {
-    if (!confirm(`Unlink ${link.subjectName} ↔ ${link.doctorName}?`)) return;
+    if (!confirm(`Unlink ${link.subjectName} ? ${link.doctorName}?`)) return;
     try {
       const url = new URL(link.link, 'http://x');
       const p = [{
@@ -1397,9 +1397,9 @@ const AdminUI = {
     } catch (e) { UI.error(e.message); }
   },
 
-  /* ═══ FILE UPLOAD ═══ */
+  /* --- FILE UPLOAD --- */
   openAddFileChoice() {
-    this.modal('➕ Upload Content', `
+    this.modal('? Upload Content', `
       <div class="field">
         <label>Content Type</label>
         <input type="text" id="mChoiceType" list="mChoiceTypeList" value="section" placeholder="Type content type...">
@@ -1433,7 +1433,7 @@ const AdminUI = {
 
   openAddFile(dataType) {
     const isVideo = dataType === 'video';
-    this.modal(`➕ Add ${dataType}`, `
+    this.modal(`? Add ${dataType}`, `
       <div class="field"><label>Title</label><input type="text" id="mFileTitle" placeholder="Enter title..."></div>
       ${isVideo
         ? '<div class="field"><label>Video URL</label><input type="text" id="mFileVideo" placeholder="https://..."></div>'
@@ -1489,7 +1489,7 @@ const AdminUI = {
 
   openEditFile(dataType, oldTitle) {
     const isVideo = dataType === 'video';
-    this.modal(`✏️ Edit ${dataType}`, `
+    this.modal(`?? Edit ${dataType}`, `
       <div class="field"><label>Old Title</label><input type="text" value="${escapeHtml(oldTitle)}" readonly style="opacity:.6"></div>
       <div class="field"><label>New Title</label><input type="text" id="mEditNew"></div>
       ${isVideo
@@ -1535,7 +1535,7 @@ const AdminUI = {
     } catch (e) { UI.error(e.message); }
   },
 
-  /* ═══ USERS ═══ */
+  /* --- USERS --- */
   async changeRole() {
     const emails = document.getElementById('userEmails').value.trim().split(/\n+/).filter(Boolean);
     if (!emails.length) return UI.error('Enter emails');

@@ -41,6 +41,9 @@ document.addEventListener('DOMContentLoaded', async function() {
       });
     });
 
+    renderSubjectBreadcrumbs();
+    renderSubjectMeta();
+    await renderDoctorsInfo();
     renderTab('section');
   } catch (err) {
     console.error(err);
@@ -147,4 +150,80 @@ function bindFileActions(grid, type) {
   grid.querySelectorAll('[data-action="download"]').forEach(function(btn) {
     btn.addEventListener('click', function() { API.downloadFile(type, btn.dataset.name, 'download'); });
   });
+}
+
+/* -------------------------------------------
+   ? BREADCRUMBS
+   ------------------------------------------- */
+function renderSubjectBreadcrumbs() {
+  const el = document.getElementById('subjectBreadcrumbs');
+  if (!el || !_subject) return;
+  
+  const parts = [
+    '<a href="index.html">Home</a>',
+    '<span class="breadcrumb-sep">/</span>',
+    '<a href="subjects.html">Courses</a>'
+  ];
+  
+  if (_subject.department) {
+    parts.push('<span class="breadcrumb-sep">/</span>');
+    parts.push('<a href="folder.html?dept=' + encodeURIComponent(_subject.department) + '">' + escapeHtml(_subject.department) + '</a>');
+  }
+  
+  parts.push('<span class="breadcrumb-sep">/</span>');
+  parts.push('<span>' + escapeHtml(_subject.name) + '</span>');
+  
+  el.innerHTML = parts.join(' ');
+}
+
+/* -------------------------------------------
+   ? SUBJECT META
+   ------------------------------------------- */
+function renderSubjectMeta() {
+  const el = document.getElementById('subjectMeta');
+  if (!el || !_subject) return;
+  
+  const parts = [];
+  if (_subject.code)             parts.push('<span class="meta-item"><strong>Code:</strong> ' + escapeHtml(_subject.code) + '</span>');
+  if (_subject.department)       parts.push('<span class="meta-item"><strong>Dept:</strong> ' + escapeHtml(_subject.department) + '</span>');
+  if (_subject.levelNumber)      parts.push('<span class="meta-item"><strong>Level:</strong> ' + escapeHtml(String(_subject.levelNumber)) + '</span>');
+  if (_subject.semesterNumber)   parts.push('<span class="meta-item"><strong>Semester:</strong> ' + escapeHtml(String(_subject.semesterNumber)) + '</span>');
+  
+  el.innerHTML = parts.join('');
+}
+
+/* -------------------------------------------
+   ? DOCTORS INFO (?? ???? ??????)
+   ------------------------------------------- */
+async function renderDoctorsInfo() {
+  const grid = document.getElementById('sectionsGrid');
+  if (!grid || !_doctors.length) return;
+  
+  const doctorCards = _doctors.map(d => {
+    const photoUrl = d.photo ? API.getDoctorPhotoUrl(d.name) : null;
+    const defaultAvatar = "data:image/svg+xml;utf8," + encodeURIComponent(
+      "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>" +
+      "<circle cx='50' cy='50' r='50' fill='#0a0f2e'/>" +
+      "<circle cx='50' cy='38' r='16' fill='#00f2fe'/>" +
+      "<path d='M20 90 Q50 60 80 90 Z' fill='#00f2fe'/>" +
+      "</svg>"
+    );
+    
+    return [
+      '<div class="doctor-mini-card">',
+      '  <img src="' + (photoUrl || defaultAvatar) + '" alt="' + escapeHtml(d.name) + '" class="doctor-mini-avatar" onerror="this.src=\'' + defaultAvatar + '\'">',
+      '  <div class="doctor-mini-body">',
+      '    <div class="doctor-mini-name">' + escapeHtml(d.name) + '</div>',
+      d.academicDegree ? '    <div class="doctor-mini-degree">' + escapeHtml(d.academicDegree) + '</div>' : '',
+      '    <a href="doctorProfile.html?name=' + encodeURIComponent(d.name) + '" class="doctor-mini-link">View Profile ?</a>',
+      '  </div>',
+      '</div>'
+    ].join('');
+  }).join('');
+  
+  // ????? ??? ??? grid
+  const wrapper = document.createElement('div');
+  wrapper.className = 'subject-doctor-info';
+  wrapper.innerHTML = doctorCards;
+  grid.parentElement.insertBefore(wrapper, grid);
 }
