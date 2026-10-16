@@ -39,7 +39,7 @@ router.route('/auth/microsoft/passwordReset/callback')
 
 router.param('token', paramSanitizeHandler());
 router.route('/resetPassword/:token')
-	.patch( // wont add is_user or admin_check cuz when using frontend we will use redirect
+	.patch( 
 		xss(),
 		AdminController.resetPasswordViaMicrosoft
 	) 

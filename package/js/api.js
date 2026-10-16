@@ -12,9 +12,10 @@ const API = (function() {
     const body = options.body;
     const isFormData = options.isFormData || false;
 
-    const url = CONFIG.API_URL
-      ? CONFIG.API_URL.replace(/\/$/, "") + "/" + path.replace(/^\//, "")
-      : "/" + path.replace(/^\//, "");
+    // ✨ نضيف الـ / قبل الـ path دايمًا لو مش موجود
+    var cleanPath = path.replace(/^\/+/, "");
+    var baseUrl = (CONFIG.API_URL || "").replace(/\/$/, "");
+    var url = baseUrl + "/" + cleanPath;
 
     const headers = {};
     if (!isFormData && body) headers["Content-Type"] = "application/json";
@@ -248,13 +249,15 @@ const API = (function() {
 
 
   async function resetPassword(opts) {
-    // ✨ الباك مستني الـ token في الـ URL مش في الـ body
+    // ✨ الباك مستني PATCH مش POST
+    // URL: /v1/admin/resetPassword/:token
+    // Body: { password, confirm_password }
     return await request(
       ep.admin.resetPassword + '/' + encodeURIComponent(opts.token),
       {
-        method: 'POST',
+        method: 'PATCH',
         body: {
-          new_password: opts.newPassword,
+          password:         opts.newPassword,
           confirm_password: opts.newPassword
         }
       }
@@ -347,4 +350,7 @@ const API = (function() {
     garanteeRoles: garanteeRoles, changeLock: changeLock
   };
 })();
+
+
+
 

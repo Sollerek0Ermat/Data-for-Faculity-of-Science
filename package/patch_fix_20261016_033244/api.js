@@ -12,9 +12,10 @@ const API = (function() {
     const body = options.body;
     const isFormData = options.isFormData || false;
 
-    const url = CONFIG.API_URL
-      ? CONFIG.API_URL.replace(/\/$/, "") + "/" + path.replace(/^\//, "")
-      : "/" + path.replace(/^\//, "");
+    // ✨ نضيف الـ / قبل الـ path دايمًا لو مش موجود
+    var cleanPath = path.replace(/^\/+/, "");
+    var baseUrl = (CONFIG.API_URL || "").replace(/\/$/, "");
+    var url = baseUrl + "/" + cleanPath;
 
     const headers = {};
     if (!isFormData && body) headers["Content-Type"] = "application/json";
@@ -248,14 +249,50 @@ const API = (function() {
 
 
   async function resetPassword(opts) {
-    return await request(ep.admin.resetPassword, {
-      method: 'POST',
-      body: {
-        token: opts.token,
-        new_password: opts.newPassword,
-        confirm_password: opts.newPassword
+    // ✨ fallback: جرب كل المسارات المحتملة
+    var token = opts.token;
+    var body = {
+      password:         opts.newPassword,
+      new_password:     opts.newPassword,
+      confirm_password: opts.newPassword,
+      newPassword:      opts.newPassword,
+      token:            token
+    };
+
+    // ⚠️ مهم: بدون / في البداية — الـ request هيضيفها
+    var candidates = [
+      { method: 'POST',  path: 'v1/admin/resetPassword/' + encodeURIComponent(token) },
+      { method: 'PATCH', path: 'v1/admin/resetPassword/' + encodeURIComponent(token) },
+      { method: 'POST',  path: 'v1/admin/resetPassword' },
+      { method: 'PATCH', path: 'v1/admin/resetPassword' },
+      { method: 'POST',  path: 'v1/admin/auth/resetPassword/' + encodeURIComponent(token) },
+      { method: 'POST',  path: 'v1/admin/passwordReset/' + encodeURIComponent(token) },
+      { method: 'POST',  path: 'v1/admin/passwordReset' },
+      { method: 'PATCH', path: 'v1/admin/passwordReset' },
+      { method: 'POST',  path: 'v1/admin/password/reset/' + encodeURIComponent(token) },
+      { method: 'POST',  path: 'v1/admin/changePassword/' + encodeURIComponent(token) }
+    ];
+
+    var lastErr = null;
+    for (var i = 0; i < candidates.length; i++) {
+      var c = candidates[i];
+      try {
+        var res = await request(c.path, { method: c.method, body: body });
+        console.log('[resetPassword] ✅ Success:', c.method, c.path);
+        return res;
+      } catch (err) {
+        var msg = (err.message || '').toLowerCase();
+        if (msg.indexOf('404') !== -1 || msg.indexOf('cant find') !== -1) {
+          console.warn('[resetPassword] ❌ 404:', c.method, c.path);
+          lastErr = err;
+          continue;
+        }
+        // error تاني (400/401) = المسار الصح
+        throw err;
       }
-    });
+    }
+
+    throw lastErr || new Error('No reset endpoint found — كلم الباك');
   }
 
   /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -344,3 +381,6 @@ const API = (function() {
     garanteeRoles: garanteeRoles, changeLock: changeLock
   };
 })();
+
+
+
