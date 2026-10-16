@@ -1,5 +1,5 @@
 /**
- * Admin Dashboard — Full (Fixed & Optimized)
+ * Admin Dashboard <i class="fa-solid fa-chevron-right" style="opacity:.4;font-size:11px;margin:0 6px"></i> Full (Fixed & Optimized)
  */
 
 let _state = {
@@ -61,6 +61,10 @@ async function loadOverview() {
       (item.subjects || []).forEach(s => subjSet.add(s.name));
     });
 
+    _state.departments = depts;
+    _state.subjects = Array.from(subjSet).map(function(n){ return { name: n }; });
+    if (window.AdminUI && AdminUI._renderWelcomeStats) AdminUI._renderWelcomeStats();
+    
     document.getElementById('statsGrid').innerHTML = [
       stat('???', 'Departments', deptCount),
       stat('?????', 'Doctors', docSet.size),
@@ -222,7 +226,7 @@ function renderLevels() {
   wrap.innerHTML = _state.levels.map(l => {
     return row(
       '??',
-      `${l.department} — Level ${l.levelNumber}`,
+      `${l.department} <i class="fa-solid fa-chevron-right" style="opacity:.4;font-size:11px;margin:0 6px"></i> Level ${l.levelNumber}`,
       '',
       [
         btn('??? Delete', 'btn-danger', () => AdminUI.deleteLevel(l.department, l.levelNumber))
@@ -238,7 +242,7 @@ function renderSemesters() {
   wrap.innerHTML = _state.semesters.map(s => {
     return row(
       '??',
-      `${s.department} — Level ${s.levelNumber} — Sem ${s.semesterNumber}`,
+      `${s.department} <i class="fa-solid fa-chevron-right" style="opacity:.4;font-size:11px;margin:0 6px"></i> Level ${s.levelNumber} <i class="fa-solid fa-chevron-right" style="opacity:.4;font-size:11px;margin:0 6px"></i> Sem ${s.semesterNumber}`,
       '',
       [
         btn('??? Delete', 'btn-danger', () => AdminUI.deleteSemester(s.department, s.levelNumber, s.semesterNumber))
@@ -549,7 +553,7 @@ function renderDoctorsTab() {
     return row(
       '?????',
       d.name,
-      `${d.academicDegree || ''} ${subjects ? '• ' + subjects : ''}`,
+      `${d.academicDegree || ''} ${subjects ? 'ï¿½ ' + subjects : ''}`,
       [
         btn('?? Edit', 'btn-ghost', () => AdminUI.openEditDoctor(d.name)),
         btn('??? Delete', 'btn-danger', () => AdminUI.deleteDoctor(d.name))
@@ -575,7 +579,7 @@ function renderLinks() {
 }
 
 /* -------------------------------------------
-   AdminUI — Global Actions
+   AdminUI <i class="fa-solid fa-chevron-right" style="opacity:.4;font-size:11px;margin:0 6px"></i> Global Actions
    ------------------------------------------- */
 const AdminUI = {
   init() {
@@ -710,7 +714,7 @@ const AdminUI = {
   },
 
   /* -----------------------------------------------------------
-     ?? BULK MODAL — Generic Function
+     ?? BULK MODAL <i class="fa-solid fa-chevron-right" style="opacity:.4;font-size:11px;margin:0 6px"></i> Generic Function
      ----------------------------------------------------------- */
   bulkModal(config) {
     var root = document.getElementById('modalRoot');
@@ -739,7 +743,7 @@ const AdminUI = {
       return [
         '<div class="bulk-row" data-row="' + index + '">',
         '  <div class="bulk-row-number">#' + (index + 1) + '</div>',
-        (index > 0 ? '<button type="button" class="bulk-row-remove" data-remove="' + index + '">×</button>' : ''),
+        (index > 0 ? '<button type="button" class="bulk-row-remove" data-remove="' + index + '">ï¿½</button>' : ''),
         fieldsHtml,
         '</div>'
       ].join('');
@@ -903,7 +907,7 @@ const AdminUI = {
     }, 100);
   },
 
-  /* --- DEPARTMENT — Bulk --- */
+  /* --- DEPARTMENT <i class="fa-solid fa-chevron-right" style="opacity:.4;font-size:11px;margin:0 6px"></i> Bulk --- */
   openAddDepartment() {
     this.bulkModal({
       title: '? Add Departments',
@@ -923,7 +927,7 @@ const AdminUI = {
     });
   },
 
-  /* --- LEVEL — Bulk --- */
+  /* --- LEVEL <i class="fa-solid fa-chevron-right" style="opacity:.4;font-size:11px;margin:0 6px"></i> Bulk --- */
   openAddLevel() {
     var deptOpts = this.deptOptions();
     var defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
@@ -963,7 +967,7 @@ const AdminUI = {
     }
   },
 
-  /* --- SEMESTER — Bulk --- */
+  /* --- SEMESTER <i class="fa-solid fa-chevron-right" style="opacity:.4;font-size:11px;margin:0 6px"></i> Bulk --- */
   openAddSemester() {
     var deptOpts = this.deptOptions();
     var defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
@@ -985,7 +989,7 @@ const AdminUI = {
     });
   },
 
-  /* --- SUBJECT — Bulk --- */
+  /* --- SUBJECT <i class="fa-solid fa-chevron-right" style="opacity:.4;font-size:11px;margin:0 6px"></i> Bulk --- */
   openAddSubject() {
     var deptOpts = this.deptOptions();
     var defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
@@ -1012,7 +1016,7 @@ const AdminUI = {
     });
   },
 
-  /* --- DOCTOR — Bulk with Photo --- */
+  /* --- DOCTOR <i class="fa-solid fa-chevron-right" style="opacity:.4;font-size:11px;margin:0 6px"></i> Bulk with Photo --- */
   openAddDoctor() {
     var self = this;
     var root = document.getElementById('modalRoot');
@@ -1023,7 +1027,7 @@ const AdminUI = {
       return [
         '<div class="bulk-row" data-row="' + index + '">',
         '  <div class="bulk-row-number">#' + (index + 1) + '</div>',
-        (index > 0 ? '<button type="button" class="bulk-row-remove" data-remove="' + index + '">×</button>' : ''),
+        (index > 0 ? '<button type="button" class="bulk-row-remove" data-remove="' + index + '">ï¿½</button>' : ''),
         '  <div class="field"><label>Name</label><input type="text" data-field="doctorName" placeholder="Amgad Salama" autocomplete="off"></div>',
         '  <div class="field"><label>Academic Degree</label><input type="text" data-field="doctorAcademicDegree" placeholder="PhD" autocomplete="off"></div>',
         '  <div class="field"><label>Description</label><input type="text" data-field="doctorDescription" placeholder="..." autocomplete="off"></div>',
@@ -1175,7 +1179,7 @@ const AdminUI = {
     };
   },
 
-  /* --- LINK DOCTOR — Bulk --- */
+  /* --- LINK DOCTOR <i class="fa-solid fa-chevron-right" style="opacity:.4;font-size:11px;margin:0 6px"></i> Bulk --- */
   openLinkDoctor() {
     var deptOpts = this.deptOptions();
     var subjOpts = this.subjectsOptions();
@@ -1203,6 +1207,77 @@ const AdminUI = {
     });
   },
 
+
+  async _confirm(opts) {
+    if (typeof opts === 'string') opts = { message: opts };
+    
+    const title = opts.title || 'Confirm';
+    const message = opts.message || '';
+    const confirmText = opts.confirmText || 'Delete';
+    const cancelText = opts.cancelText || 'Cancel';
+    const icon = opts.icon || '<i class="fa-solid fa-triangle-exclamation"></i>';
+    
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'confirm-overlay';
+      overlay.innerHTML = `
+        <div class="confirm-modal" role="dialog" aria-modal="true">
+          <div class="confirm-icon">${icon}</div>
+          <h3 class="confirm-title">${title}</h3>
+          <p class="confirm-message">${message}</p>
+          <div class="confirm-actions">
+            <button type="button" class="confirm-btn cancel">${cancelText}</button>
+            <button type="button" class="confirm-btn confirm">${confirmText}</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      
+      const cancelBtn = overlay.querySelector('.cancel');
+      const confirmBtn = overlay.querySelector('.confirm');
+      
+      const close = (result) => {
+        overlay.remove();
+        document.removeEventListener('keydown', onKey);
+        resolve(result);
+      };
+      
+      cancelBtn.addEventListener('click', () => close(false));
+      confirmBtn.addEventListener('click', () => close(true));
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) close(false); });
+      
+      const onKey = (e) => { if (e.key === 'Escape') close(false); };
+      document.addEventListener('keydown', onKey);
+      
+      setTimeout(() => confirmBtn.focus(), 100);
+    });
+  },
+
+  async _deleteConfirm(name, kind) {
+    return await this._confirm({
+      title: `Delete ${kind}`,
+      message: `Are you sure you want to delete <strong>${escapeHtml(String(name))}</strong>?<br><span style="color:rgba(236,72,153,.8);font-size:12px">This action cannot be undone.</span>`,
+      confirmText: 'Delete',
+      icon: '<i class="fa-solid fa-trash"></i>'
+    });
+  },
+
+  _renderWelcomeStats() {
+    const set = (key, val) => {
+      const el = document.querySelector(`[data-count="${key}"]`);
+      if (el) el.textContent = val;
+    };
+    set('departments', _state.departments ? _state.departments.length : 0);
+    set('levels', _state.levels ? _state.levels.length : 0);
+    set('subjects', _state.subjects ? _state.subjects.length : 0);
+  },
+
+  _updateStructureCounts() {
+    const d = document.getElementById('deptsCount');
+    if (d) d.textContent = _state.departments ? _state.departments.length : 0;
+    const l = document.getElementById('levelsCount');
+    if (l) l.textContent = _state.levels ? _state.levels.length : 0;
+  },
   closeModal() {
     const root = document.getElementById('modalRoot');
     if (root) root.innerHTML = '';
@@ -1257,7 +1332,7 @@ const AdminUI = {
   },
 
   async deleteDepartment(name) {
-    if (!confirm(`Delete department "${name}"?`)) return;
+    if (!(await AdminUI._deleteConfirm(name, "department"))) return;
     try {
       await API.deleteDepartments([name]);
       UI.success('Deleted');
@@ -1269,7 +1344,7 @@ const AdminUI = {
   
 
   async deleteLevel(dept, num) {
-    if (!confirm(`Delete Level ${num} in ${dept}?`)) return;
+    if (!(await AdminUI._deleteConfirm(`Level ${num} in ${dept}`, "level"))) return;
     try {
       await API.deleteLevels([{ DepartmentName: dept, levelNumber: num }]);
       UI.success('Deleted');
@@ -1326,7 +1401,7 @@ const AdminUI = {
   },
 
   async deleteSubject(name, dept, lvl, sem) {
-    if (!confirm(`Delete subject "${name}"?`)) return;
+    if (!(await AdminUI._deleteConfirm(name, "subject"))) return;
     try {
       const payload = [{
         DepartmentName: dept || _state.path.department || CONFIG.DEFAULTS.department,
@@ -1369,7 +1444,7 @@ const AdminUI = {
   },
 
   async deleteDoctor(name) {
-    if (!confirm(`Delete doctor "${name}"?`)) return;
+    if (!(await AdminUI._deleteConfirm(name, "doctor"))) return;
     try {
       await API.deleteDoctors(name);
       UI.success('Deleted');
@@ -1524,7 +1599,7 @@ const AdminUI = {
   },
 
   async deleteFile(dataType, title) {
-    if (!confirm(`Delete "${title}"?`)) return;
+    if (!(await AdminUI._deleteConfirm(title, "file"))) return;
     try {
       if (dataType === 'section') await API.deleteSections(title);
       if (dataType === 'summary') await API.deleteSummaries(title);
