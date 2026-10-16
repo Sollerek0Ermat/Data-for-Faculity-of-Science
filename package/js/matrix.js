@@ -1,122 +1,125 @@
 ﻿/**
- * 🌧️ Matrix Rain — Cyan (always on, transparent)
+ * 🌧️ Matrix Rain — Reliable init
  */
 (function () {
   'use strict';
 
-  let canvas = document.getElementById('matrixCanvas');
+  function createCanvas() {
+    var canvas = document.getElementById('matrixCanvas');
+    if (canvas) return canvas;
 
-  if (!canvas) {
     canvas = document.createElement('canvas');
     canvas.id = 'matrixCanvas';
-    if (document.body.firstChild) {
-      document.body.insertBefore(canvas, document.body.firstChild);
-    } else {
-      document.body.appendChild(canvas);
-    }
+    document.body.insertBefore(canvas, document.body.firstChild);
+    return canvas;
   }
 
-  // ✨ شيلنا الـ condition — المطر بيشتغل دايمًا
-  canvas.style.display = 'block';
+  function initMatrix() {
+    var canvas = createCanvas();
 
-  const ctx = canvas.getContext('2d', { alpha: true });
-
-  let width, height, columns, drops;
-  let fontSize = 18;
-  let frameInterval = 100;
-  let lastFrame = 0;
-  let rafId = null;
-  let paused = false;
-
-  const isMobile = window.innerWidth < 768;
-  if (isMobile) {
-    fontSize = 24;
-    frameInterval = 150;
-  }
-
-  function resize() {
-    width  = window.innerWidth;
-    height = window.innerHeight;
-    canvas.width  = width;
-    canvas.height = height;
-    canvas.style.width  = width + 'px';
-    canvas.style.height = height + 'px';
-    columns = Math.floor(width / fontSize);
-    drops = Array(columns).fill(1);
-    ctx.clearRect(0, 0, width, height);
-  }
-
-  const chars = '01アイウエオカキクケコ';
-
-  function draw(timestamp) {
-    if (paused) return;
-    if (timestamp - lastFrame < frameInterval) {
-      rafId = requestAnimationFrame(draw);
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) {
+      canvas.style.display = 'none';
       return;
     }
-    lastFrame = timestamp;
 
-    // خلفية شفافة
-    ctx.fillStyle = 'rgba(6, 9, 25, 0.08)';
-    ctx.fillRect(0, 0, width, height);
+    var ctx = canvas.getContext('2d', { alpha: true });
 
-    ctx.font = fontSize + 'px "JetBrains Mono", monospace';
-    ctx.shadowBlur = 0;
+    var width, height, columns, drops;
+    var fontSize = 18;
+    var frameInterval = 1000 / 30;
+    var lastFrame = 0;
+    var rafId = null;
+    var paused = false;
 
-    for (let i = 0; i < drops.length; i++) {
-      const char = chars[Math.floor(Math.random() * chars.length)];
-      const x = i * fontSize;
-      const y = drops[i] * fontSize;
+    if (window.innerWidth < 768) {
+      fontSize = 22;
+      frameInterval = 1000 / 24;
+    }
 
-      if (Math.random() > 0.99) {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      } else {
-        ctx.fillStyle = 'rgba(0, 213, 232, 0.5)';
+    function resize() {
+      width  = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width  = width;
+      canvas.height = height;
+      canvas.style.width  = width + 'px';
+      canvas.style.height = height + 'px';
+      columns = Math.floor(width / fontSize);
+      drops = [];
+      for (var i = 0; i < columns; i++) drops.push(1);
+      ctx.clearRect(0, 0, width, height);
+    }
+
+    var chars = '01アイウエオカキクケコ';
+
+    function draw(timestamp) {
+      if (paused) return;
+      if (timestamp - lastFrame < frameInterval) {
+        rafId = requestAnimationFrame(draw);
+        return;
+      }
+      lastFrame = timestamp;
+
+      ctx.fillStyle = 'rgba(6, 9, 25, 0.06)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.font = fontSize + 'px "JetBrains Mono", monospace';
+
+      for (var i = 0; i < drops.length; i++) {
+        var char = chars[Math.floor(Math.random() * chars.length)];
+        var x = i * fontSize;
+        var y = drops[i] * fontSize;
+
+        if (Math.random() > 0.93) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        } else if (Math.random() > 0.6) {
+          ctx.fillStyle = 'rgba(190, 130, 255, 0.55)';
+        } else {
+          ctx.fillStyle = 'rgba(0, 213, 232, 0.45)';
+        }
+
+        ctx.fillText(char, x, y);
+
+        if (y > height && Math.random() > 0.985) drops[i] = 0;
+        drops[i] += 1;
       }
 
-      ctx.fillText(char, x, y);
-
-      if (y > height && Math.random() > 0.975) drops[i] = 0;
-      drops[i] += 1;
+      rafId = requestAnimationFrame(draw);
     }
 
-    rafId = requestAnimationFrame(draw);
-  }
-
-  function start() {
-    if (rafId) return;
-    paused = false;
-    lastFrame = 0;
-    rafId = requestAnimationFrame(draw);
-  }
-
-  function stop() {
-    paused = true;
-    if (rafId) {
-      cancelAnimationFrame(rafId);
-      rafId = null;
+    function start() {
+      if (rafId) return;
+      paused = false;
+      lastFrame = 0;
+      rafId = requestAnimationFrame(draw);
     }
+
+    function stop() {
+      paused = true;
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+    }
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stop(); else start();
+    });
+
+    var resizeTimeout;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(resize, 250);
+    });
+
+    resize();
+    start();
   }
 
-  let scrollTimer;
-  window.addEventListener('scroll', () => {
-    frameInterval = 150;
-    clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(() => {
-      frameInterval = isMobile ? 150 : 100;
-    }, 200);
-  }, { passive: true });
-
-  document.addEventListener('visibilitychange', () => {
-    document.hidden ? stop() : start();
-  });
-
-  let resizeTimeout;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(resize, 250);
-  });
-
-  resize();
-  start();
+  // ✨ تشغيل بعد ما الصفحة تحمّل كاملة
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMatrix);
+  } else {
+    initMatrix();
+  }
 })();

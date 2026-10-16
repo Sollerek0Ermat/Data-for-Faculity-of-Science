@@ -248,14 +248,17 @@ const API = (function() {
 
 
   async function resetPassword(opts) {
-    return await request(ep.admin.resetPassword, {
-      method: 'POST',
-      body: {
-        token: opts.token,
-        new_password: opts.newPassword,
-        confirm_password: opts.newPassword
+    // ✨ الباك مستني الـ token في الـ URL مش في الـ body
+    return await request(
+      ep.admin.resetPassword + '/' + encodeURIComponent(opts.token),
+      {
+        method: 'POST',
+        body: {
+          new_password: opts.newPassword,
+          confirm_password: opts.newPassword
+        }
       }
-    });
+    );
   }
 
   /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -344,3 +347,4 @@ const API = (function() {
     garanteeRoles: garanteeRoles, changeLock: changeLock
   };
 })();
+

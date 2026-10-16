@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 🔑 Reset Password Callback Handler
  * يستقبل token أو error من الـ URL ويعمل redirect
  */
@@ -14,7 +14,24 @@
     var error = params.get('error');
 
     if (error) {
-      statusMsg.textContent = '❌ ' + decodeURIComponent(error);
+      var errorText = decodeURIComponent(error);
+
+      // ✨ حلل الـ error لو [object Object] أو نص مش مفهوم
+      if (
+        errorText === '[object Object]' ||
+        errorText.indexOf('[object') !== -1 ||
+        errorText.trim() === ''
+      ) {
+        errorText = 'Microsoft authentication failed. Please try again later.';
+      }
+
+      // ✨ لو الرسالة فيها rate limit، عرضها بشكل ألطف
+      if (errorText.toLowerCase().indexOf('try again') !== -1 ||
+          errorText.toLowerCase().indexOf('minutes') !== -1) {
+        errorText = '⏳ ' + errorText;
+      }
+
+      statusMsg.textContent = '❌ ' + errorText;
       statusMsg.style.color = 'var(--danger)';
       setTimeout(function () { location.href = 'admin-login.html'; }, 5000);
       return;
