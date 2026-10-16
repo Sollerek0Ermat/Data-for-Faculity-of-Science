@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   _state.userRole = (user && user.role) ? user.role : 'user';
   _state.userName = (user && user.name) ? user.name : 'Admin';
 
-  document.getElementById('welcomeTitle').textContent = '👋 Welcome ' + _state.userName;
-  const roleDisplay = document.querySelector('.hero-content #userRole');
+  document.getElementById('welcomeTitle').textContent = _state.userName;
+  const roleDisplay = document.getElementById('userRole');
   if (roleDisplay) roleDisplay.textContent = 'Role: ' + _state.userRole.toUpperCase();
 
   if (_state.userRole !== 'owner') {
@@ -1560,3 +1560,4 @@ const AdminUI = {
 };
 
 window.AdminUI = AdminUI;
+

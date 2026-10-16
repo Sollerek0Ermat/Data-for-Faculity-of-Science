@@ -18,9 +18,22 @@
 
     <section class="container">
       <div class="hero hero-home" style="min-height:180px;padding:24px 4%">
-        <div class="hero-content" style="width:100%;text-align:left">
-          <h1 id="welcomeTitle" style="font-size:clamp(24px,3vw,36px)">👋 Welcome</h1>
-          <p id="userRole">Loading...</p>
+        <div class="hero-content welcome-banner">
+          <div class="welcome-left">
+            <div class="welcome-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+              </svg>
+            </div>
+            <div class="welcome-text">
+              <p class="welcome-greeting">Welcome back <span class="welcome-wave">👋</span></p>
+              <h1 class="welcome-name" id="welcomeTitle" dir="rtl" lang="ar">Loading...</h1>
+            </div>
+          </div>
+          <div class="welcome-right">
+            <span class="role-badge" id="userRole">Role: —</span>
+          </div>
         </div>
       </div>
     </section>
@@ -182,6 +195,7 @@
   <script src="js/pages/admin.js"     defer></script>
 </body>
 </html>
+
 
 
 

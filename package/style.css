@@ -5807,3 +5807,236 @@ html body .hero-home:hover {
     padding: 12px 16px !important;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════
+   🎯 WELCOME BANNER — Flex layout (icon + greeting | role)
+   ═══════════════════════════════════════════════════════════ */
+.welcome-banner {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 24px !important;
+  flex-wrap: wrap !important;
+  padding: 0 !important;
+  text-align: left !important;
+  width: 100% !important;
+}
+
+.welcome-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.welcome-icon {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 30% 30%, rgba(0, 242, 254, 0.2), rgba(123, 44, 191, 0.35) 70%);
+  border: 1.5px solid rgba(0, 242, 254, 0.6);
+  box-shadow:
+    0 0 24px rgba(0, 242, 254, 0.5),
+    0 0 50px rgba(255, 0, 127, 0.25),
+    inset 0 0 20px rgba(0, 242, 254, 0.15);
+  color: #00f2fe;
+}
+
+.welcome-icon svg {
+  width: 36px;
+  height: 36px;
+  filter:
+    drop-shadow(0 0 8px rgba(0, 242, 254, 0.95))
+    drop-shadow(0 0 16px rgba(255, 0, 127, 0.5));
+}
+
+.welcome-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.welcome-greeting {
+  margin: 0 !important;
+  font-family: 'Karla', 'Cairo', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #a9b8e3 !important;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.welcome-wave {
+  display: inline-block;
+  animation: waveHand 1.8s ease-in-out infinite;
+  transform-origin: 70% 70%;
+}
+
+@keyframes waveHand {
+  0%, 60%, 100% { transform: rotate(0deg); }
+  10%, 30%      { transform: rotate(14deg); }
+  20%, 40%      { transform: rotate(-8deg); }
+}
+
+.welcome-name {
+  margin: 0 !important;
+  font-family: 'Cairo', 'Inter', 'Karla', sans-serif !important;
+  font-size: clamp(24px, 3vw, 34px) !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  line-height: 1.2;
+  letter-spacing: 0.2px;
+  background: linear-gradient(90deg, #ffffff, #d08bff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 16px rgba(0, 242, 254, 0.35));
+  word-break: break-word;
+}
+
+.welcome-right {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+/* ─── Role Badge ─── */
+.role-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 10px 22px !important;
+  border-radius: 999px !important;
+  font-family: 'Karla', 'Cairo', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.2px !important;
+  text-transform: uppercase !important;
+  color: #ffd700 !important;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.18), rgba(0, 242, 254, 0.08)) !important;
+  border: 1.5px solid rgba(255, 215, 0, 0.55) !important;
+  box-shadow:
+    0 0 18px rgba(255, 215, 0, 0.35),
+    0 0 36px rgba(255, 215, 0, 0.18),
+    inset 0 0 12px rgba(255, 215, 0, 0.15) !important;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+  white-space: nowrap;
+  animation: rolePulse 3s ease-in-out infinite;
+}
+
+@keyframes rolePulse {
+  0%, 100% { box-shadow: 0 0 18px rgba(255, 215, 0, 0.35), 0 0 36px rgba(255, 215, 0, 0.18), inset 0 0 12px rgba(255, 215, 0, 0.15); }
+  50%      { box-shadow: 0 0 26px rgba(255, 215, 0, 0.55), 0 0 52px rgba(255, 215, 0, 0.28), inset 0 0 18px rgba(255, 215, 0, 0.22); }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .welcome-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    text-align: center;
+  }
+  .welcome-left {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    gap: 14px;
+  }
+  .welcome-icon {
+    width: 60px;
+    height: 60px;
+  }
+  .welcome-icon svg {
+    width: 30px;
+    height: 30px;
+  }
+  .welcome-text {
+    align-items: center;
+    text-align: center;
+  }
+  .welcome-right {
+    align-self: center;
+    width: 100%;
+    justify-content: center;
+  }
+  .role-badge {
+    font-size: 13px !important;
+    padding: 9px 18px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-icon {
+    width: 52px;
+    height: 52px;
+  }
+  .welcome-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+  .welcome-greeting { font-size: 12px !important; }
+  .welcome-name { font-size: 22px !important; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   🎨 SELECT / OPTION — Fix white background contrast
+   ═══════════════════════════════════════════════════════════ */
+select,
+select option,
+.field select,
+#tab-users select#userRole {
+  color-scheme: dark !important;
+}
+
+select option,
+.field select option,
+#tab-users select#userRole option {
+  background-color: #0d132a !important;
+  color: #f8fafc !important;
+  padding: 10px 14px !important;
+  font-weight: 500 !important;
+}
+
+/* الـ option المختار */
+select option:checked,
+select option:checked:hover,
+.field select option:checked,
+#tab-users select#userRole option:checked {
+  background-color: #00f2fe !important;
+  color: #060919 !important;
+  font-weight: 700 !important;
+}
+
+/* الـ option عند الـ hover */
+select option:hover,
+.field select option:hover,
+#tab-users select#userRole option:hover {
+  background-color: #7b2cbf !important;
+  color: #ffffff !important;
+}
+
+/* الـ select نفسه */
+select,
+.field select,
+#tab-users select#userRole {
+  background-color: rgba(10, 14, 40, 0.85) !important;
+  color: #e6ecff !important;
+  border: 1.5px solid rgba(0, 242, 254, 0.35) !important;
+}
+
+select:focus,
+.field select:focus,
+#tab-users select#userRole:focus {
+  border-color: #00f2fe !important;
+  box-shadow: 0 0 16px rgba(0, 242, 254, 0.5) !important;
+}
