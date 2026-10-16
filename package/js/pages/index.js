@@ -11,14 +11,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   // 2) Intro redirect (first visit only)
-  const introSeen = localStorage.getItem('intro_seen_v3');
-  const skipIntro = new URLSearchParams(location.search).get('skip_intro');
-
-  if (!introSeen && !skipIntro) {
-    localStorage.setItem('intro_seen_v3', '1');
-    window.location.replace('intro.html?next=index.html');
-    return;
-  }
+  // ✨ Intro redirect removed — now handled after login only
 
   // 3) Render page
   renderTopbar('index.html');

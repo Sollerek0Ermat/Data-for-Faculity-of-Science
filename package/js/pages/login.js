@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Login - Microsoft OAuth (Cookie-Only)
  * + error message handler من URL
  */

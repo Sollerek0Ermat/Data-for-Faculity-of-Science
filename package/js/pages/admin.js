@@ -1400,7 +1400,7 @@ const AdminUI = {
     });
   },
 
-  async deleteSubject(name, dept, lvl, sem) {
+  async async deleteSubject(name, dept, lvl, sem) {
     if (!(await AdminUI._deleteConfirm(name, "subject"))) return;
     try {
       const payload = [{
@@ -1443,7 +1443,7 @@ const AdminUI = {
     });
   },
 
-  async deleteDoctor(name) {
+  async async deleteDoctor(name) {
     if (!(await AdminUI._deleteConfirm(name, "doctor"))) return;
     try {
       await API.deleteDoctors(name);
@@ -1455,7 +1455,7 @@ const AdminUI = {
   /* --- LINK DOCTOR --- */
   
 
-  async unlinkDoctor(link) {
+  async async unlinkDoctor(link) {
     if (!confirm(`Unlink ${link.subjectName} ? ${link.doctorName}?`)) return;
     try {
       const url = new URL(link.link, 'http://x');
@@ -1598,7 +1598,7 @@ const AdminUI = {
     });
   },
 
-  async deleteFile(dataType, title) {
+  async async deleteFile(dataType, title) {
     if (!(await AdminUI._deleteConfirm(title, "file"))) return;
     try {
       if (dataType === 'section') await API.deleteSections(title);

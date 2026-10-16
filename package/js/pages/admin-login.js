@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Admin Login
  */
 
@@ -67,7 +67,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /* 3) Staff → show password form */
-  const firstTime = !profile.hasPassword;
+  // ✨ FIX: الباك ممكن يرجّع `password` أو `hasPassword`
+    var _hasPwd = profile.hasPassword;
+    if (_hasPwd === null || _hasPwd === undefined) {
+      _hasPwd = (profile.password !== undefined) ? !!profile.password : false;
+    }
+    const firstTime = !_hasPwd;
+    console.log('[admin-login] firstTime:', firstTime, '| profile:', profile);
 
   title.textContent = 'Admin Access';
   subtitle.textContent = firstTime

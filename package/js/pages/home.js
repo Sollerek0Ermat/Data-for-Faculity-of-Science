@@ -11,14 +11,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     return;
   }
 
-  var introSeen = localStorage.getItem('intro_seen_v4');
-  var skipIntro = new URLSearchParams(location.search).get('skip_intro');
-  if (!introSeen && !skipIntro) {
-    // ✅ نخلي الصفحة تخلص تحميل الأول، بعدها نروح للانترو
-    localStorage.setItem('intro_seen_v4', '1');
-    window.location.href = 'intro.html';
-    return;
-  }
+  // ✨ Intro redirect removed
 
   renderTopbar('index.html');
   var footer = document.getElementById('footerPlaceholder');
