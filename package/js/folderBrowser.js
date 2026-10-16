@@ -88,27 +88,59 @@ const FolderBrowser = (function () {
     return cleanParams(p);
   }
 
-  function folderCardHTML(item, href, navKey) {
-    var icon = FOLDER_ICONS[item.level] || '\uD83D\uDCC1';
+  
+function folderCardHTML(item, href, navKey) {
+  var icon = FOLDER_ICONS[item.level] || '\uD83D\uDCC1';
+  var label =
+    safeText(item.name) ||
+    (item.levelNumber != null ? 'Level ' + safeText(item.levelNumber) : '') ||
+    (item.semesterNumber != null ? 'Semester ' + safeText(item.semesterNumber) : '');
+  if (!label) label = '\u2014';
 
-    // ✅ استخدام أيقونة مخصصة حسب القسم
-    if (item.level === 'department' && typeof Mappers !== 'undefined' && Mappers._getDepartmentIcon) {
-      icon = Mappers._getDepartmentIcon(item.name);
-    }
-
-    var label =
-      safeText(item.name) ||
-      (item.levelNumber != null ? 'Level ' + safeText(item.levelNumber) : '') ||
-      (item.semesterNumber != null ? 'Semester ' + safeText(item.semesterNumber) : '');
-    if (!label) label = '—';
-    return [
-      '<a href="' + href + '" class="subject-card"' + (navKey ? ' data-nav="' + navKey + '"' : '') + '>',
-      '  <span class="subject-icon">' + icon + '</span>',
-      '  <h3>' + escapeHtml(String(label)) + '</h3>',
-      item.code ? '  <span class="subject-code">' + escapeHtml(item.code) + '</span>' : '',
-      '</a>'
-    ].join('');
+  // ✨ أيقونة مخصصة للأقسام
+  if (item.level === 'department' && typeof Mappers !== 'undefined' && Mappers._getDepartmentIcon) {
+    icon = Mappers._getDepartmentIcon(item.name);
   }
+
+  // ✨ بيانات إضافية حسب النوع
+  var metaHtml = '';
+
+  // كود (للأقسام والمواد)
+  if (item.code) {
+    metaHtml += '<span class="folder-card-code">' + escapeHtml(item.code) + '</span>';
+  }
+
+  // وصف
+  if (item.description) {
+    metaHtml += '<p class="folder-card-desc">' + escapeHtml(item.description) + '</p>';
+  }
+
+  // Expected Jobs (للأقسام)
+  if (item.expectedJobs) {
+    metaHtml += '<div class="folder-card-jobs">' +
+      '<span class="folder-card-jobs-label">\uD83D\uDCBC Expected Jobs:</span>' +
+      '<span class="folder-card-jobs-value">' + escapeHtml(item.expectedJobs) + '</span>' +
+    '</div>';
+  }
+
+  // معلومات إضافية للمستويات/الترمات
+  var badgeHtml = '';
+  if (item.levelNumber != null && item.level === 'level') {
+    badgeHtml = '<span class="folder-card-badge">Level ' + safeText(item.levelNumber) + '</span>';
+  }
+  if (item.semesterNumber != null && item.level === 'semester') {
+    badgeHtml = '<span class="folder-card-badge">Sem ' + safeText(item.semesterNumber) + '</span>';
+  }
+
+  return [
+    '<a href="' + href + '" class="subject-card folder-card"' + (navKey ? ' data-nav="' + navKey + '"' : '') + '>',
+    '  <span class="subject-icon">' + icon + '</span>',
+    badgeHtml,
+    '  <h3>' + escapeHtml(String(label)) + '</h3>',
+    metaHtml ? '  <div class="folder-card-meta">' + metaHtml + '</div>' : '',
+    '</a>'
+  ].join('');
+}
 
   function dataTypeCardHTML(item, href, navKey) {
     var meta = DATA_TYPE_META[item.dataType] || { icon: '\uD83D\uDCC1', label: item.dataType || 'Folder', desc: '' };
@@ -173,7 +205,15 @@ const FolderBrowser = (function () {
       if (params.dataType)       query.dataType = params.dataType;
 
       var raw = await API.getFolders(query);
-      var items = Mappers.folderList(raw);
+      // ✨ لو احنا في مستوى "file" — نستخدم Mappers.file
+      var items;
+      if (level === 'file' && params.dataType) {
+        items = (Array.isArray(raw) ? raw : []).map(function(r) {
+          return Mappers.file(r, params.dataType);
+        }).filter(Boolean);
+      } else {
+        items = Mappers.folderList(raw);
+      }
 
       if (!items.length) {
         setEmpty(grid, '⏳ Soon — Content will be added');
@@ -218,4 +258,6 @@ const FolderBrowser = (function () {
     renderLevel: renderLevel
   };
 })();
+
+
 

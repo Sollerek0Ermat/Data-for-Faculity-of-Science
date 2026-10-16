@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
@@ -12,7 +12,7 @@
 
   <link rel="preload" href="style.css" as="style">
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎓%3C/text%3E%3C/svg%3E">
 </head>
 <body class="dark">
   <canvas id="matrixCanvas" aria-hidden="true"></canvas>
@@ -22,47 +22,21 @@
 
     <div class="login-wrap" style="flex:1">
       <div class="login-card">
-        <!-- 🎓 ICON (SVG) -->
-        <div class="login-icon">
-          <svg width="44" height="44" viewBox="0 0 120 100" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
-            <path d="M60 8L6 36l54 28 54-28z"/>
-            <path d="M26 49v22c0 8 15 17 34 17s34-9 34-17V49"/>
-            <path d="M102 40v28"/>
-          </svg>
-        </div>
-
+        <div class="login-icon">🎓</div>
         <h1>Sign In</h1>
         <p>Sign in with your university account</p>
 
-        <!-- 🪟 MICROSOFT BUTTON (SVG) -->
-        <button class="btn btn-primary btn-block" id="msLoginBtn" style="height:56px;font-size:16px;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:12px">
-          <svg width="22" height="22" viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-            <rect x="0" y="0" width="11" height="11" fill="#f25022"/>
-            <rect x="12" y="0" width="11" height="11" fill="#7fba00"/>
-            <rect x="0" y="12" width="11" height="11" fill="#00a4ef"/>
-            <rect x="12" y="12" width="11" height="11" fill="#ffb900"/>
-          </svg>
+        <button class="btn btn-primary btn-block" id="msLoginBtn" style="height:56px;font-size:16px;margin-top:8px">
+          <svg width="20" height="20" viewBox="0 0 23 23" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0"><rect x="0" y="0" width="10.5" height="10.5" fill="#f25022"/><rect x="12.5" y="0" width="10.5" height="10.5" fill="#7fba00"/><rect x="0" y="12.5" width="10.5" height="10.5" fill="#00a4ef"/><rect x="12.5" y="12.5" width="10.5" height="10.5" fill="#ffb900"/></svg>
           Sign in with Microsoft
         </button>
 
-        <!-- 🔒 HINT (SVG) -->
-        <div class="login-hint" style="margin-top:24px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
-          <span>Only <strong>@science.tanta.edu.eg</strong> accounts are allowed</span>
+        <div class="login-hint" style="margin-top:24px">
+          🔒 Only <strong>@science.tanta.edu.eg</strong> accounts are allowed
         </div>
 
-        <!-- ← BACK (SVG) -->
         <div style="text-align:center;margin-top:20px">
-          <a href="index.html" style="color:var(--muted);font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;text-decoration:none">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"/>
-              <polyline points="12 19 5 12 12 5"/>
-            </svg>
-            Back to Home
-          </a>
+          <a href="index.html" style="color:var(--muted);font-size:13px;font-weight:600">← Back to Home</a>
         </div>
       </div>
     </div>
@@ -77,8 +51,13 @@
   <script src="js/auth.js"          defer></script>
   <script src="js/mappers.js"       defer></script>
   <script src="js/api.js"           defer></script>
-  <script src="js/matrix.js"        defer></script>
+<script src="js/matrix.js"        defer></script>
   <script src="js/topbar.js"        defer></script>
   <script src="js/pages/login.js"   defer></script>
 </body>
 </html>
+
+
+
+
+

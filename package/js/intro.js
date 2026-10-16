@@ -9,7 +9,7 @@
   const $ = id => document.getElementById(id);
   const bg = $('bg'), fx = $('fx'), bx = bg.getContext('2d'), cx = fx.getContext('2d');
   const hud = $('hud'), pctEl = $('pct'), barEl = $('bar'), stEl = $('status'), mL = $('mL'), mR = $('mR');
-  const ENTER_URL = 'index.html';
+  const ENTER_URL = "login.html";
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const T1 = reduce ? 1.2 : 1.9, T2 = reduce ? 1.2 : 1.7, HOLD = .9, PD = 1.1;
   const IW = 610, IH = 900, PAD = 40;

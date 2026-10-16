@@ -193,3 +193,98 @@ document.addEventListener('click', function(e) {
     }
   }
 });
+
+/* ═══════════════════════════════════════════════════════════
+   💬 URL MESSAGE HANDLER
+   يعرض رسائل الأخطاء اللي بتيجي في الـ URL
+   زي: index.html?message=Microsoft%20authentication%20failed
+   ═══════════════════════════════════════════════════════════ */
+function showUrlMessage() {
+  var params = new URLSearchParams(location.search);
+  var message = params.get('message') || params.get('error');
+
+  if (!message) return;
+
+  // فك الـ encoding + شيل %20
+  var cleanMessage;
+  try {
+    cleanMessage = decodeURIComponent(message);
+  } catch (e) {
+    cleanMessage = message;
+  }
+  cleanMessage = cleanMessage.replace(/\+/g, ' ').replace(/%20/g, ' ').trim();
+
+  if (!cleanMessage) return;
+
+  // شيل الـ message من الـ URL عشان الـ refresh ميعرضهوش تاني
+  var url = new URL(location.href);
+  url.searchParams.delete('message');
+  url.searchParams.delete('error');
+  history.replaceState({}, document.title, url.pathname + (url.search ? url.search : ''));
+
+  // اعرض الـ toast بعد ما الصفحة تحمّل
+  setTimeout(function() {
+    if (typeof UI !== 'undefined' && UI.error) {
+      UI.error(cleanMessage);
+    } else {
+      // Fallback: alert
+      alert('❌ ' + cleanMessage);
+    }
+  }, 400);
+
+  // ✨ كمان اعرض بانر ثابت
+  showMessageBanner(cleanMessage);
+}
+
+/* ✨ بانر خطأ مثبّت فوق الصفحة */
+function showMessageBanner(message) {
+  // شيل أي بانر قديم
+  var old = document.getElementById('urlMessageBanner');
+  if (old) old.remove();
+
+  var banner = document.createElement('div');
+  banner.id = 'urlMessageBanner';
+  banner.className = 'url-message-banner';
+  banner.setAttribute('role', 'alert');
+  banner.innerHTML = [
+    '<div class="url-message-icon">',
+    '  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">',
+    '    <circle cx="12" cy="12" r="10"/>',
+    '    <line x1="12" y1="8" x2="12" y2="12"/>',
+    '    <line x1="12" y1="16" x2="12.01" y2="16"/>',
+    '  </svg>',
+    '</div>',
+    '<div class="url-message-content">',
+    '  <strong class="url-message-title">Sign in failed</strong>',
+    '  <p class="url-message-text">' + escapeHtml(message) + '</p>',
+    '</div>',
+    '<button type="button" class="url-message-close" aria-label="Dismiss">✕</button>'
+  ].join('');
+
+  // ضيفه في أول الصفحة
+  document.body.insertBefore(banner, document.body.firstChild);
+
+  // animation دخول
+  requestAnimationFrame(function() { banner.classList.add('show'); });
+
+  // Close button
+  banner.querySelector('.url-message-close').addEventListener('click', function() {
+    banner.classList.remove('show');
+    setTimeout(function() { banner.remove(); }, 300);
+  });
+
+  // اختفاء تلقائي بعد 12 ثانية
+  setTimeout(function() {
+    if (document.body.contains(banner)) {
+      banner.classList.remove('show');
+      setTimeout(function() { banner.remove(); }, 300);
+    }
+  }, 12000);
+}
+
+/* ✨ استدعي عند تحميل الصفحة */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', showUrlMessage);
+} else {
+  showUrlMessage();
+}

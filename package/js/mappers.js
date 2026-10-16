@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Mappers - Convert backend responses for frontend
  */
 
@@ -163,6 +163,7 @@ const Mappers = {
   file: function (raw, type) {
     if (!raw) return null;
     var t = (type === 'recourse') ? 'resource' : type;
+
     var titles = {
       section:  raw.sectionTitle,
       summary:  raw.summaryTitle,
@@ -187,47 +188,26 @@ const Mappers = {
       resource: raw.resourceLastEditDate || raw.recourseLastEditDate,
       video:    raw.videoLastEditDate
     };
-    var url = raw[t] || (t === 'resource' ? (raw.resource || raw.recourse) : null);
+
+    // ✨ الـ link بيجي من الباك كـ URL كامل
+    var url = raw.link || raw[t] || (t === 'resource' ? (raw.resource || raw.recourse) : null);
+
     return {
       id:         titles[t] || (t + '_' + Date.now()),
       title:      titles[t] || '',
       type:       t,
       publisher:  publishers[t] || '-',
       url:        url,
+      link:       raw.link || null,
       fileType:   raw.fileType || null,
       created_at: dates[t] || null,
       edited_at:  editDates[t] || null,
-      link:       raw.link || null,
       size:       raw.size || null,
       status:     'approved'
     };
   },
 
-  folder: function (raw) {
-    if (!raw) return null;
-
-    if (raw.depName) {
-      return { level: 'department', id: raw.depName, name: raw.depName, code: raw.code || '', link: raw.link || null };
-    }
-    if (raw.levelNumber !== undefined && raw.levelNumber !== null) {
-      return { level: 'level', id: 'level_' + raw.levelNumber, levelNumber: raw.levelNumber, name: 'Level ' + raw.levelNumber, link: raw.link || null };
-    }
-    if (raw.semesterNumber !== undefined && raw.semesterNumber !== null) {
-      return { level: 'semester', id: 'sem_' + raw.semesterNumber, semesterNumber: raw.semesterNumber, name: 'Semester ' + raw.semesterNumber, link: raw.link || null };
-    }
-    if (raw.subjectName) {
-      return { level: 'subject', id: raw.subjectName, name: raw.subjectName, icon: Mappers._getIcon(raw.subjectName), link: raw.link || null };
-    }
-    if (raw.doctorName) {
-      return { level: 'doctor', id: raw.doctorName, name: raw.doctorName, link: raw.link || null };
-    }
-    if (raw.dataType && raw.dataType !== 'undefined' && raw.dataType !== 'null') {
-      return { level: 'dataType', id: raw.dataType, dataType: raw.dataType, link: raw.link || null };
-    }
-    return null;
-  },
-
-  folderList: function (raw) {
+  : function (raw) {
     if (!raw || !Array.isArray(raw)) return [];
     return raw
       .map(function (item) { return Mappers.folder(item); })
@@ -311,3 +291,5 @@ const Mappers = {
     return raw;
   }
 };
+
+

@@ -5,7 +5,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   if (!Auth.requireAuth()) return;
 
-  renderTopbar('admin.html');
+  renderTopbar();
 
   const form = document.getElementById('changeForm');
   const btn  = document.getElementById('submitBtn');
