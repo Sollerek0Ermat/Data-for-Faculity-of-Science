@@ -4688,3 +4688,705 @@ html body .hero-home:hover {
   .login-error-text span   { font-size: 12px; }
 }
 
+
+
+/* ═══════════════════════════════════════════════════════════
+   📱 MENU BUTTON — Fix sizing & padding
+   ═══════════════════════════════════════════════════════════ */
+.menu-toggle-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  min-width: 72px !important;
+  height: 42px !important;
+  padding: 0 16px !important;
+  border-radius: 30px !important;
+  background: rgba(4, 24, 66, 0.6) !important;
+  border: 1px solid rgba(0, 242, 254, 0.4) !important;
+  color: #e6ecff !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.5px !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+
+.menu-toggle-btn:hover,
+.menu-toggle-btn:focus-visible {
+  background: rgba(0, 242, 254, 0.15) !important;
+  border-color: #00f2fe !important;
+  color: #00f2fe !important;
+  box-shadow: 0 0 14px rgba(0, 242, 254, 0.4) !important;
+}
+
+/* ─── Mobile adjustments ─── */
+@media (max-width: 900px) {
+  .menu-toggle-btn {
+    min-width: 64px !important;
+    height: 38px !important;
+    padding: 0 14px !important;
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .menu-toggle-btn {
+    min-width: 60px !important;
+    height: 36px !important;
+    padding: 0 12px !important;
+    font-size: 12.5px !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   🎯 EMPTY STATE — Neon glass card
+   ═══════════════════════════════════════════════════════════ */
+
+.empty {
+  position: relative;
+  max-width: 560px;
+  margin: 40px auto;
+  padding: 44px 32px 36px;
+  border-radius: 24px;
+  text-align: center;
+  background:
+    linear-gradient(135deg, rgba(11, 20, 69, .92), rgba(10, 15, 46, .92) 55%, rgba(23, 10, 56, .92)) padding-box,
+    linear-gradient(135deg, #00f2fe, #7b2cbf 50%, #ff007f) border-box;
+  border: 1.5px solid transparent;
+  box-shadow:
+    0 0 24px rgba(0, 242, 254, .25),
+    0 0 55px rgba(255, 0, 127, .15),
+    0 20px 50px rgba(0, 0, 0, .5);
+  color: var(--text);
+  isolation: isolate;
+  overflow: hidden;
+  grid-column: 1 / -1;
+}
+
+.empty::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 0%, rgba(0, 242, 254, .08), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.empty > * { position: relative; z-index: 1; }
+
+.empty-icon {
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 30% 30%, rgba(0, 242, 254, .2), rgba(123, 44, 191, .35) 70%);
+  border: 1.5px solid rgba(0, 242, 254, .55);
+  box-shadow:
+    0 0 24px rgba(0, 242, 254, .55),
+    0 0 50px rgba(255, 0, 127, .3),
+    inset 0 0 22px rgba(0, 242, 254, .15);
+  color: #00f2fe;
+}
+
+.empty-icon svg {
+  width: 44px;
+  height: 44px;
+  filter:
+    drop-shadow(0 0 8px rgba(0, 242, 254, .95))
+    drop-shadow(0 0 16px rgba(255, 0, 127, .45));
+}
+
+.empty--soon .empty-icon {
+  animation: emptyFloat 3.2s ease-in-out infinite;
+}
+
+@keyframes emptyFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+.empty--error .empty-icon {
+  animation: emptyPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes emptyPulse {
+  0%, 100% { box-shadow: 0 0 24px rgba(255, 0, 127, .4), 0 0 50px rgba(255, 0, 127, .2), inset 0 0 22px rgba(255, 0, 127, .1); }
+  50%      { box-shadow: 0 0 34px rgba(255, 0, 127, .7), 0 0 70px rgba(255, 0, 127, .35), inset 0 0 30px rgba(255, 0, 127, .2); }
+}
+
+.empty-title {
+  margin: 0 0 6px;
+  font-family: var(--font, 'Karla', sans-serif);
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(90deg, #00f2fe, #d08bff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 10px rgba(0, 242, 254, .45));
+}
+
+.empty-arabic {
+  display: block;
+  margin: 0 0 14px;
+  font-family: 'Cairo', 'Karla', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #d08bff;
+  text-shadow: 0 0 12px rgba(208, 139, 255, .55);
+}
+
+.empty-message {
+  margin: 0 auto 22px;
+  max-width: 380px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #d5e0ff;
+  font-weight: 400;
+}
+
+.empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 999px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+  border: none;
+  outline: none;
+  white-space: nowrap;
+}
+
+.empty-btn svg { flex-shrink: 0; }
+
+.empty-btn.btn-primary {
+  background: linear-gradient(90deg, #00f2fe, #7b2cbf 55%, #ff007f);
+  color: #fff;
+  box-shadow: 0 0 18px rgba(0, 242, 254, .4);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+}
+.empty-btn.btn-primary:hover,
+.empty-btn.btn-primary:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 0 28px rgba(255, 0, 127, .55), 0 0 45px rgba(123, 44, 191, .35);
+}
+
+.empty-btn.btn-ghost {
+  background: rgba(10, 14, 40, .55);
+  color: #e6ecff;
+  border: 1.5px solid rgba(0, 242, 254, .55);
+  box-shadow: 0 0 12px rgba(123, 44, 191, .25), inset 0 0 10px rgba(123, 44, 191, .15);
+}
+.empty-btn.btn-ghost:hover,
+.empty-btn.btn-ghost:focus-visible {
+  background: rgba(123, 44, 191, .28);
+  border-color: #00f2fe;
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(0, 242, 254, .45);
+}
+
+.empty-btn:focus-visible {
+  outline: 2px solid #00f2fe;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .empty--soon .empty-icon,
+  .empty--error .empty-icon {
+    animation: none !important;
+  }
+  .empty-btn { transition: none !important; }
+}
+
+@media (max-width: 640px) {
+  .empty {
+    padding: 32px 22px 26px;
+    margin: 24px auto;
+    border-radius: 20px;
+  }
+  .empty-icon { width: 72px; height: 72px; }
+  .empty-icon svg { width: 36px; height: 36px; }
+  .empty-title { font-size: 19px; }
+  .empty-arabic { font-size: 15px; }
+  .empty-message { font-size: 13.5px; }
+  .empty-actions { flex-direction: column; align-items: stretch; }
+  .empty-btn { width: 100%; padding: 12px 18px; }
+}
+
+@media (max-width: 400px) {
+  .empty { padding: 26px 16px 22px; }
+  .empty-icon { width: 64px; height: 64px; }
+  .empty-icon svg { width: 32px; height: 32px; }
+  .empty-title { font-size: 18px; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   🎓 CAP LOGO — توحيد القبعة (topbar + hero)
+   نفس اللون، نفس الشكل، نفس الـ gradient
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── القبعة في الـ topbar (brand logo) ─── */
+.brand-logo {
+  width: 34px !important;
+  height: 34px !important;
+  display: inline-block !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 6px rgba(0, 242, 254, .9))
+    drop-shadow(0 0 12px rgba(255, 0, 127, .5)) !important;
+  transition: filter .25s ease !important;
+}
+
+.brand:hover .brand-logo {
+  filter:
+    drop-shadow(0 0 10px rgba(0, 242, 254, 1))
+    drop-shadow(0 0 18px rgba(255, 0, 127, .7)) !important;
+}
+
+/* ─── القبعة في الـ hero (h1::before) — نفس الـ SVG ─── */
+.hero-home h1::before {
+  content: "" !important;
+  flex: none !important;
+  width: clamp(72px, 9vw, 120px) !important;
+  aspect-ratio: 1.2 !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 14px rgba(0, 242, 254, .95))
+    drop-shadow(0 0 28px rgba(255, 0, 127, .6)) !important;
+}
+
+/* ─── القبعة في الـ hero العادي (Doctors/Subjects/etc) ─── */
+.hero h1::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: clamp(50px, 6vw, 80px) !important;
+  aspect-ratio: 1.2 !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 10px rgba(0, 242, 254, .95))
+    drop-shadow(0 0 20px rgba(255, 0, 127, .55)) !important;
+  margin-right: 12px !important;
+  vertical-align: middle !important;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .brand-logo {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .brand-logo {
+    width: 24px !important;
+    height: 24px !important;
+  }
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo,
+  .hero-home h1::before,
+  .hero h1::before {
+    filter: drop-shadow(0 0 8px rgba(0, 242, 254, .8)) !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   🎓 CAP GLOW FIX — glow متوازن من فوق وتحت
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Brand logo (topbar) ─── */
+.brand-logo {
+  width: 34px !important;
+  height: 34px !important;
+  display: inline-block !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-8 -8 136 116' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 4px rgba(0, 242, 254, 1))
+    drop-shadow(0 0 8px rgba(0, 242, 254, .9))
+    drop-shadow(0 2px 10px rgba(0, 242, 254, .7))
+    drop-shadow(0 0 16px rgba(255, 0, 127, .55))
+    drop-shadow(0 2px 20px rgba(255, 0, 127, .4)) !important;
+  transition: filter .25s ease !important;
+}
+
+.brand:hover .brand-logo {
+  filter:
+    drop-shadow(0 0 6px rgba(0, 242, 254, 1))
+    drop-shadow(0 0 12px rgba(0, 242, 254, .95))
+    drop-shadow(0 4px 16px rgba(0, 242, 254, .8))
+    drop-shadow(0 0 24px rgba(255, 0, 127, .7))
+    drop-shadow(0 4px 28px rgba(255, 0, 127, .55)) !important;
+}
+
+/* ─── Hero home cap ─── */
+.hero-home h1::before {
+  content: "" !important;
+  flex: none !important;
+  width: clamp(72px, 9vw, 120px) !important;
+  aspect-ratio: 1.2 !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-8 -8 136 116' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 6px rgba(0, 242, 254, 1))
+    drop-shadow(0 0 14px rgba(0, 242, 254, .9))
+    drop-shadow(0 4px 20px rgba(0, 242, 254, .75))
+    drop-shadow(0 0 28px rgba(255, 0, 127, .6))
+    drop-shadow(0 4px 36px rgba(255, 0, 127, .45)) !important;
+  overflow: visible !important;
+}
+
+/* ─── Hero cap (Doctors/Subjects) ─── */
+.hero h1::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: clamp(50px, 6vw, 80px) !important;
+  aspect-ratio: 1.2 !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-8 -8 136 116' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 5px rgba(0, 242, 254, 1))
+    drop-shadow(0 0 10px rgba(0, 242, 254, .9))
+    drop-shadow(0 3px 14px rgba(0, 242, 254, .7))
+    drop-shadow(0 0 20px rgba(255, 0, 127, .55))
+    drop-shadow(0 3px 26px rgba(255, 0, 127, .4)) !important;
+  margin-right: 12px !important;
+  vertical-align: middle !important;
+  overflow: visible !important;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .brand-logo { width: 28px !important; height: 28px !important; }
+}
+@media (max-width: 640px) {
+  .brand-logo { width: 24px !important; height: 24px !important; }
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo,
+  .hero-home h1::before,
+  .hero h1::before {
+    filter:
+      drop-shadow(0 0 6px rgba(0, 242, 254, .85))
+      drop-shadow(0 2px 10px rgba(255, 0, 127, .5)) !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   🎓 CAP — موحّد (نفس الشكل واللون في كل مكان)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Brand logo في الـ topbar ─── */
+.brand-logo {
+  width: 34px !important;
+  height: 34px !important;
+  display: inline-block !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 6px rgba(0, 242, 254, .9))
+    drop-shadow(0 0 14px rgba(255, 0, 127, .5)) !important;
+}
+
+/* ─── Hero home (الرئيسية) — نفس الـ SVG ─── */
+.hero-home h1::before {
+  content: "" !important;
+  flex: none !important;
+  width: clamp(72px, 9vw, 120px) !important;
+  aspect-ratio: 1.2 !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 10px rgba(0, 242, 254, .9))
+    drop-shadow(0 0 22px rgba(255, 0, 127, .55)) !important;
+}
+
+/* ─── Hero العادي (Doctors/Subjects/etc) ─── */
+.hero h1::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: clamp(50px, 6vw, 80px) !important;
+  aspect-ratio: 1.2 !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 8px rgba(0, 242, 254, .9))
+    drop-shadow(0 0 18px rgba(255, 0, 127, .5)) !important;
+  margin-right: 12px !important;
+  vertical-align: middle !important;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .brand-logo {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .brand-logo {
+    width: 24px !important;
+    height: 24px !important;
+  }
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo,
+  .hero-home h1::before,
+  .hero h1::before {
+    filter: drop-shadow(0 0 8px rgba(0, 242, 254, .85)) !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   🎓 CAP — توهج متساوي من كل الجيهات (فوق = تحت)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Brand logo في الـ topbar ─── */
+.brand-logo {
+  position: relative !important;
+  width: 34px !important;
+  height: 34px !important;
+  display: inline-block !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 6px rgba(0, 242, 254, 1))
+    drop-shadow(0 0 6px rgba(0, 242, 254, 1))
+    drop-shadow(0 0 12px rgba(255, 0, 127, .55))
+    drop-shadow(0 0 12px rgba(255, 0, 127, .55)) !important;
+}
+
+/* Halo خلف القبعة — توهج متساوي */
+.brand-logo::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 140% !important;
+  height: 140% !important;
+  transform: translate(-50%, -50%) !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle,
+    rgba(0, 242, 254, .35) 0%,
+    rgba(0, 242, 254, .15) 40%,
+    transparent 70%) !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+  filter: blur(6px) !important;
+}
+
+/* ─── Hero home cap ─── */
+.hero-home h1::before {
+  position: relative !important;
+  content: "" !important;
+  flex: none !important;
+  width: clamp(72px, 9vw, 120px) !important;
+  aspect-ratio: 1.2 !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 8px rgba(0, 242, 254, 1))
+    drop-shadow(0 0 8px rgba(0, 242, 254, 1))
+    drop-shadow(0 0 18px rgba(255, 0, 127, .6))
+    drop-shadow(0 0 18px rgba(255, 0, 127, .6)) !important;
+}
+
+/* ─── Hero عادي (Doctors/Subjects) ─── */
+.hero h1::before {
+  position: relative !important;
+  content: "" !important;
+  display: inline-block !important;
+  width: clamp(50px, 6vw, 80px) !important;
+  aspect-ratio: 1.2 !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/defs%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 7px rgba(0, 242, 254, 1))
+    drop-shadow(0 0 7px rgba(0, 242, 254, 1))
+    drop-shadow(0 0 14px rgba(255, 0, 127, .55))
+    drop-shadow(0 0 14px rgba(255, 0, 127, .55)) !important;
+  margin-right: 12px !important;
+  vertical-align: middle !important;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .brand-logo {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .brand-logo {
+    width: 24px !important;
+    height: 24px !important;
+  }
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo,
+  .hero-home h1::before,
+  .hero h1::before {
+    filter: drop-shadow(0 0 8px rgba(0, 242, 254, .85)) !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   🎓 CAP — موحّد (نفس الشكل واللون في كل مكان)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Brand logo في الـ topbar ─── */
+.brand-logo {
+  width: 34px !important;
+  height: 34px !important;
+  display: inline-block !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 6px rgba(0, 242, 254, .9))
+    drop-shadow(0 0 14px rgba(255, 0, 127, .5)) !important;
+}
+
+/* ─── Hero home (الرئيسية) — نفس الـ SVG ─── */
+.hero-home h1::before {
+  content: "" !important;
+  flex: none !important;
+  width: clamp(72px, 9vw, 120px) !important;
+  aspect-ratio: 1.2 !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 10px rgba(0, 242, 254, .9))
+    drop-shadow(0 0 22px rgba(255, 0, 127, .55)) !important;
+}
+
+/* ─── Hero العادي (Doctors/Subjects/etc) ─── */
+.hero h1::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: clamp(50px, 6vw, 80px) !important;
+  aspect-ratio: 1.2 !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 8px rgba(0, 242, 254, .9))
+    drop-shadow(0 0 18px rgba(255, 0, 127, .5)) !important;
+  margin-right: 12px !important;
+  vertical-align: middle !important;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .brand-logo {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .brand-logo {
+    width: 24px !important;
+    height: 24px !important;
+  }
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo,
+  .hero-home h1::before,
+  .hero h1::before {
+    filter: drop-shadow(0 0 8px rgba(0, 242, 254, .85)) !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   🎓 CAP — موحّد (نفس الشكل واللون في كل مكان)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Brand logo في الـ topbar ─── */
+.brand-logo {
+  width: 34px !important;
+  height: 34px !important;
+  display: inline-block !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 6px rgba(0, 242, 254, .9))
+    drop-shadow(0 0 14px rgba(255, 0, 127, .5)) !important;
+}
+
+/* ─── Hero home (الرئيسية) — نفس الـ SVG ─── */
+.hero-home h1::before {
+  content: "" !important;
+  flex: none !important;
+  width: clamp(72px, 9vw, 120px) !important;
+  aspect-ratio: 1.2 !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 10px rgba(0, 242, 254, .9))
+    drop-shadow(0 0 22px rgba(255, 0, 127, .55)) !important;
+}
+
+/* ─── Hero العادي (Doctors/Subjects/etc) ─── */
+.hero h1::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: clamp(50px, 6vw, 80px) !important;
+  aspect-ratio: 1.2 !important;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100' fill='none' stroke-width='5' stroke-linejoin='round' stroke-linecap='round'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300f2fe'/%3E%3Cstop offset='1' stop-color='%23ff007f'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M60 8L6 36l54 28 54-28z' stroke='url(%23g)'/%3E%3Cpath d='M26 49v22c0 8 15 17 34 17s34-9 34-17V49' stroke='url(%23g)'/%3E%3Cpath d='M102 40v28' stroke='url(%23g)'/%3E%3C/svg%3E") center/contain no-repeat !important;
+  filter:
+    drop-shadow(0 0 8px rgba(0, 242, 254, .9))
+    drop-shadow(0 0 18px rgba(255, 0, 127, .5)) !important;
+  margin-right: 12px !important;
+  vertical-align: middle !important;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .brand-logo {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .brand-logo {
+    width: 24px !important;
+    height: 24px !important;
+  }
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo,
+  .hero-home h1::before,
+  .hero h1::before {
+    filter: drop-shadow(0 0 8px rgba(0, 242, 254, .85)) !important;
+  }
+}
