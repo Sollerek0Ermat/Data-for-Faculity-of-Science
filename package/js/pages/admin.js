@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Admin Dashboard — Full (Fixed & Optimized)
  */
 
@@ -709,6 +709,500 @@ const AdminUI = {
     }
   },
 
+  /* ═══════════════════════════════════════════════════════════
+     📦 BULK MODAL — Generic Function
+     ═══════════════════════════════════════════════════════════ */
+  bulkModal(config) {
+    var root = document.getElementById('modalRoot');
+    var title = config.title || 'Add Items';
+    var fields = config.fields || [];
+    var defaultValues = config.defaultValues || {};
+    var buildPayload = config.buildPayload || function(row) { return row; };
+    var saveHandler = config.saveHandler;
+    var itemIcon = config.itemIcon || '📦';
+    var itemLabel = config.itemLabel || function(item) { return item.name || JSON.stringify(item).substring(0, 40); };
+
+    var buildRow = function(index) {
+      var fieldsHtml = fields.map(function(f) {
+        var val = defaultValues[f.name] !== undefined ? defaultValues[f.name] : (f.default || '');
+        var inputAttr = '';
+        if (f.type === 'number') inputAttr = 'type="number" min="1"';
+        else if (f.type === 'text') inputAttr = 'type="text"';
+        else inputAttr = 'type="text"';
+        
+        return '<div class="field">' +
+          '<label>' + escapeHtml(f.label) + '</label>' +
+          '<input ' + inputAttr + ' data-field="' + f.name + '" value="' + escapeHtml(String(val)) + '" placeholder="' + escapeHtml(f.placeholder || '') + '" autocomplete="off">' +
+        '</div>';
+      }).join('');
+
+      return [
+        '<div class="bulk-row" data-row="' + index + '">',
+        '  <div class="bulk-row-number">#' + (index + 1) + '</div>',
+        (index > 0 ? '<button type="button" class="bulk-row-remove" data-remove="' + index + '">×</button>' : ''),
+        fieldsHtml,
+        '</div>'
+      ].join('');
+    };
+
+    root.innerHTML = [
+      '<div class="bulk-overlay" id="bulkOverlay">',
+      '  <div class="bulk-modal">',
+      '    <div class="bulk-header">',
+      '      <h3 class="bulk-title">' + title + ' <span class="bulk-count" id="bulkCount">1</span></h3>',
+      '      <button type="button" class="bulk-close" data-close="true">✕</button>',
+      '    </div>',
+      '    <div class="bulk-rows" id="bulkRows">',
+      buildRow(0),
+      '    </div>',
+      '    <div class="bulk-actions">',
+      '      <button type="button" class="bulk-btn bulk-btn-add" id="bulkAddRowBtn">',
+      '        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+      '        Add Another',
+      '      </button>',
+      '      <div class="bulk-actions-right">',
+      '        <button type="button" class="bulk-btn bulk-btn-ghost" data-close="true">Cancel</button>',
+      '        <button type="button" class="bulk-btn bulk-btn-save" id="bulkSaveBtn">💾 Save All</button>',
+      '      </div>',
+      '    </div>',
+      '  </div>',
+      '</div>'
+    ].join('');
+
+    var self = this;
+
+    var updateCount = function() {
+      var rows = document.querySelectorAll('.bulk-row').length;
+      var el = document.getElementById('bulkCount');
+      if (el) el.textContent = rows;
+    };
+
+    var renumber = function() {
+      document.querySelectorAll('.bulk-row').forEach(function(r, i) {
+        var num = r.querySelector('.bulk-row-number');
+        if (num) num.textContent = '#' + (i + 1);
+      });
+    };
+
+    var removeRow = function(row) {
+      row.style.transition = 'opacity .2s, transform .2s';
+      row.style.opacity = '0';
+      row.style.transform = 'translateY(-8px)';
+      setTimeout(function() {
+        row.remove();
+        renumber();
+        updateCount();
+      }, 200);
+    };
+
+    var bindRemove = function(scope) {
+      (scope || document).querySelectorAll('.bulk-row-remove').forEach(function(btn) {
+        btn.onclick = function() {
+          var row = btn.closest('.bulk-row');
+          if (row) removeRow(row);
+        };
+      });
+    };
+
+    var addNewRow = function() {
+      var rows = document.getElementById('bulkRows');
+      var idx = rows.querySelectorAll('.bulk-row').length;
+      rows.insertAdjacentHTML('beforeend', buildRow(idx));
+      var newRow = rows.lastElementChild;
+
+      // اربط زرار الحذف
+      var removeBtn = newRow.querySelector('.bulk-row-remove');
+      if (removeBtn) {
+        removeBtn.onclick = function() { removeRow(newRow); };
+      }
+
+      updateCount();
+      newRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      var firstInput = newRow.querySelector('input');
+      if (firstInput) setTimeout(function() { firstInput.focus(); }, 150);
+    };
+
+    document.getElementById('bulkAddRowBtn').onclick = addNewRow;
+
+    root.querySelectorAll('[data-close]').forEach(function(el) {
+      el.onclick = function() { self.closeModal(); };
+    });
+
+    var overlay = document.getElementById('bulkOverlay');
+    if (overlay) {
+      overlay.onclick = function(e) {
+        if (e.target === overlay) self.closeModal();
+      };
+    }
+
+    var escHandler = function(e) {
+      if (e.key === 'Escape') {
+        self.closeModal();
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
+
+    bindRemove();
+
+    // ✨ Save All
+    document.getElementById('bulkSaveBtn').onclick = async function() {
+      var items = [];
+      var hasError = false;
+
+      document.querySelectorAll('.bulk-row').forEach(function(row) {
+        var raw = {};
+        row.querySelectorAll('[data-field]').forEach(function(inp) {
+          var v = inp.value.trim();
+          if (inp.type === 'number') {
+            v = parseInt(v, 10);
+            if (isNaN(v)) v = null;
+          }
+          raw[inp.dataset.field] = v;
+        });
+
+        // تحقق من الحقول الإلزامية
+        var missing = fields.filter(function(f) { return f.required && !raw[f.name]; });
+        if (missing.length) {
+          if (!hasError) {
+            UI.error(missing[0].label + ' مطلوب في صف ' + (items.length + 1));
+            var inp = row.querySelector('[data-field="' + missing[0].name + '"]');
+            if (inp) inp.focus();
+          }
+          hasError = true;
+          return;
+        }
+
+        var payload = buildPayload(raw);
+        if (payload) items.push(payload);
+      });
+
+      if (hasError) return;
+      if (!items.length) {
+        UI.error('Add at least one item');
+        return;
+      }
+
+      var btn = document.getElementById('bulkSaveBtn');
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Saving ' + items.length + '...';
+
+      try {
+        await saveHandler(items);
+        self.closeModal();
+      } catch (e) {
+        UI.error(e.message);
+        btn.disabled = false;
+        btn.innerHTML = '💾 Save All';
+      }
+    };
+
+    setTimeout(function() {
+      var first = document.querySelector('.bulk-row input');
+      if (first) first.focus();
+    }, 100);
+  },
+
+  /* ═══ DEPARTMENT — Bulk ═══ */
+  openAddDepartment() {
+    this.bulkModal({
+      title: '➕ Add Departments',
+      itemIcon: '🏛️',
+      fields: [
+        { name: 'DepartmentName', label: 'Name', placeholder: 'computer science', required: true },
+        { name: 'departmentDescription', label: 'Description', placeholder: '...' },
+        { name: 'departmentExpectedJobs', label: 'Expected Jobs', placeholder: '...' },
+        { name: 'departmentCode', label: 'Code', placeholder: 'CS' }
+      ],
+      buildPayload: function(row) { return row; },
+      saveHandler: async function(items) {
+        await API.addDepartments(items);
+        UI.success('✅ Added ' + items.length + ' department' + (items.length > 1 ? 's' : ''));
+        await loadStructure();
+      }
+    });
+  },
+
+  /* ═══ LEVEL — Bulk ═══ */
+  openAddLevel() {
+    var deptOpts = this.deptOptions();
+    var defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
+
+    // ✨ Datalist للقسم
+    var datalistHtml = '<datalist id="bulkDeptList">' + deptOpts + '</datalist>';
+    var datalistPlaced = false;
+
+    this.bulkModal({
+      title: '➕ Add Levels',
+      itemIcon: '📊',
+      fields: [
+        { name: 'DepartmentName', label: 'Department', placeholder: 'computer science', required: true, default: defaultDept, datalist: 'bulkDeptList' },
+        { name: 'levelNumber', label: 'Level Number', placeholder: '1', required: true, default: 1, type: 'number' }
+      ],
+      buildPayload: function(row) {
+        return {
+          DepartmentName: row.DepartmentName,
+          levelNumber: row.levelNumber
+        };
+      },
+      saveHandler: async function(items) {
+        await API.addLevels(items);
+        UI.success('✅ Added ' + items.length + ' level' + (items.length > 1 ? 's' : ''));
+        await loadLevels();
+        await loadSemesters();
+      }
+    });
+
+    // ضيف الـ datalist في الصفحة
+    if (!document.getElementById('bulkDeptList')) {
+      document.body.insertAdjacentHTML('beforeend', datalistHtml);
+      // اربط الـ inputs بالـ datalist
+      document.querySelectorAll('.bulk-row [data-field="DepartmentName"]').forEach(function(inp) {
+        inp.setAttribute('list', 'bulkDeptList');
+      });
+    }
+  },
+
+  /* ═══ SEMESTER — Bulk ═══ */
+  openAddSemester() {
+    var deptOpts = this.deptOptions();
+    var defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
+
+    this.bulkModal({
+      title: '➕ Add Semesters',
+      itemIcon: '📅',
+      fields: [
+        { name: 'DepartmentName', label: 'Department', placeholder: 'computer science', required: true, default: defaultDept },
+        { name: 'levelNumber', label: 'Level Number', placeholder: '1', required: true, default: 1, type: 'number' },
+        { name: 'semesterNumber', label: 'Semester Number', placeholder: '1', required: true, default: 1, type: 'number' }
+      ],
+      buildPayload: function(row) { return row; },
+      saveHandler: async function(items) {
+        await API.addSemesters(items);
+        UI.success('✅ Added ' + items.length + ' semester' + (items.length > 1 ? 's' : ''));
+        await loadSemesters();
+      }
+    });
+  },
+
+  /* ═══ SUBJECT — Bulk ═══ */
+  openAddSubject() {
+    var deptOpts = this.deptOptions();
+    var defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
+    var defaultLvl = _state.path.levelNumber || 1;
+    var defaultSem = _state.path.semesterNumber || 1;
+
+    this.bulkModal({
+      title: '➕ Add Subjects',
+      itemIcon: '📚',
+      fields: [
+        { name: 'DepartmentName', label: 'Department', placeholder: 'computer science', required: true, default: defaultDept },
+        { name: 'levelNumber', label: 'Level', placeholder: '1', required: true, default: defaultLvl, type: 'number' },
+        { name: 'semesterNumber', label: 'Semester', placeholder: '1', required: true, default: defaultSem, type: 'number' },
+        { name: 'subjectName', label: 'Subject Name', placeholder: 'algorithm', required: true },
+        { name: 'subjectDescription', label: 'Description', placeholder: '...' },
+        { name: 'subjectCode', label: 'Code', placeholder: 'ALG101' }
+      ],
+      buildPayload: function(row) { return row; },
+      saveHandler: async function(items) {
+        await API.addSubjects(items);
+        UI.success('✅ Added ' + items.length + ' subject' + (items.length > 1 ? 's' : ''));
+        await loadSubjects();
+      }
+    });
+  },
+
+  /* ═══ DOCTOR — Bulk with Photo ═══ */
+  openAddDoctor() {
+    var self = this;
+    var root = document.getElementById('modalRoot');
+    var rows = [];
+    var photos = {};  // rowIndex -> File
+
+    var buildRow = function(index) {
+      return [
+        '<div class="bulk-row" data-row="' + index + '">',
+        '  <div class="bulk-row-number">#' + (index + 1) + '</div>',
+        (index > 0 ? '<button type="button" class="bulk-row-remove" data-remove="' + index + '">×</button>' : ''),
+        '  <div class="field"><label>Name</label><input type="text" data-field="doctorName" placeholder="Amgad Salama" autocomplete="off"></div>',
+        '  <div class="field"><label>Academic Degree</label><input type="text" data-field="doctorAcademicDegree" placeholder="PhD" autocomplete="off"></div>',
+        '  <div class="field"><label>Description</label><input type="text" data-field="doctorDescription" placeholder="..." autocomplete="off"></div>',
+        '  <div class="field"><label>Photo (required)</label><input type="file" data-field="doctorPhoto" accept="image/*"></div>',
+        '</div>'
+      ].join('');
+    };
+
+    root.innerHTML = [
+      '<div class="bulk-overlay" id="bulkOverlay">',
+      '  <div class="bulk-modal">',
+      '    <div class="bulk-header">',
+      '      <h3 class="bulk-title">➕ Add Doctors <span class="bulk-count" id="bulkCount">1</span></h3>',
+      '      <button type="button" class="bulk-close" data-close="true">✕</button>',
+      '    </div>',
+      '    <div class="bulk-rows" id="bulkRows">',
+      buildRow(0),
+      '    </div>',
+      '    <div class="bulk-actions">',
+      '      <button type="button" class="bulk-btn bulk-btn-add" id="bulkAddRowBtn">➕ Add Another</button>',
+      '      <div class="bulk-actions-right">',
+      '        <button type="button" class="bulk-btn bulk-btn-ghost" data-close="true">Cancel</button>',
+      '        <button type="button" class="bulk-btn bulk-btn-save" id="bulkSaveBtn">💾 Save All</button>',
+      '      </div>',
+      '    </div>',
+      '  </div>',
+      '</div>'
+    ].join('');
+
+    var updateCount = function() {
+      var el = document.getElementById('bulkCount');
+      if (el) el.textContent = document.querySelectorAll('.bulk-row').length;
+    };
+
+    var renumber = function() {
+      document.querySelectorAll('.bulk-row').forEach(function(r, i) {
+        var num = r.querySelector('.bulk-row-number');
+        if (num) num.textContent = '#' + (i + 1);
+      });
+    };
+
+    var removeRow = function(row) {
+      row.style.transition = 'opacity .2s, transform .2s';
+      row.style.opacity = '0';
+      row.style.transform = 'translateY(-8px)';
+      setTimeout(function() {
+        row.remove();
+        renumber();
+        updateCount();
+      }, 200);
+    };
+
+    document.getElementById('bulkAddRowBtn').onclick = function() {
+      var rowsContainer = document.getElementById('bulkRows');
+      var idx = rowsContainer.querySelectorAll('.bulk-row').length;
+      rowsContainer.insertAdjacentHTML('beforeend', buildRow(idx));
+      var newRow = rowsContainer.lastElementChild;
+      var removeBtn = newRow.querySelector('.bulk-row-remove');
+      if (removeBtn) removeBtn.onclick = function() { removeRow(newRow); };
+      updateCount();
+      newRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    root.querySelectorAll('[data-close]').forEach(function(el) {
+      el.onclick = function() { self.closeModal(); };
+    });
+
+    var overlay = document.getElementById('bulkOverlay');
+    if (overlay) {
+      overlay.onclick = function(e) {
+        if (e.target === overlay) self.closeModal();
+      };
+    }
+
+    var escHandler = function(e) {
+      if (e.key === 'Escape') {
+        self.closeModal();
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
+
+    // اربط زر الحذف الأول
+    document.querySelectorAll('.bulk-row-remove').forEach(function(btn) {
+      btn.onclick = function() {
+        var row = btn.closest('.bulk-row');
+        if (row) removeRow(row);
+      };
+    });
+
+    // ✨ Save
+    document.getElementById('bulkSaveBtn').onclick = async function() {
+      var dataItems = [];
+      var photoFiles = [];
+      var hasError = false;
+
+      document.querySelectorAll('.bulk-row').forEach(function(row, i) {
+        var name = row.querySelector('[data-field="doctorName"]').value.trim();
+        var deg = row.querySelector('[data-field="doctorAcademicDegree"]').value.trim() || 'PhD';
+        var desc = row.querySelector('[data-field="doctorDescription"]').value.trim();
+        var photoInput = row.querySelector('[data-field="doctorPhoto"]');
+        var photo = photoInput && photoInput.files[0];
+
+        if (!name) {
+          if (!hasError) UI.error('Name مطلوب في صف #' + (i + 1));
+          hasError = true;
+          return;
+        }
+        if (!photo) {
+          if (!hasError) UI.error('Photo مطلوبة في صف #' + (i + 1));
+          hasError = true;
+          return;
+        }
+
+        dataItems.push({
+          doctorName: name,
+          doctorAcademicDegree: deg,
+          doctorDescription: desc,
+          doctorPhotoFile: 'photo' + i,
+          doctorCertificationFiles: []
+        });
+        photoFiles.push({ key: 'photo' + i, file: photo });
+      });
+
+      if (hasError) return;
+      if (!dataItems.length) {
+        UI.error('Add at least one doctor');
+        return;
+      }
+
+      var btn = document.getElementById('bulkSaveBtn');
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Saving ' + dataItems.length + '...';
+
+      try {
+        var fd = new FormData();
+        fd.append('data', JSON.stringify(dataItems));
+        photoFiles.forEach(function(p) { fd.append(p.key, p.file); });
+
+        await API.addDoctors(fd);
+        UI.success('✅ Added ' + dataItems.length + ' doctor' + (dataItems.length > 1 ? 's' : ''));
+        self.closeModal();
+        await loadDoctorsTab();
+      } catch (e) {
+        UI.error(e.message);
+        btn.disabled = false;
+        btn.innerHTML = '💾 Save All';
+      }
+    };
+  },
+
+  /* ═══ LINK DOCTOR — Bulk ═══ */
+  openLinkDoctor() {
+    var deptOpts = this.deptOptions();
+    var subjOpts = this.subjectsOptions();
+    var docOpts = this.doctorsOptions();
+    var p = _state.path;
+    var defaultDept = p.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
+
+    this.bulkModal({
+      title: '🔗 Link Doctors to Subjects',
+      itemIcon: '🔗',
+      fields: [
+        { name: 'DepartmentName', label: 'Department', placeholder: 'computer science', required: true, default: defaultDept },
+        { name: 'levelNumber', label: 'Level', placeholder: '1', required: true, default: p.levelNumber || 1, type: 'number' },
+        { name: 'semesterNumber', label: 'Semester', placeholder: '1', required: true, default: p.semesterNumber || 1, type: 'number' },
+        { name: 'subjectName', label: 'Subject', placeholder: 'algorithm', required: true, default: p.subject || '' },
+        { name: 'doctorName', label: 'Doctor', placeholder: 'Amgad Salama', required: true }
+      ],
+      buildPayload: function(row) { return row; },
+      saveHandler: async function(items) {
+        await API.linkDoctors(items);
+        UI.success('✅ Linked ' + items.length + ' doctor' + (items.length > 1 ? 's' : ''));
+        await loadDoctorsTab();
+        if (p.subject) await renderContentLevel();
+      }
+    });
+  },
+
   closeModal() {
     const root = document.getElementById('modalRoot');
     if (root) root.innerHTML = '';
@@ -736,36 +1230,7 @@ const AdminUI = {
   },
 
   /* ═══ DEPARTMENT ═══ */
-  openAddDepartment() {
-    this.modal('➕ Add Department', `
-      <div class="field"><label>Name</label><input type="text" id="mDeptName" placeholder="computer science"></div>
-      <div class="field"><label>Description</label><input type="text" id="mDeptDesc" placeholder="..."></div>
-      <div class="field"><label>Expected Jobs</label><input type="text" id="mDeptJobs" placeholder="..."></div>
-      <div class="field"><label>Code</label><input type="text" id="mDeptCode" placeholder="CS"></div>
-    `, async (keepOpen) => {
-      const d = {
-        DepartmentName: document.getElementById('mDeptName').value.trim(),
-        departmentDescription: document.getElementById('mDeptDesc').value.trim(),
-        departmentExpectedJobs: document.getElementById('mDeptJobs').value.trim(),
-        departmentCode: document.getElementById('mDeptCode').value.trim()
-      };
-      if (!d.DepartmentName) return UI.error('Name required');
-      try {
-        await API.addDepartments([d]);
-        UI.success('Department added');
-        await loadDepartments();
-        if (keepOpen) {
-          document.getElementById('mDeptName').value = '';
-          document.getElementById('mDeptDesc').value = '';
-          document.getElementById('mDeptJobs').value = '';
-          document.getElementById('mDeptCode').value = '';
-          document.getElementById('mDeptName').focus();
-        } else {
-          AdminUI.closeModal();
-        }
-      } catch (e) { UI.error(e.message); }
-    }, true);
-  },
+  
 
   openEditDepartment(oldName) {
     this.modal('✏️ Edit Department', `
@@ -801,36 +1266,7 @@ const AdminUI = {
   },
 
   /* ═══ LEVEL ═══ */
-  openAddLevel() {
-    const deptOpts = AdminUI.deptOptions();
-    const defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
-    this.modal('➕ Add Level', `
-      <div class="field">
-        <label>Department</label>
-        <input type="text" id="mLvlDept" list="mLvlDeptList" value="${escapeHtml(defaultDept)}" placeholder="Select or type department...">
-        <datalist id="mLvlDeptList">${deptOpts}</datalist>
-      </div>
-      <div class="field"><label>Level Number</label><input type="number" id="mLvlNum" value="1" min="1" max="6"></div>
-    `, async (keepOpen) => {
-      const p = {
-        DepartmentName: document.getElementById('mLvlDept').value.trim(),
-        levelNumber: parseInt(document.getElementById('mLvlNum').value, 10)
-      };
-      if (!p.DepartmentName) return UI.error('Department required');
-      try {
-        await API.addLevels([p]);
-        UI.success('Level added');
-        await loadLevels();
-        await loadSemesters();
-        if (keepOpen) {
-          document.getElementById('mLvlNum').value = p.levelNumber + 1;
-          document.getElementById('mLvlNum').focus();
-        } else {
-          AdminUI.closeModal();
-        }
-      } catch (e) { UI.error(e.message); }
-    }, true);
-  },
+  
 
   async deleteLevel(dept, num) {
     if (!confirm(`Delete Level ${num} in ${dept}?`)) return;
@@ -843,36 +1279,7 @@ const AdminUI = {
   },
 
   /* ═══ SEMESTER ═══ */
-  openAddSemester() {
-    const deptOpts = AdminUI.deptOptions();
-    const defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
-    this.modal('➕ Add Semester', `
-      <div class="field">
-        <label>Department</label>
-        <input type="text" id="mSemDept" list="mSemDeptList" value="${escapeHtml(defaultDept)}" placeholder="Select or type department...">
-        <datalist id="mSemDeptList">${deptOpts}</datalist>
-      </div>
-      <div class="field"><label>Level Number</label><input type="number" id="mSemLvl" value="1"></div>
-      <div class="field"><label>Semester Number</label><input type="number" id="mSemNum" value="1"></div>
-    `, async (keepOpen) => {
-      const p = {
-        DepartmentName: document.getElementById('mSemDept').value.trim(),
-        levelNumber: parseInt(document.getElementById('mSemLvl').value, 10),
-        semesterNumber: parseInt(document.getElementById('mSemNum').value, 10)
-      };
-      if (!p.DepartmentName) return UI.error('Department required');
-      try {
-        await API.addSemesters([p]);
-        UI.success('Semester added');
-        await loadSemesters();
-        if (keepOpen) {
-          document.getElementById('mSemNum').value = p.semesterNumber === 1 ? 2 : 1;
-        } else {
-          AdminUI.closeModal();
-        }
-      } catch (e) { UI.error(e.message); }
-    }, true);
-  },
+  
 
   async deleteSemester(dept, lvl, sem) {
     if (!confirm(`Delete Semester ${sem} in Level ${lvl}?`)) return;
@@ -884,47 +1291,7 @@ const AdminUI = {
   },
 
   /* ═══ SUBJECT ═══ */
-  openAddSubject() {
-    const deptOpts = AdminUI.deptOptions();
-    const defaultDept = _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
-    const defaultLvl = _state.path.levelNumber || 1;
-    const defaultSem = _state.path.semesterNumber || 1;
-    this.modal('➕ Add Subject', `
-      <div class="field">
-        <label>Department</label>
-        <input type="text" id="mSubDept" list="mSubDeptList" value="${escapeHtml(defaultDept)}" placeholder="Select or type department...">
-        <datalist id="mSubDeptList">${deptOpts}</datalist>
-      </div>
-      <div class="field"><label>Level</label><input type="number" id="mSubLvl" value="${defaultLvl}"></div>
-      <div class="field"><label>Semester</label><input type="number" id="mSubSem" value="${defaultSem}"></div>
-      <div class="field"><label>Subject Name</label><input type="text" id="mSubName" placeholder="algorithm"></div>
-      <div class="field"><label>Description</label><input type="text" id="mSubDesc"></div>
-      <div class="field"><label>Code</label><input type="text" id="mSubCode"></div>
-    `, async (keepOpen) => {
-      const p = {
-        DepartmentName: document.getElementById('mSubDept').value.trim(),
-        levelNumber: parseInt(document.getElementById('mSubLvl').value, 10),
-        semesterNumber: parseInt(document.getElementById('mSubSem').value, 10),
-        subjectName: document.getElementById('mSubName').value.trim(),
-        subjectDescription: document.getElementById('mSubDesc').value.trim(),
-        subjectCode: document.getElementById('mSubCode').value.trim()
-      };
-      if (!p.DepartmentName || !p.subjectName) return UI.error('Dept + Name required');
-      try {
-        await API.addSubjects([p]);
-        UI.success('Subject added');
-        await loadSubjects();
-        if (keepOpen) {
-          document.getElementById('mSubName').value = '';
-          document.getElementById('mSubDesc').value = '';
-          document.getElementById('mSubCode').value = '';
-          document.getElementById('mSubName').focus();
-        } else {
-          AdminUI.closeModal();
-        }
-      } catch (e) { UI.error(e.message); }
-    }, true);
-  },
+  
 
   openEditSubject(oldName, dept, lvl, sem) {
     const defaultDept = dept || _state.path.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
@@ -974,42 +1341,7 @@ const AdminUI = {
   },
 
   /* ═══ DOCTOR ═══ */
-  openAddDoctor() {
-    this.modal('➕ Add Doctor', `
-      <div class="field"><label>Name</label><input type="text" id="mDocName" placeholder="Amgad Salama"></div>
-      <div class="field"><label>Academic Degree</label><input type="text" id="mDocDeg" placeholder="PhD"></div>
-      <div class="field"><label>Description</label><input type="text" id="mDocDesc"></div>
-      <div class="field"><label>Photo (required)</label><input type="file" id="mDocPhoto" accept="image/*"></div>
-    `, async (keepOpen) => {
-      const name = document.getElementById('mDocName').value.trim();
-      const photo = document.getElementById('mDocPhoto').files[0];
-      if (!name || !photo) return UI.error('Name + Photo required');
-
-      const fd = new FormData();
-      fd.append('data', JSON.stringify([{
-        doctorName: name,
-        doctorAcademicDegree: document.getElementById('mDocDeg').value.trim() || 'PhD',
-        doctorDescription: document.getElementById('mDocDesc').value.trim() || '',
-        doctorPhotoFile: 'photo1',
-        doctorCertificationFiles: []
-      }]));
-      fd.append('photo1', photo);
-
-      try {
-        await API.addDoctors(fd);
-        UI.success('Doctor added');
-        await loadDoctorsTab();
-        if (keepOpen) {
-          document.getElementById('mDocName').value = '';
-          document.getElementById('mDocDesc').value = '';
-          document.getElementById('mDocPhoto').value = '';
-          document.getElementById('mDocName').focus();
-        } else {
-          AdminUI.closeModal();
-        }
-      } catch (e) { UI.error(e.message); }
-    }, true);
-  },
+  
 
   openEditDoctor(name) {
     this.modal('✏️ Edit Doctor', `
@@ -1046,54 +1378,7 @@ const AdminUI = {
   },
 
   /* ═══ LINK DOCTOR ═══ */
-  openLinkDoctor() {
-    const p = _state.path;
-    const deptOpts = AdminUI.deptOptions();
-    const subjOpts = AdminUI.subjectsOptions();
-    const docOpts = AdminUI.doctorsOptions();
-    const defaultDept = p.department || (_state.departments[0] && (_state.departments[0].depName || _state.departments[0].name)) || '';
-
-    this.modal('🔗 Link Doctor to Subject', `
-      <div class="field">
-        <label>Department</label>
-        <input type="text" id="mLnkDept" list="mLnkDeptList" value="${escapeHtml(defaultDept)}" placeholder="Select or type department...">
-        <datalist id="mLnkDeptList">${deptOpts}</datalist>
-      </div>
-      <div class="field"><label>Level</label><input type="number" id="mLnkLvl" value="${p.levelNumber || 1}"></div>
-      <div class="field"><label>Semester</label><input type="number" id="mLnkSem" value="${p.semesterNumber || 1}"></div>
-      <div class="field">
-        <label>Subject</label>
-        <input type="text" id="mLnkSub" list="mLnkSubList" value="${escapeHtml(p.subject || '')}" placeholder="Select or type subject...">
-        <datalist id="mLnkSubList">${subjOpts}</datalist>
-      </div>
-      <div class="field">
-        <label>Doctor</label>
-        <input type="text" id="mLnkDoc" list="mLnkDocList" placeholder="Select or type doctor...">
-        <datalist id="mLnkDocList">${docOpts}</datalist>
-      </div>
-    `, async (keepOpen) => {
-      const payload = [{
-        DepartmentName: document.getElementById('mLnkDept').value.trim(),
-        levelNumber: parseInt(document.getElementById('mLnkLvl').value, 10),
-        semesterNumber: parseInt(document.getElementById('mLnkSem').value, 10),
-        subjectName: document.getElementById('mLnkSub').value.trim(),
-        doctorName: document.getElementById('mLnkDoc').value.trim()
-      }];
-      if (!payload[0].DepartmentName || !payload[0].subjectName || !payload[0].doctorName) return UI.error('Fill all fields');
-      try {
-        await API.linkDoctors(payload);
-        UI.success('Linked');
-        await loadDoctorsTab();
-        if (p.subject) await renderContentLevel();
-        if (keepOpen) {
-          document.getElementById('mLnkDoc').value = '';
-          document.getElementById('mLnkDoc').focus();
-        } else {
-          AdminUI.closeModal();
-        }
-      } catch (e) { UI.error(e.message); }
-    }, true);
-  },
+  
 
   async unlinkDoctor(link) {
     if (!confirm(`Unlink ${link.subjectName} ↔ ${link.doctorName}?`)) return;
